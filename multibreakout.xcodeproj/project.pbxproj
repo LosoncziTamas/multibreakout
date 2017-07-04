@@ -43,6 +43,7 @@
 		E93D152D1F0BA6AA007BF3ED /* MultiBreakout.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MultiBreakout.hpp; sourceTree = "<group>"; };
 		E93D152F1F0BCF13007BF3ED /* Vec2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vec2.cpp; sourceTree = "<group>"; };
 		E93D15301F0BCF13007BF3ED /* Vec2.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Vec2.hpp; sourceTree = "<group>"; };
+		E93D82711F0C2FF1008505B3 /* Intrinsics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Intrinsics.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +91,7 @@
 				E93D152D1F0BA6AA007BF3ED /* MultiBreakout.hpp */,
 				E93D152F1F0BCF13007BF3ED /* Vec2.cpp */,
 				E93D15301F0BCF13007BF3ED /* Vec2.hpp */,
+				E93D82711F0C2FF1008505B3 /* Intrinsics.h */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -283,6 +285,7 @@
 				E93D151F1F0B9158007BF3ED /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
