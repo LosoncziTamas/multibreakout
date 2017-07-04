@@ -1,11 +1,11 @@
 #include "Window.hpp"
 
-Window::Window() {
+Window::Window(int width, int height) {
     sdlWindow = SDL_CreateWindow("Multibreakout",
                                  SDL_WINDOWPOS_CENTERED_MASK,
                                  SDL_WINDOWPOS_CENTERED_MASK,
-                                 640,
-                                 480,
+                                 width,
+                                 height,
                                  SDL_WINDOW_RESIZABLE);
     SDL_assert(sdlWindow);
 }

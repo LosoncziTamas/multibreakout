@@ -12,6 +12,7 @@ public:
     
     void clear() const;
     void update() const;
+    void drawRectangle(const SDL_Rect& rect) const;
     
 private:
     Renderer(const Renderer& other);

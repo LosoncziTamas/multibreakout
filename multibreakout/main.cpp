@@ -5,6 +5,9 @@
 #include "Renderer.hpp"
 #include "MultiBreakout.hpp"
 
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+
 const float targetUpdateHz = 30.0f;
 
 SDL_bool eval(bool expr)
@@ -44,7 +47,7 @@ int main(void)
 {
     SDL_Init(SDL_INIT_VIDEO);
     
-    Window window;
+    Window window(SCREEN_WIDTH, SCREEN_HEIGHT);
     Renderer renderer(window);
     SDL_bool running = SDL_TRUE;
     

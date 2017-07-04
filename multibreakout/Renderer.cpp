@@ -14,6 +14,11 @@ void Renderer::update() const {
     SDL_RenderPresent(sdlRenderer);
 }
 
+void Renderer::drawRectangle(const SDL_Rect& rect) const {
+    SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(sdlRenderer, &rect);
+}
+
 Renderer::~Renderer() {
     SDL_DestroyRenderer(sdlRenderer);
 }

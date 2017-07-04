@@ -5,6 +5,9 @@
 
 #include "Renderer.hpp"
 
+extern const int SCREEN_WIDTH;
+extern const int SCREEN_HEIGHT;
+
 struct GameInput
 {
     union

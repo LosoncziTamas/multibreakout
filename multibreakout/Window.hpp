@@ -10,7 +10,7 @@ private:
     Window& operator=(const Window&);
 public:
     SDL_Window *sdlWindow;
-    Window();
+    Window(int width, int height);
     ~Window();
 };
 
