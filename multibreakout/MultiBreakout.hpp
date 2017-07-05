@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 
+#include "Vec2.hpp"
 #include "Renderer.hpp"
 
 extern const int SCREEN_WIDTH;
@@ -26,5 +27,6 @@ struct GameInput
 };
 
 void gameUpdate(const GameInput& input, const Renderer& renderer, float delta);
+
 
 #endif

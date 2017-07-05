@@ -1,7 +1,8 @@
 #include "Renderer.hpp"
+#include <cmath>
 
 Renderer::Renderer(const Window &window) {
-    sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1, 0);
+    sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC);
     SDL_assert(sdlRenderer);
 }
 
@@ -14,8 +15,13 @@ void Renderer::update() const {
     SDL_RenderPresent(sdlRenderer);
 }
 
-void Renderer::drawRectangle(const SDL_Rect& rect) const {
+void Renderer::drawPaddle(const Paddle& paddle) const {
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
+    int x = round(paddle.centerPos.x - paddle.width * 0.5f);
+    int y = round(paddle.centerPos.y);
+    int w = round(paddle.width);
+    int h = round(paddle.height);
+    SDL_Rect rect = {x, y, w, h};
     SDL_RenderFillRect(sdlRenderer, &rect);
 }
 

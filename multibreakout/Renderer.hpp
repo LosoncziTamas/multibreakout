@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include "Window.hpp"
+#include "Paddle.hpp"
 
 class Renderer {
     
@@ -12,7 +13,7 @@ public:
     
     void clear() const;
     void update() const;
-    void drawRectangle(const SDL_Rect& rect) const;
+    void drawPaddle(const Paddle& paddle) const;
     
 private:
     Renderer(const Renderer& other);

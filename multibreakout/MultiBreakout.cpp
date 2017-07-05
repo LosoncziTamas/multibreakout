@@ -1,30 +1,35 @@
 #include <iostream>
 
 #include "MultiBreakout.hpp"
-#include "Vec2.hpp"
+#include "Paddle.hpp"
 
-SDL_Rect rect = {SCREEN_WIDTH / 2,  SCREEN_HEIGHT / 2, 120, 40};
+static SDL_bool init;
+static Paddle paddle;
 
-struct Paddle {
-    float x;
-    float y;
-};
+const float PADDLE_SPEED = 4.0f;
 
 void gameUpdate(const GameInput& input, const Renderer& renderer, float delta){
     
     std::cout << delta << std::endl;
     
-    Vec2 vec(1.0f, 2.0f);
-    Vec2 _vec(3.0f, 1.0f);
+    if (!init) {
+        paddle = {Vec2(SCREEN_WIDTH / 2,  SCREEN_HEIGHT / 2), 120, 40};
+        init = SDL_TRUE;
+    }
     
+    Vec2 paddleDelta;
     if (input.left) {
-        rect.x -= static_cast<int>(100 * delta);
+        paddleDelta.x = -1.0;
     }
     if (input.right) {
-        rect.x += static_cast<int>(100 * delta);
+        paddleDelta.x = 1.0;
     }
     
+    paddleDelta *= PADDLE_SPEED;
+    
+    paddle.centerPos += paddleDelta;
+    
     renderer.clear();
-    renderer.drawRectangle(rect);
+    renderer.drawPaddle(paddle);
     renderer.update();
 }

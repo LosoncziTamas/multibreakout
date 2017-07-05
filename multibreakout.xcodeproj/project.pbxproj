@@ -15,6 +15,7 @@
 		E93D152B1F0B9F84007BF3ED /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E93D15291F0B9F84007BF3ED /* Renderer.cpp */; };
 		E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E93D152C1F0BA6AA007BF3ED /* MultiBreakout.cpp */; };
 		E93D15311F0BCF13007BF3ED /* Vec2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E93D152F1F0BCF13007BF3ED /* Vec2.cpp */; };
+		E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,7 +44,9 @@
 		E93D152D1F0BA6AA007BF3ED /* MultiBreakout.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MultiBreakout.hpp; sourceTree = "<group>"; };
 		E93D152F1F0BCF13007BF3ED /* Vec2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vec2.cpp; sourceTree = "<group>"; };
 		E93D15301F0BCF13007BF3ED /* Vec2.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Vec2.hpp; sourceTree = "<group>"; };
-		E93D82711F0C2FF1008505B3 /* Intrinsics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Intrinsics.h; sourceTree = "<group>"; };
+		E93D82711F0C2FF1008505B3 /* Intrinsics.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Intrinsics.hpp; sourceTree = "<group>"; };
+		E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Paddle.cpp; sourceTree = "<group>"; };
+		E9C5A0B21F0CDBC10017FCE6 /* Paddle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Paddle.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,7 +94,9 @@
 				E93D152D1F0BA6AA007BF3ED /* MultiBreakout.hpp */,
 				E93D152F1F0BCF13007BF3ED /* Vec2.cpp */,
 				E93D15301F0BCF13007BF3ED /* Vec2.hpp */,
-				E93D82711F0C2FF1008505B3 /* Intrinsics.h */,
+				E93D82711F0C2FF1008505B3 /* Intrinsics.hpp */,
+				E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */,
+				E9C5A0B21F0CDBC10017FCE6 /* Paddle.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -153,6 +158,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E93D152B1F0B9F84007BF3ED /* Renderer.cpp in Sources */,
+				E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */,
 				E93D151A1F0B9158007BF3ED /* main.cpp in Sources */,
 				E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */,
 				E93D15281F0B9C13007BF3ED /* Window.cpp in Sources */,
