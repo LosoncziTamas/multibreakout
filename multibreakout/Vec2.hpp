@@ -1,6 +1,8 @@
 #ifndef Vec2_hpp
 #define Vec2_hpp
 
+#include <iostream>
+
 struct Vec2 {
     
     float x;
@@ -23,5 +25,6 @@ struct Vec2 {
 
 Vec2 operator*(const Vec2& lhs, float rhs);
 Vec2 operator*(float lhs, const Vec2& rhs);
+std::ostream& operator<< (std::ostream& stream, const Vec2& vec);
 
 #endif

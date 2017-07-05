@@ -1,5 +1,5 @@
 #include "Vec2.hpp"
-#include "Intrinsics.hpp"
+#include "math.h"
 
 Vec2::Vec2(float x, float y) : x(x), y(y) {}
 
@@ -36,7 +36,7 @@ float Vec2::dotProduct(const Vec2& rhs) const{
 }
 
 float Vec2::length() const {
-    return sqrt(x * x  + y * y);
+    return sqrtf(x * x  + y * y);
 }
 
 float Vec2::sqrLength() const {
@@ -50,3 +50,9 @@ Vec2 operator*(const Vec2& lhs, float rhs) {
 Vec2 operator*(float lhs, const Vec2& rhs) {
     return Vec2(lhs * rhs.x, lhs * rhs.y);
 }
+
+std::ostream& operator<< (std::ostream& stream, const Vec2& vec) {
+    stream << "(x: " << vec.x << ", y: " << vec.y << ")";
+    return stream;
+}
+
