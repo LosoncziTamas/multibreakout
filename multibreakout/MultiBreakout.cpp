@@ -17,9 +17,15 @@ void gameUpdate(const GameInput& input, const Renderer& renderer, float delta){
     
     Vec2 acceleration;
     if (input.left) {
+        if (paddle.velocity.x > 0){
+            paddle.velocity.x = 0;
+        }
         acceleration.x = -1.0;
     }
     if (input.right) {
+        if (paddle.velocity.x < 0){
+            paddle.velocity.x = 0;
+        }
         acceleration.x = 1.0;
     }
     
