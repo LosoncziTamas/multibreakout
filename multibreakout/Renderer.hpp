@@ -14,6 +14,7 @@ public:
     void clear() const;
     void update() const;
     void drawPaddle(const Paddle& paddle) const;
+    void drawRectangle(const SDL_Rect& rectangle) const;
     
 private:
     Renderer(const Renderer& other);

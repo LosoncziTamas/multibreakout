@@ -25,6 +25,11 @@ void Renderer::drawPaddle(const Paddle& paddle) const {
     SDL_RenderFillRect(sdlRenderer, &rect);
 }
 
+void Renderer::drawRectangle(const SDL_Rect& rectangle) const {
+    SDL_SetRenderDrawColor(sdlRenderer, 128, 0, 0, 255);
+    SDL_RenderFillRect(sdlRenderer, &rectangle);
+}
+
 Renderer::~Renderer() {
     SDL_DestroyRenderer(sdlRenderer);
 }
