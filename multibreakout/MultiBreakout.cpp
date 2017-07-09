@@ -22,21 +22,22 @@ void gameUpdate(const GameInput& input, const Renderer& renderer, float delta){
     Vec2 acceleration;
     if (input.left) {
         if (paddle.velocity.x > 0){
-            paddle.velocity.x = 0;
+            paddle.velocity.x = 0.0f;
         }
         acceleration.x = -1.0;
-    }
-    if (input.right) {
+    } else if (input.right) {
         if (paddle.velocity.x < 0){
-            paddle.velocity.x = 0;
+            paddle.velocity.x = 0.0f;
         }
         acceleration.x = 1.0;
+    } else {
+        paddle.velocity += - 0.02 * paddle.velocity;
     }
     
     acceleration *= paddleSpeed;
-        
+    
     Vec2 oldPos = paddle.centerPos;
-    Vec2 playerDelta = (0.5f * acceleration * sqrtf(delta) + paddle.velocity * delta);
+    Vec2 playerDelta = (0.5f * acceleration * pow(delta, 2) + paddle.velocity * delta);
     paddle.velocity += acceleration * delta;
     Vec2 newPos = oldPos + playerDelta;
     
@@ -46,14 +47,14 @@ void gameUpdate(const GameInput& input, const Renderer& renderer, float delta){
     
     if (paddleLeftCorner.x < leftWall.w) {
         Vec2 wallNorm(1, 0);
-        playerDelta = playerDelta - 2 * playerDelta * wallNorm.dotProduct(wallNorm);
-        paddle.velocity.x *= -1.0;
+        paddle.velocity = paddle.velocity - 2 * paddle.velocity.dotProduct(wallNorm) * wallNorm;
+        playerDelta += wallNorm;
 
     }
     if (paddleRightCorner.x > rightWall.x) {
         Vec2 wallNorm(-1, 0);
-        playerDelta = playerDelta - 2 * playerDelta * wallNorm.dotProduct(wallNorm);
-        paddle.velocity.x *= -1.0;
+        paddle.velocity = paddle.velocity - 2 * paddle.velocity.dotProduct(wallNorm) * wallNorm;
+        playerDelta += wallNorm;
     }
 
     paddle.centerPos = oldPos + playerDelta;
