@@ -71,8 +71,12 @@ int main(void)
         newInput.down = eval(state[SDL_SCANCODE_DOWN]);
         newInput.up = eval(state[SDL_SCANCODE_UP]);
         newInput.right = eval(state[SDL_SCANCODE_RIGHT]);
+        newInput.pause = eval(state[SDL_SCANCODE_SPACE]);
+
+        Uint32 mouseVal = SDL_GetMouseState(&newInput.mouseX, &newInput.mouseY);
         
-        SDL_GetMouseState(&newInput.mouseX, &newInput.mouseY);
+        newInput.mouseLeft = eval(mouseVal & SDL_BUTTON(SDL_BUTTON_LEFT));
+        newInput.mouseRight = eval(mouseVal & SDL_BUTTON(SDL_BUTTON_RIGHT));
         
         while (secondsElapsed(startCounter, SDL_GetPerformanceCounter()) < secondsPerFrame);
         

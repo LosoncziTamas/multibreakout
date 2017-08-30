@@ -6,10 +6,13 @@
 #include "Paddle.hpp"
 #include "Ball.hpp"
 
-class Renderer {
+struct Renderer {
     
-public:
+    SDL_Renderer *sdlRenderer;
+    
     Renderer(const Window &window);
+    Renderer(const Renderer& other) = delete;
+    Renderer& operator=(const Renderer&) = delete;
     ~Renderer();
     
     void clear() const;
@@ -20,11 +23,6 @@ public:
     void drawPoint(const Vec2& vec, SDL_Color color = {255, 0, 0, 255}) const;
     void drawPoint(float x, float y, SDL_Color color = {255, 0, 0, 255}) const;
     
-private:
-    Renderer(const Renderer& other);
-    Renderer& operator=(const Renderer&);
-    
-    SDL_Renderer *sdlRenderer;
 };
 
 #endif

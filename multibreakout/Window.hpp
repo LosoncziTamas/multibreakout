@@ -3,12 +3,9 @@
 
 #include <SDL2/SDL.h>
 
-class Window {
-    
-private:
-    Window(const Window& other);
-    Window& operator=(const Window&);
-public:
+struct Window {
+    Window(const Window& other) = delete;
+    Window& operator=(const Window&) = delete;
     SDL_Window *sdlWindow;
     Window(int width, int height);
     ~Window();

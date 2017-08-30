@@ -25,7 +25,7 @@ void Renderer::drawPaddle(const Paddle& paddle) const {
     SDL_Rect rect = {x, y, w, h};
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
     SDL_RenderFillRect(sdlRenderer, &rect);
-    drawBall({Vec2(x, y), 20});
+    //drawBall({Vec2(x, y), Vec2(), 20});
 
 }
 

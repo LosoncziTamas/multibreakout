@@ -20,6 +20,7 @@ struct Vec2 {
     float dotProduct(const Vec2& rhs) const;
     float length() const;
     float sqrLength() const;
+    Vec2& normalize();
 
 };
 

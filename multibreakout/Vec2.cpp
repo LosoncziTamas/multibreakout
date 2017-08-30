@@ -31,6 +31,14 @@ Vec2& Vec2::operator*=(float rhs) {
     return *this;
 }
 
+Vec2& Vec2::normalize() {
+    float len = length();
+    x = x / len;
+    y = y / len;
+    return *this;
+}
+
+
 float Vec2::dotProduct(const Vec2& rhs) const{
     return x * rhs.x + y * rhs.y;
 }

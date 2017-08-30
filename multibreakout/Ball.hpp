@@ -5,6 +5,7 @@
 
 struct Ball {
     Vec2 center;
+    Vec2 velocity;
     float radius;
 };
 
