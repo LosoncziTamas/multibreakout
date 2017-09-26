@@ -49,6 +49,7 @@
 		E96AD1DA1F1A3CF600B66D3A /* Ball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ball.cpp; sourceTree = "<group>"; };
 		E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Paddle.cpp; sourceTree = "<group>"; };
 		E9C5A0B21F0CDBC10017FCE6 /* Paddle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Paddle.hpp; sourceTree = "<group>"; };
+		E9F606E51F7AE7AD005A405E /* GameState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GameState.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +101,7 @@
 				E93D15301F0BCF13007BF3ED /* Vec2.hpp */,
 				E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */,
 				E9C5A0B21F0CDBC10017FCE6 /* Paddle.hpp */,
+				E9F606E51F7AE7AD005A405E /* GameState.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";

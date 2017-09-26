@@ -2,45 +2,54 @@
 
 #include "MultiBreakout.hpp"
 #include "Paddle.hpp"
-
-static SDL_bool init;
-static Paddle paddle;
-static Ball ball;
-static SDL_bool paused;
+#include "GameState.hpp"
 
 const float paddleSpeed = 50.0f;
 const int wallWidth = 10;
 
-static SDL_Rect leftWall = {0, 0, wallWidth, SCREEN_HEIGHT};
-static SDL_Rect rightWall = {SCREEN_WIDTH - wallWidth, 0, wallWidth, SCREEN_HEIGHT};
+void gameUpdate(GameState& gameState, const Renderer& renderer) {
 
-void gameUpdate(const GameInput& input, const Renderer& renderer, float delta) {
-    
-    if (!init) {
-        initPaddle(paddle);
-        initBall(ball);
-        init = SDL_TRUE;
+    if (!gameState.init) {
+        initPaddle(gameState.paddle);
+        initBall(gameState.ball);
+        gameState.leftWall = {0, 0, wallWidth, SCREEN_HEIGHT};
+        gameState.rightWall = {SCREEN_WIDTH - wallWidth, 0, wallWidth, SCREEN_HEIGHT};
+        gameState.init = SDL_TRUE;
     }
     
-    if (input.pause) {
-        paused = paused == SDL_TRUE ? SDL_FALSE : SDL_TRUE;
+    if (gameState.input.pause) {
+        gameState.paused = gameState.paused == SDL_TRUE ? SDL_FALSE : SDL_TRUE;
     }
     
-    if (paused) {
+    if (gameState.input.mouseLeft) {
+        gameState.ball.center.x = gameState.input.mouseX;
+        gameState.ball.center.y = gameState.input.mouseY;
+        gameState.ball.velocity.x = 0.0f;
+        gameState.ball.velocity.y = 0.0f;
+    }
+    
+    if (gameState.input.mouseRight) {
+        Vec2 newVelocity(gameState.input.mouseX - gameState.ball.center.x, gameState.input.mouseY - gameState.ball.center.y);
+        gameState.ball.velocity = newVelocity.normalize() * 100.0f;
+    }
+
+    
+    if (gameState.paused) {
         return;
     }
     
-    update(paddle, ball, input, delta, leftWall, rightWall);
+    updateBall(gameState.ball, gameState.delta);
+    updatePaddle(gameState.paddle, gameState.ball, gameState.input, gameState.delta, gameState.leftWall, gameState.rightWall);
 
 
     renderer.clear();
-    renderer.drawBall(ball);
+    renderer.drawBall(gameState.ball);
 #if 0
     renderer.drawRectangle(collisionShape);
 #endif
-    renderer.drawPaddle(paddle);
-    renderer.drawRectangle(leftWall);
-    renderer.drawRectangle(rightWall);
+    renderer.drawPaddle(gameState.paddle);
+    renderer.drawRectangle(gameState.leftWall);
+    renderer.drawRectangle(gameState.rightWall);
 #if 0
     if (collision) {
         renderer.drawPoint(pointOfCollision);

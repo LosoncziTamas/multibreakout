@@ -7,7 +7,7 @@ void initBall(Ball &ball) {
     ball.radius = 16;
 }
 
-void update(Ball& ball, float delta) {
+void updateBall(Ball& ball, float delta) {
     Vec2 ballDelta = ball.velocity * delta;
     ball.oldPos = ball.center;
     ball.newPos = ball.center + ballDelta;

@@ -4,6 +4,7 @@
 #include "Window.hpp"
 #include "Renderer.hpp"
 #include "MultiBreakout.hpp"
+#include "GameState.hpp"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -55,7 +56,7 @@ int main(void)
     Uint64 startCounter = SDL_GetPerformanceCounter();
     Uint64 perfCountFreq = SDL_GetPerformanceFrequency();
     
-    GameInput newInput;
+    GameState gameState;
     
     while(running)
     {
@@ -65,25 +66,27 @@ int main(void)
             running = handleEvent(event);
         }
         
-        newInput = {};
+        GameInput input = {};
         const Uint8 *state = SDL_GetKeyboardState(NULL);
-        newInput.left = eval(state[SDL_SCANCODE_LEFT]);
-        newInput.down = eval(state[SDL_SCANCODE_DOWN]);
-        newInput.up = eval(state[SDL_SCANCODE_UP]);
-        newInput.right = eval(state[SDL_SCANCODE_RIGHT]);
-        newInput.pause = eval(state[SDL_SCANCODE_SPACE]);
+        input.left = eval(state[SDL_SCANCODE_LEFT]);
+        input.down = eval(state[SDL_SCANCODE_DOWN]);
+        input.up = eval(state[SDL_SCANCODE_UP]);
+        input.right = eval(state[SDL_SCANCODE_RIGHT]);
+        input.pause = eval(state[SDL_SCANCODE_SPACE]);
 
-        Uint32 mouseVal = SDL_GetMouseState(&newInput.mouseX, &newInput.mouseY);
+        Uint32 mouseVal = SDL_GetMouseState(&input.mouseX, &input.mouseY);
         
-        newInput.mouseLeft = eval(mouseVal & SDL_BUTTON(SDL_BUTTON_LEFT));
-        newInput.mouseRight = eval(mouseVal & SDL_BUTTON(SDL_BUTTON_RIGHT));
+        input.mouseLeft = eval(mouseVal & SDL_BUTTON(SDL_BUTTON_LEFT));
+        input.mouseRight = eval(mouseVal & SDL_BUTTON(SDL_BUTTON_RIGHT));
         
         while (secondsElapsed(startCounter, SDL_GetPerformanceCounter()) < secondsPerFrame);
         
         Uint64 end_counter = SDL_GetPerformanceCounter();
         
-        float delta = static_cast<float>(end_counter - startCounter) / static_cast<float>(perfCountFreq);
-        gameUpdate(newInput, renderer, delta);
+        gameState.delta = static_cast<float>(end_counter - startCounter) / static_cast<float>(perfCountFreq);
+        gameState.input = input;
+        
+        gameUpdate(gameState, renderer);
         
         startCounter = end_counter;
     }

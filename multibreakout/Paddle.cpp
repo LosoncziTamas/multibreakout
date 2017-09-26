@@ -18,8 +18,7 @@ void initPaddle(Paddle &paddle) {
     paddle.centerPos = Vec2(SCREEN_WIDTH / 2,  SCREEN_HEIGHT / 2);
 }
 
-void update(Paddle& paddle, Ball& ball, const GameInput& input, float delta, const SDL_Rect& leftWall, const SDL_Rect& rightWall) {
-    update(ball, delta);
+void updatePaddle(Paddle& paddle, Ball& ball, const GameInput& input, float delta, const SDL_Rect& leftWall, const SDL_Rect& rightWall) {
     Vec2 acceleration;
     
     if (input.left) {

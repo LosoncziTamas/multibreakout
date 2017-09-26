@@ -12,6 +12,6 @@ struct Ball {
 };
 
 void initBall(Ball &ball);
-void update(Ball& ball, float delta);
+void updateBall(Ball& ball, float delta);
 
 #endif
