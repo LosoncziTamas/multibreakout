@@ -115,7 +115,6 @@ void gameUpdate(const GameInput& input, const Renderer& renderer, float delta){
         playerDelta.x -= 1.0f;
     }
 
-    
     Vec2 ballNewPos;
     Vec2 ballDelta = ball.velocity * delta;
     ballNewPos = ball.center + ballDelta;
@@ -203,17 +202,20 @@ void gameUpdate(const GameInput& input, const Renderer& renderer, float delta){
                             std::cout << "bottom|left" << ball.velocity << std::endl;
                         } else if (dx > 0 && dy > 0) {
                             reflect(Vec2(-1.0f, 0.0f), ball, playerDelta);
-                            std::cout << "left" << ball.velocity << std::endl;
+                            if (ball.velocity.x > 0) {
+                                ball.velocity.x *= -1;
+                                std::cout << "left" << ball.velocity << std::endl;
+                            }
                         } else if (dx < 0 && dy < 0) {
-                            reflect(Vec2(0.0f, -1.0f), ball);
+                            reflect(Vec2(0.0f, 1.0f), ball);
                             std::cout << "bottom" << ball.velocity << std::endl;
                         }
                     } else if (pointOfCollision.x >= left && pointOfCollision.x <= right) {
-                        reflect(Vec2(0.0f, -1.0f), ball);
+                        reflect(Vec2(0.0f, 1.0f), ball);
                         std::cout << "bottom" << ball.velocity << std::endl;
                     } else if (pointOfCollision.x > right) {
                         if (dx > 0 && dy < 0) {
-                            reflect(Vec2(0.0f, -1.0f), ball);
+                            reflect(Vec2(0.0f, 1.0f), ball);
                             std::cout << "bottom" << ball.velocity << std::endl;
                         } else if (dx < 0 && dy > 0) {
                             reflect(Vec2(1.0f, 0.0f), ball, playerDelta);
@@ -228,6 +230,9 @@ void gameUpdate(const GameInput& input, const Renderer& renderer, float delta){
                 } else if (pointOfCollision.y > top && pointOfCollision.y < bottom) {
                     if (pointOfCollision.x < left) {
                         reflect(Vec2(-1.0f, 0.0f), ball, playerDelta);
+                        if (ball.velocity.x > 0) {
+                            ball.velocity.x *= -1;
+                        }
                         std::cout << "left" << ball.velocity << std::endl;
                     } else if (pointOfCollision.x >= left && pointOfCollision.x <= right) {
                         std::cout << "inside" << ball.velocity << std::endl;
@@ -238,7 +243,6 @@ void gameUpdate(const GameInput& input, const Renderer& renderer, float delta){
                         SDL_assert(false);
                     }
                 }
-                
                 break;
             }
         }
