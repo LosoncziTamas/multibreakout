@@ -3,8 +3,9 @@
 
 #include <SDL2/SDL.h>
 #include "Window.hpp"
-#include "Paddle.hpp"
 #include "Ball.hpp"
+
+struct Paddle;
 
 struct Renderer {
     

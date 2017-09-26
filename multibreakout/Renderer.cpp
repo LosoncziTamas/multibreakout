@@ -1,4 +1,5 @@
 #include "Renderer.hpp"
+#include "Paddle.hpp"
 #include <cmath>
 
 Renderer::Renderer(const Window &window) {
