@@ -19,6 +19,6 @@ std::ostream& operator<< (std::ostream& stream, const Paddle& paddle);
 
 void initPaddle(Paddle &paddle);
 
-void updatePaddle(Paddle& paddle, Ball& ball, const GameInput& input, float delta, const SDL_Rect& leftWall, const SDL_Rect& rightWall);
+void updatePaddle(Paddle& paddle, Ball& ball, const GameInput& input, float delta, const SDL_Rect& leftWall, const SDL_Rect& rightWall,const Renderer& renderer);
 
 #endif

@@ -8,7 +8,7 @@ const float paddleSpeed = 50.0f;
 const int wallWidth = 10;
 
 void gameUpdate(GameState& gameState, const Renderer& renderer) {
-
+    
     if (!gameState.init) {
         initPaddle(gameState.paddle);
         initBall(gameState.ball);
@@ -23,13 +23,13 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
     
     if (gameState.input.mouseLeft) {
         gameState.ball.center.x = gameState.input.mouseX;
-        gameState.ball.center.y = gameState.input.mouseY;
+        gameState.ball.center.y = SCREEN_HEIGHT - gameState.input.mouseY;
         gameState.ball.velocity.x = 0.0f;
         gameState.ball.velocity.y = 0.0f;
     }
     
     if (gameState.input.mouseRight) {
-        Vec2 newVelocity(gameState.input.mouseX - gameState.ball.center.x, gameState.input.mouseY - gameState.ball.center.y);
+        Vec2 newVelocity(gameState.input.mouseX - gameState.ball.center.x, SCREEN_HEIGHT - gameState.input.mouseY - gameState.ball.center.y);
         gameState.ball.velocity = newVelocity.normalize() * 100.0f;
     }
 
@@ -37,17 +37,16 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
     if (gameState.paused) {
         return;
     }
-    
-    updateBall(gameState.ball, gameState.delta);
-    updatePaddle(gameState.paddle, gameState.ball, gameState.input, gameState.delta, gameState.leftWall, gameState.rightWall);
 
 
     renderer.clear();
+    renderer.drawPaddle(gameState.paddle);
     renderer.drawBall(gameState.ball);
+    updateBall(gameState.ball, gameState.delta);
+    updatePaddle(gameState.paddle, gameState.ball, gameState.input, gameState.delta, gameState.leftWall, gameState.rightWall, renderer);
 #if 0
     renderer.drawRectangle(collisionShape);
 #endif
-    renderer.drawPaddle(gameState.paddle);
     renderer.drawRectangle(gameState.leftWall);
     renderer.drawRectangle(gameState.rightWall);
 #if 0

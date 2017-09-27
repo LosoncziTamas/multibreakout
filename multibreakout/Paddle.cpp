@@ -5,7 +5,7 @@ const float paddleSpeed = 50.0f;
 
 void initPaddle(Paddle &paddle);
 void update(Paddle& paddle, Ball& ball, const GameInput& input, float delta, const SDL_Rect& leftWall, const SDL_Rect& rightWall);
-void collide(float delta, Paddle& paddle, Ball& ball);
+void collide(float delta, Paddle& paddle, Ball& ball, const Renderer& renderer);
 
 std::ostream& operator<< (std::ostream& stream, const Paddle& paddle) {
     stream << "vel: " << paddle.velocity << " pos: " << paddle.centerPos;
@@ -15,10 +15,10 @@ std::ostream& operator<< (std::ostream& stream, const Paddle& paddle) {
 void initPaddle(Paddle &paddle) {
     paddle.width = 120;
     paddle.height = 40;
-    paddle.centerPos = Vec2(SCREEN_WIDTH / 2,  SCREEN_HEIGHT / 2);
+    paddle.centerPos = Vec2(SCREEN_WIDTH / 2, 50);
 }
 
-void updatePaddle(Paddle& paddle, Ball& ball, const GameInput& input, float delta, const SDL_Rect& leftWall, const SDL_Rect& rightWall) {
+void updatePaddle(Paddle& paddle, Ball& ball, const GameInput& input, float delta, const SDL_Rect& leftWall, const SDL_Rect& rightWall, const Renderer& renderer) {
     Vec2 acceleration;
     
     if (input.left) {
@@ -50,7 +50,6 @@ void updatePaddle(Paddle& paddle, Ball& ball, const GameInput& input, float delt
         Vec2 wallNorm(1, 0);
         Vec2 reflection = paddle.velocity - 2 * paddle.velocity.dotProduct(wallNorm) * wallNorm;
         paddle.velocity = reflection;
-        //TODO: add some offset to bounce
         paddle.movementDelta.x += 1.0f;
     } else if (paddleRightCorner.x > rightWall.x) {
         Vec2 wallNorm(-1, 0);
@@ -58,13 +57,13 @@ void updatePaddle(Paddle& paddle, Ball& ball, const GameInput& input, float delt
         paddle.movementDelta.x -= 1.0f;
     }
     
-    collide(delta, paddle, ball);
+    collide(delta, paddle, ball, renderer);
 }
 
 SDL_Rect createCollisionShape(Paddle& paddle, float radius) {
     float offset = paddle.width * 0.5f + radius;
     int x = paddle.oldPos.x < paddle.newPos.x ? paddle.oldPos.x - offset : paddle.newPos.x - offset;
-    int y = paddle.oldPos.y - paddle.height - radius;
+    int y = paddle.oldPos.y - radius; // old: paddle.oldPos.y - paddle.height - radius
     int w = fabsf(paddle.oldPos.x - paddle.newPos.x) + paddle.width + 2 * radius;
     int h = paddle.height + 2 * radius;
     SDL_Rect shape = {x, y, w, h};
@@ -81,7 +80,7 @@ bool contains(const SDL_Rect& rect, Vec2& vec) {
 SDL_Rect createExtendedPaddleRect(Paddle& paddle, Vec2 paddleCollisionLocation, float radius) {
     float offset = paddle.width * 0.5f + radius;
     int x = paddleCollisionLocation.x - offset;
-    int y = paddleCollisionLocation.y - paddle.height - radius;
+    int y = paddleCollisionLocation.y - radius; //paddleCollisionLocation.y - paddle.height - radius
     int w = paddle.width + 2 * radius;
     int h = paddle.height + 2 * radius;
     
@@ -94,9 +93,9 @@ void reflect(const Vec2& norm, Ball& ball, const Vec2& playerDelta = Vec2(0, 0))
     ball.center += norm + playerDelta;
 }
 
-void collide(float delta, Paddle& paddle, Ball& ball) {
+void collide(float delta, Paddle& paddle, Ball& ball, const Renderer& renderer) {
     SDL_Rect collisionShape = createCollisionShape(paddle, ball.radius);
-    
+
     bool collision = false;
     Vec2 pointOfCollision;
 
@@ -113,49 +112,51 @@ void collide(float delta, Paddle& paddle, Ball& ball) {
                 collision = true;
                 pointOfCollision = ballCollisionLocation;
                 
+                renderer.drawPoint(pointOfCollision);
+                
                 float dx = ball.newPos.x - ball.center.x;
                 float dy = ball.newPos.y - ball.center.y;
                 
                 float offset = 0.5f * paddle.width;
                 
-                float top = paddleCollisionLocation.y - paddle.height;
+                float top = paddleCollisionLocation.y + paddle.height;
                 float bottom = paddleCollisionLocation.y;
                 float left = paddleCollisionLocation.x - offset;
                 float right = paddleCollisionLocation.x + offset;
                 
-                if (pointOfCollision.y <= top) {
+                if (pointOfCollision.y >= top) {
                     if (pointOfCollision.x < left) {
                         if (dx > 0 && dy > 0) {
-                            reflect(Vec2(-0.707f, -0.707f), ball, paddle.movementDelta);
+                            reflect(Vec2(-0.707f, 0.707f), ball, paddle.movementDelta);
                             std::cout << "top|left" << ball.velocity << std::endl;
                         } else if (dx > 0 && dy < 0) {
                             reflect(Vec2(-1.0f, 0.0f), ball, paddle.movementDelta);
                             std::cout << "left" << ball.velocity << std::endl;
                         } else if (dx < 0 && dy > 0) {
-                            reflect(Vec2(0.0f, -1.0f), ball);
+                            reflect(Vec2(0.0f, 1.0f), ball);
                             std::cout << "top" << ball.velocity << std::endl;
                         }
                     } else if (pointOfCollision.x >= left && pointOfCollision.x <= right) {
-                        reflect(Vec2(0.0f, -1.0f), ball);
+                        reflect(Vec2(0.0f, 1.0f), ball);
                         std::cout << "top" << ball.velocity << std::endl;
                     } else if (pointOfCollision.x > right) {
                         if (dx > 0 && dy > 0) {
-                            reflect(Vec2(0.0f, -1.0f), ball);
+                            reflect(Vec2(0.0f, 1.0f), ball);
                             std::cout << "top" << ball.velocity << std::endl;
                         } else if (dx < 0 && dy < 0) {
                             reflect(Vec2(1.0f, 0.0f), ball, paddle.movementDelta);
                             std::cout << "right" << ball.velocity << std::endl;
                         } else if (dx < 0 && dy > 0) {
-                            reflect(Vec2(0.707f, -0.707f), ball, paddle.movementDelta);
+                            reflect(Vec2(0.707f, 0.707f), ball, paddle.movementDelta);
                             std::cout << "top|right" << ball.velocity << std::endl;
                         }
                     } else {
                         SDL_assert(false);
                     }
-                } else if (pointOfCollision.y >= bottom) {
+                } else if (pointOfCollision.y <= bottom) {
                     if (pointOfCollision.x < left) {
                         if (dx > 0 && dy < 0) {
-                            reflect(Vec2(-0.707f, 0.707f), ball, paddle.movementDelta);
+                            reflect(Vec2(-0.707f, -0.707f), ball, paddle.movementDelta);
                             std::cout << "bottom|left" << ball.velocity << std::endl;
                         } else if (dx > 0 && dy > 0) {
                             reflect(Vec2(-1.0f, 0.0f), ball, paddle.movementDelta);
@@ -164,27 +165,27 @@ void collide(float delta, Paddle& paddle, Ball& ball) {
                                 std::cout << "left" << ball.velocity << std::endl;
                             }
                         } else if (dx < 0 && dy < 0) {
-                            reflect(Vec2(0.0f, 1.0f), ball);
+                            reflect(Vec2(0.0f, -1.0f), ball);
                             std::cout << "bottom" << ball.velocity << std::endl;
                         }
                     } else if (pointOfCollision.x >= left && pointOfCollision.x <= right) {
-                        reflect(Vec2(0.0f, 1.0f), ball);
+                        reflect(Vec2(0.0f, -1.0f), ball);
                         std::cout << "bottom" << ball.velocity << std::endl;
                     } else if (pointOfCollision.x > right) {
                         if (dx > 0 && dy < 0) {
-                            reflect(Vec2(0.0f, 1.0f), ball);
+                            reflect(Vec2(0.0f, -1.0f), ball);
                             std::cout << "bottom" << ball.velocity << std::endl;
                         } else if (dx < 0 && dy > 0) {
                             reflect(Vec2(1.0f, 0.0f), ball, paddle.movementDelta);
                             std::cout << "right" << ball.velocity << std::endl;
                         } else if (dx < 0 && dy < 0) {
-                            reflect(Vec2(0.707f, 0.707f), ball, paddle.movementDelta);
+                            reflect(Vec2(0.707f, -0.707f), ball, paddle.movementDelta);
                             std::cout << "bottom|right" << ball.velocity << std::endl;
                         }
                     } else {
                         SDL_assert(false);
                     }
-                } else if (pointOfCollision.y > top && pointOfCollision.y < bottom) {
+                } else if (pointOfCollision.y < top && pointOfCollision.y > bottom) {
                     if (pointOfCollision.x < left) {
                         reflect(Vec2(-1.0f, 0.0f), ball, paddle.movementDelta);
                         if (ball.velocity.x > 0) {
