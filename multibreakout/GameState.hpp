@@ -4,6 +4,7 @@
 #include "Ball.hpp"
 #include "Paddle.hpp"
 #include "MultiBreakout.hpp"
+#include "Rect.hpp"
 
 struct GameState {
     float delta;
@@ -11,8 +12,8 @@ struct GameState {
     SDL_bool init;
     SDL_bool paused;
     
-    SDL_Rect leftWall;
-    SDL_Rect rightWall;
+    Rect leftWall;
+    Rect rightWall;
     
     Ball ball;
     Paddle paddle;

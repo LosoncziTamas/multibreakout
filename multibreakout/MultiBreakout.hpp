@@ -1,7 +1,7 @@
 #ifndef MultiBreakout_hpp
 #define MultiBreakout_hpp
 
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_stdinc.h>
 
 #include "Renderer.hpp"
 

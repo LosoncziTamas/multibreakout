@@ -1,11 +1,13 @@
 #ifndef Renderer_hpp
 #define Renderer_hpp
 
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_render.h>
+
 #include "Window.hpp"
 #include "Ball.hpp"
 
 struct Paddle;
+struct Rect;
 
 struct Renderer {
     
@@ -19,7 +21,7 @@ struct Renderer {
     void clear() const;
     void update() const;
     void drawPaddle(const Paddle& paddle) const;
-    void drawRectangle(const SDL_Rect& rectangle) const;
+    void drawRectangle(const Rect& rectangle) const;
     void drawBall(const Ball& ball) const;
     void drawPoint(const Vec2& vec, SDL_Color color = {255, 0, 0, 255}) const;
     void drawPoint(float x, float y, SDL_Color color = {255, 0, 0, 255}) const;

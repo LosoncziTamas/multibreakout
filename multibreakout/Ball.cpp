@@ -1,5 +1,6 @@
 #include "Ball.hpp"
 #include "MultiBreakout.hpp"
+#include "GameState.hpp"
 
 void initBall(Ball &ball) {
     ball.center = Vec2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -7,7 +8,19 @@ void initBall(Ball &ball) {
     ball.radius = 16;
 }
 
-void updateBall(Ball& ball, float delta) {
+void updateBall(Ball& ball, float delta, const GameInput& input) {
+    if (input.mouseLeft) {
+        ball.center.x = input.mouseX;
+        ball.center.y = SCREEN_HEIGHT - input.mouseY;
+        ball.velocity.x = 0.0f;
+        ball.velocity.y = 0.0f;
+    }
+    
+    if (input.mouseRight) {
+        Vec2 newVelocity(input.mouseX - ball.center.x, SCREEN_HEIGHT - input.mouseY - ball.center.y);
+        ball.velocity = newVelocity.normalize() * 100.0f;
+    }
+    
     Vec2 ballDelta = ball.velocity * delta;
     ball.oldPos = ball.center;
     ball.newPos = ball.center + ballDelta;

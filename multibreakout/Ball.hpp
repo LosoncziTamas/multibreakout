@@ -3,6 +3,8 @@
 
 #include "Vec2.hpp"
 
+struct GameInput;
+
 struct Ball {
     Vec2 center;
     Vec2 velocity;
@@ -12,6 +14,6 @@ struct Ball {
 };
 
 void initBall(Ball &ball);
-void updateBall(Ball& ball, float delta);
+void updateBall(Ball& ball, float delta, const GameInput& input);
 
 #endif

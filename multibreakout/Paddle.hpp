@@ -5,6 +5,8 @@
 #include "Ball.hpp"
 #include "MultiBreakout.hpp"
 
+struct GameState;
+
 struct Paddle {
     float width;
     float height;
@@ -15,10 +17,8 @@ struct Paddle {
     Vec2 newPos;
 };
 
-std::ostream& operator<< (std::ostream& stream, const Paddle& paddle);
-
 void initPaddle(Paddle &paddle);
-
-void updatePaddle(Paddle& paddle, Ball& ball, const GameInput& input, float delta, const SDL_Rect& leftWall, const SDL_Rect& rightWall,const Renderer& renderer);
+void updatePaddle(GameState& gameState, const Renderer& renderer);
+void collide(GameState& gameState, const Renderer& renderer);
 
 #endif

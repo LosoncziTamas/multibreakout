@@ -1,7 +1,9 @@
+#include <cmath>
+
 #include "Renderer.hpp"
 #include "Paddle.hpp"
 #include "MultiBreakout.hpp"
-#include <cmath>
+#include "Rect.hpp"
 
 Renderer::Renderer(const Window &window) {
     sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC);
@@ -18,35 +20,26 @@ void Renderer::update() const {
 }
 
 void Renderer::drawPaddle(const Paddle& paddle) const {
-    
-    Vec2 flippedCenter = paddle.centerPos;
-    flippedCenter.y = SCREEN_HEIGHT - flippedCenter.y;
-    
     int w = round(paddle.width);
     int h = round(paddle.height);
-
     int x = round(paddle.centerPos.x - paddle.width * 0.5f);
-    int y = round(flippedCenter.y - paddle.height);
+    int y = round(SCREEN_HEIGHT - paddle.centerPos.y - paddle.height);
     
     SDL_Rect rect = {x, y, w, h};
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
     SDL_RenderFillRect(sdlRenderer, &rect);
 }
 
-void Renderer::drawRectangle(const SDL_Rect& rectangle) const {
+void Renderer::drawRectangle(const Rect& rect) const {
     SDL_SetRenderDrawColor(sdlRenderer, 128, 0, 0, 255);
-    SDL_Rect flippedRect = rectangle;
-    flippedRect.y = SCREEN_HEIGHT - rectangle.y - rectangle.h;
-    SDL_RenderFillRect(sdlRenderer, &flippedRect);
+    SDL_Rect sdlRect = toSdlRect(rect);
+    SDL_RenderFillRect(sdlRenderer, &sdlRect);
 }
 
 void Renderer::drawBall(const Ball& ball) const {
     
-    Vec2 flippedCenter = ball.center;
-    flippedCenter.y = SCREEN_HEIGHT - ball.center.y;
-    
-    int x0 = round(flippedCenter.x);
-    int y0 = round(flippedCenter.y);
+    int x0 = round(ball.center.x);
+    int y0 = round(SCREEN_HEIGHT - ball.center.y);
     int radius = round(ball.radius);
     
     int x = radius-1;
