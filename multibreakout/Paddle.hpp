@@ -20,5 +20,6 @@ struct Paddle {
 void initPaddle(Paddle &paddle);
 void updatePaddle(GameState& gameState, const Renderer& renderer);
 void collide(GameState& gameState, const Renderer& renderer);
+void debugCollision(GameState& gameState, const Renderer& renderer);
 
 #endif

@@ -80,6 +80,50 @@ void reflect(const Vec2& norm, Ball& ball, const Vec2& playerDelta = Vec2(0, 0))
     ball.center += norm + playerDelta;
 }
 
+bool collide2(GameState& gameState) {
+    Vec2& ballPos = gameState.ball.newPos;
+    Vec2& paddlePos = gameState.paddle.newPos;
+    
+    //TODO: paddle center pos
+    
+    float verticalDist = fabsf(ballPos.y - (paddlePos.y + gameState.paddle.height / 2));
+    float horizontalDist = fabsf(ballPos.x - paddlePos.x);
+    
+    if (horizontalDist > gameState.ball.radius + gameState.paddle.width / 2) {
+        return false;
+    }
+    
+    if (verticalDist > gameState.ball.radius + gameState.paddle.height / 2) {
+        return false;
+    }
+    
+    if (horizontalDist <= gameState.paddle.width / 2) {
+        return true;
+    }
+
+    if (verticalDist <= gameState.paddle.height / 2) {
+        return true;
+    }
+    
+    float dx = horizontalDist - gameState.paddle.width / 2;
+    float dy = verticalDist - gameState.paddle.height / 2;
+    return (dx * dx + dy * dy <= (gameState.ball.radius * gameState.ball.radius));
+}
+
+Vec2 getReflectionNorm(const Ball& ball, const Paddle& paddle) {
+    Vec2 norm;
+    return norm;
+}
+
+void debugCollision(GameState& gameState, const Renderer& renderer) {
+    if (collide2(gameState)) {
+        SDL_Color collisionColor = {255, 0, 0, 255};
+        renderer.drawBall(gameState.ball, collisionColor);
+    }
+}
+
+
+
 void collide(GameState& gameState, const Renderer& renderer) {
     Paddle &paddle = gameState.paddle;
     Ball &ball = gameState.ball;
@@ -87,22 +131,20 @@ void collide(GameState& gameState, const Renderer& renderer) {
     bool collision = false;
     Vec2 pointOfCollision;
 
-    if (contains(collisionShape, ball.center)) {
+    if (contains(collisionShape, ball.oldPos)) {
         Vec2 ballCollisionLocation;
         Vec2 paddleCollisionLocation;
         
         for (int i = 1; i <= 4; ++i) {
-            ballCollisionLocation = (1.0f - 1.0f / i) * ball.center + (1.0f / i) * ball.newPos;
-            paddleCollisionLocation = (1.0f - 1.0f / i) * paddle.centerPos + (1.0f / i) * paddle.newPos;
+            ballCollisionLocation = (1.0f - 1.0f / i) * ball.oldPos + (1.0f / i) * ball.newPos;
+            paddleCollisionLocation = (1.0f - 1.0f / i) * paddle.oldPos + (1.0f / i) * paddle.newPos;
             Rect paddleRect = createExtendedPaddleRect(paddle, paddleCollisionLocation, ball.radius);
             if (contains(paddleRect, ballCollisionLocation)) {
                 collision = true;
                 pointOfCollision = ballCollisionLocation;
-                
-                renderer.drawPoint(pointOfCollision);
-                
-                float dx = ball.newPos.x - ball.center.x;
-                float dy = ball.newPos.y - ball.center.y;
+                                
+                float dx = ball.newPos.x - ball.oldPos.x;
+                float dy = ball.newPos.y - ball.oldPos.y;
                 
                 float top = paddleCollisionLocation.y + paddle.height;
                 float bottom = paddleCollisionLocation.y;
@@ -190,6 +232,7 @@ void collide(GameState& gameState, const Renderer& renderer) {
             }
         }
     }
+
     
     ball.center += ball.velocity * gameState.delta;
     paddle.centerPos = paddle.oldPos + paddle.movementDelta;

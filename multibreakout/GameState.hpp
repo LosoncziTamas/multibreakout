@@ -15,6 +15,8 @@ struct GameState {
     Rect leftWall;
     Rect rightWall;
     
+    Rect brick;
+    
     Ball ball;
     Paddle paddle;
     GameInput input;

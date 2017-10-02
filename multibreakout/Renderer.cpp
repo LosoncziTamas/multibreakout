@@ -36,7 +36,7 @@ void Renderer::drawRectangle(const Rect& rect) const {
     SDL_RenderFillRect(sdlRenderer, &sdlRect);
 }
 
-void Renderer::drawBall(const Ball& ball) const {
+void Renderer::drawBall(const Ball& ball, SDL_Color color) const {
     
     int x0 = round(ball.center.x);
     int y0 = round(SCREEN_HEIGHT - ball.center.y);
@@ -50,7 +50,7 @@ void Renderer::drawBall(const Ball& ball) const {
     
     while (x >= y)
     {
-        SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(sdlRenderer, color.r, color.g, color.b, color.a);
         SDL_RenderDrawPoint(sdlRenderer, x0 + x, y0 + y);
         SDL_RenderDrawPoint(sdlRenderer, x0 + y, y0 + x);
         SDL_RenderDrawPoint(sdlRenderer, x0 - y, y0 + x);
