@@ -25,6 +25,8 @@ void updateBall(Ball& ball, float delta, const GameInput& input) {
     ball.oldPos = ball.center;
     ball.newPos = ball.center + ballDelta;
     
+//    std::cout << ball.newPos;
+    
     if (ball.newPos.y + ball.radius >= SCREEN_HEIGHT) {
         Vec2 wallNorm(0.0f, -1.0f);
         ball.velocity = ball.velocity - 2 * ball.velocity.dotProduct(wallNorm) * wallNorm;
