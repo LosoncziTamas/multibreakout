@@ -16,8 +16,8 @@
 		E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E93D152C1F0BA6AA007BF3ED /* MultiBreakout.cpp */; };
 		E93D15311F0BCF13007BF3ED /* Vec2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E93D152F1F0BCF13007BF3ED /* Vec2.cpp */; };
 		E96AD1DB1F1A3CF600B66D3A /* Ball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E96AD1DA1F1A3CF600B66D3A /* Ball.cpp */; };
-		E9B8B33E1F7BC522008CA7D1 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9B8B33C1F7BC522008CA7D1 /* Rect.cpp */; };
 		E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */; };
+		E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D20FAA1F85730E0064A1B3 /* Brick.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -48,10 +48,10 @@
 		E93D15301F0BCF13007BF3ED /* Vec2.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Vec2.hpp; sourceTree = "<group>"; };
 		E96AD1D91F1A3CF600B66D3A /* Ball.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Ball.hpp; sourceTree = "<group>"; };
 		E96AD1DA1F1A3CF600B66D3A /* Ball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ball.cpp; sourceTree = "<group>"; };
-		E9B8B33C1F7BC522008CA7D1 /* Rect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Rect.cpp; sourceTree = "<group>"; };
-		E9B8B33D1F7BC522008CA7D1 /* Rect.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Rect.hpp; sourceTree = "<group>"; };
 		E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Paddle.cpp; sourceTree = "<group>"; };
 		E9C5A0B21F0CDBC10017FCE6 /* Paddle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Paddle.hpp; sourceTree = "<group>"; };
+		E9D20FAA1F85730E0064A1B3 /* Brick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Brick.cpp; sourceTree = "<group>"; };
+		E9D20FAB1F85730E0064A1B3 /* Brick.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Brick.hpp; sourceTree = "<group>"; };
 		E9F606E51F7AE7AD005A405E /* GameState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GameState.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -105,8 +105,8 @@
 				E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */,
 				E9C5A0B21F0CDBC10017FCE6 /* Paddle.hpp */,
 				E9F606E51F7AE7AD005A405E /* GameState.hpp */,
-				E9B8B33C1F7BC522008CA7D1 /* Rect.cpp */,
-				E9B8B33D1F7BC522008CA7D1 /* Rect.hpp */,
+				E9D20FAA1F85730E0064A1B3 /* Brick.cpp */,
+				E9D20FAB1F85730E0064A1B3 /* Brick.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -172,9 +172,9 @@
 				E93D151A1F0B9158007BF3ED /* main.cpp in Sources */,
 				E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */,
 				E93D15281F0B9C13007BF3ED /* Window.cpp in Sources */,
+				E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */,
 				E93D15311F0BCF13007BF3ED /* Vec2.cpp in Sources */,
 				E96AD1DB1F1A3CF600B66D3A /* Ball.cpp in Sources */,
-				E9B8B33E1F7BC522008CA7D1 /* Rect.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -5,9 +5,10 @@
 
 #include "Window.hpp"
 #include "Ball.hpp"
+#include "Brick.hpp"
 
 struct Paddle;
-struct Rect;
+
 
 struct Renderer {
     
@@ -21,7 +22,8 @@ struct Renderer {
     void clear() const;
     void update() const;
     void drawPaddle(const Paddle& paddle) const;
-    void drawRectangle(const Rect& rectangle) const;
+    void drawBoundaries(int left, int right) const;
+    void drawBrick(const Brick& brick) const;
     void drawBall(const Ball& ball, SDL_Color color = {0, 0, 0, 255}) const;
     void drawPoint(const Vec2& vec, SDL_Color color = {255, 0, 0, 255}) const;
     void drawPoint(float x, float y, SDL_Color color = {255, 0, 0, 255}) const;

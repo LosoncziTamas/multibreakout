@@ -1,12 +1,11 @@
 #include "Paddle.hpp"
 #include "MultiBreakout.hpp"
-#include "Rect.hpp"
 #include "GameState.hpp"
 
 void initPaddle(Paddle &paddle) {
     paddle.width = 120.0f;
     paddle.height = 40.0f;
-    paddle.newPos = Vec2(SCREEN_WIDTH / 2, 250);
+    paddle.newPos = Vec2(SCREEN_WIDTH / 2, 20);
     paddle.speed = 50.0f;
 }
 
@@ -37,11 +36,11 @@ void updatePaddle(GameState& gameState) {
     paddle.newPos = paddle.oldPos + paddle.movementDelta;
     
     float offset = paddle.width * 0.5f;
-    if (paddle.newPos.x - offset < gameState.leftWall.w) {
+    if (paddle.newPos.x - offset < gameState.leftBoundary) {
         Vec2 wallNorm(1, 0);
         paddle.velocity = paddle.velocity - 2 * paddle.velocity.dotProduct(wallNorm) * wallNorm;
         paddle.movementDelta.x += 1.0f;
-    } else if (paddle.newPos.x + offset > gameState.rightWall.x) {
+    } else if (paddle.newPos.x + offset > gameState.rightBoundary) {
         Vec2 wallNorm(-1, 0);
         paddle.velocity = paddle.velocity - 2 * paddle.velocity.dotProduct(wallNorm) * wallNorm;
         paddle.movementDelta.x -= 1.0f;

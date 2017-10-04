@@ -3,7 +3,6 @@
 #include "Renderer.hpp"
 #include "Paddle.hpp"
 #include "MultiBreakout.hpp"
-#include "Rect.hpp"
 
 Renderer::Renderer(const Window &window) {
     sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC);
@@ -27,13 +26,22 @@ void Renderer::drawPaddle(const Paddle& paddle) const {
     
     SDL_Rect rect = {x, y, w, h};
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
-    SDL_RenderFillRect(sdlRenderer, &rect);
+    SDL_RenderDrawRect(sdlRenderer, &rect);
 }
 
-void Renderer::drawRectangle(const Rect& rect) const {
+void Renderer::drawBrick(const Brick& brick) const {
+    SDL_SetRenderDrawColor(sdlRenderer, 0, 255, 0, 255);
+    SDL_Rect sdlRect = {brick.x, SCREEN_HEIGHT - brick.y - brick.height, brick.width, brick.height};
+    SDL_RenderDrawRect(sdlRenderer, &sdlRect);
+}
+
+void Renderer::drawBoundaries(int left, int right) const {
     SDL_SetRenderDrawColor(sdlRenderer, 128, 0, 0, 255);
-    SDL_Rect sdlRect = toSdlRect(rect);
-    SDL_RenderFillRect(sdlRenderer, &sdlRect);
+    SDL_Rect leftRect = {0, 0, left, SCREEN_HEIGHT};
+    SDL_Rect rightRect = {right, 0, SCREEN_WIDTH - right, SCREEN_HEIGHT};
+    SDL_RenderFillRect(sdlRenderer, &leftRect);
+    SDL_RenderFillRect(sdlRenderer, &rightRect);
+
 }
 
 void Renderer::drawBall(const Ball& ball, SDL_Color color) const {
