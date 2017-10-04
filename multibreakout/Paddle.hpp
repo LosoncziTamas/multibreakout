@@ -10,6 +10,7 @@ struct GameState;
 struct Paddle {
     float width;
     float height;
+    float speed;
     Vec2 centerPos;
     Vec2 velocity;
     Vec2 movementDelta;

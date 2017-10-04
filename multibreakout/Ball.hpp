@@ -11,6 +11,7 @@ struct Ball {
     Vec2 oldPos;
     Vec2 newPos;
     float radius;
+    float speed;
 };
 
 void initBall(Ball &ball);

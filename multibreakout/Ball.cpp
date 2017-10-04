@@ -4,8 +4,9 @@
 
 void initBall(Ball &ball) {
     ball.center = Vec2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-    ball.velocity = Vec2(0, 0);
-    ball.radius = 16;
+    ball.velocity = Vec2(0.0f, 0.0f);
+    ball.radius = 16.0f;
+    ball.speed = 100.0f;
 }
 
 void updateBall(Ball& ball, float delta, const GameInput& input) {
@@ -18,10 +19,10 @@ void updateBall(Ball& ball, float delta, const GameInput& input) {
     
     if (input.mouseRight) {
         Vec2 newVelocity(input.mouseX - ball.center.x, SCREEN_HEIGHT - input.mouseY - ball.center.y);
-        ball.velocity = newVelocity.normalize() * 100.0f;
+        ball.velocity = newVelocity.normalize();
     }
     
-    Vec2 ballDelta = ball.velocity * delta;
+    Vec2 ballDelta = ball.velocity * ball.speed * delta;
     ball.oldPos = ball.center;
     ball.newPos = ball.center + ballDelta;
     
