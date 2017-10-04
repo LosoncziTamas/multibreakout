@@ -11,7 +11,6 @@ struct Paddle {
     float width;
     float height;
     float speed;
-    Vec2 centerPos;
     Vec2 velocity;
     Vec2 movementDelta;
     Vec2 oldPos;
@@ -19,8 +18,7 @@ struct Paddle {
 };
 
 void initPaddle(Paddle &paddle);
-void updatePaddle(GameState& gameState, const Renderer& renderer);
-void collide(GameState& gameState, const Renderer& renderer);
-void debugCollision(GameState& gameState, const Renderer& renderer);
+void updatePaddle(GameState& gameState);
+void resolveCollision(Ball& ball, Paddle& paddle, const Renderer& renderer, float delta);
 
 #endif

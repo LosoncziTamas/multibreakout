@@ -22,8 +22,8 @@ void Renderer::update() const {
 void Renderer::drawPaddle(const Paddle& paddle) const {
     int w = round(paddle.width);
     int h = round(paddle.height);
-    int x = round(paddle.centerPos.x - paddle.width * 0.5f);
-    int y = round(SCREEN_HEIGHT - paddle.centerPos.y - paddle.height);
+    int x = round(paddle.newPos.x - paddle.width * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
     
     SDL_Rect rect = {x, y, w, h};
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
@@ -38,8 +38,8 @@ void Renderer::drawRectangle(const Rect& rect) const {
 
 void Renderer::drawBall(const Ball& ball, SDL_Color color) const {
     
-    int x0 = round(ball.center.x);
-    int y0 = round(SCREEN_HEIGHT - ball.center.y);
+    int x0 = round(ball.newPos.x);
+    int y0 = round(SCREEN_HEIGHT - ball.newPos.y);
     int radius = round(ball.radius);
     
     int x = radius-1;

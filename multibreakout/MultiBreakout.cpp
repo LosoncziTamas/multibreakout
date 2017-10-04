@@ -23,15 +23,15 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
     }
 
     updateBall(gameState.ball, gameState.delta, gameState.input);
-    updatePaddle(gameState, renderer);
-
+    updatePaddle(gameState);
+    
     renderer.clear();
     renderer.drawPaddle(gameState.paddle);
     renderer.drawBall(gameState.ball);
-    debugCollision(gameState, renderer);
+    resolveCollision(gameState.ball, gameState.paddle, renderer, gameState.delta);
     renderer.drawRectangle(gameState.leftWall);
     renderer.drawRectangle(gameState.rightWall);
     renderer.drawRectangle(gameState.brick);
-    renderer.drawPoint(gameState.paddle.centerPos);
+    renderer.drawPoint(gameState.paddle.newPos);
     renderer.update();
 }

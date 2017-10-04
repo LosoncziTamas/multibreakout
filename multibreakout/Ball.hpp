@@ -6,10 +6,10 @@
 struct GameInput;
 
 struct Ball {
-    Vec2 center;
     Vec2 velocity;
     Vec2 oldPos;
     Vec2 newPos;
+    Vec2 movementDelta;
     float radius;
     float speed;
 };
