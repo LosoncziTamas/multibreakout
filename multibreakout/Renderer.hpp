@@ -9,6 +9,12 @@
 
 struct Paddle;
 
+const SDL_Color RED = {255, 0, 0, 255};
+const SDL_Color GREEN = {0, 255, 0, 255};
+const SDL_Color BLUE = {0, 0, 255, 255};
+const SDL_Color BLACK = {0, 0, 0, 255};
+const SDL_Color YELLOW = {255, 255, 0, 0};
+const SDL_Color WHITE = {0, 0, 0, 0};
 
 struct Renderer {
     
@@ -24,9 +30,9 @@ struct Renderer {
     void drawPaddle(const Paddle& paddle) const;
     void drawBoundaries(int left, int right) const;
     void drawBrick(const Brick& brick) const;
-    void drawBall(const Ball& ball, SDL_Color color = {0, 0, 0, 255}) const;
-    void drawPoint(const Vec2& vec, SDL_Color color = {255, 0, 0, 255}) const;
-    void drawPoint(float x, float y, SDL_Color color = {255, 0, 0, 255}) const;
+    void drawBall(const Ball& ball, SDL_Color color = BLACK) const;
+    void drawPoint(const Vec2& vec, SDL_Color color = RED) const;
+    void drawPoint(float x, float y, SDL_Color color = RED) const;
     
 };
 

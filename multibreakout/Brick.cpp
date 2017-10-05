@@ -3,6 +3,28 @@
 #include "Brick.hpp"
 #include "MultiBreakout.hpp"
 
+void callback(Brick& brick, Ball& ball) {
+    switch (brick.powerUp) {
+        case speedUp:
+            printf("speed up \n");
+            break;
+        case slowDown:
+            printf("slow down \n");
+            break;
+        case strech:
+            printf("strech \n");
+            break;
+        case shrink:
+            printf("shrink \n");
+            break;
+        case neutral:
+        default:
+            printf("neutral \n");
+            break;
+    }
+    brick.active = false;
+}
+
 void initBricks(std::vector<Brick>& bricks) {
     int brickWidth = 30;
     int brickHeight = 30;
@@ -15,7 +37,13 @@ void initBricks(std::vector<Brick>& bricks) {
     
     for (int i = 0; i < columns; ++i) {
         for (int j = 0; j < rows; ++j) {
-            Brick brick = {Vec2(pivotX + (i * brickWidth) + halfWidth, pivotY - (j * brickHeight) + halfHeight), brickWidth, brickHeight, true};
+            Brick brick;
+            brick.center = Vec2(pivotX + (i * brickWidth) + halfWidth, pivotY - (j * brickHeight) + halfHeight);
+            brick.width = brickWidth;
+            brick.height = brickHeight;
+            brick.active = true;
+            brick.callback = callback;
+            brick.powerUp = static_cast<PowerUp>(rand() % shrink + 1);
             bricks.push_back(brick);
         }
     }
@@ -58,6 +86,6 @@ void collideWithBrick(Ball& ball, Brick& brick) {
         reflectionNorm.normalize();
         ball.velocity = reflectionNorm;
         ball.movementDelta += reflectionNorm;
-        brick.active = false;
+        brick.callback(brick, ball);
     }
 }

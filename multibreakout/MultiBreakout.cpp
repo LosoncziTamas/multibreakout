@@ -24,7 +24,7 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
         return;
     }
 
-    updateBall(gameState.ball, gameState.delta, gameState.input);
+    updateBall(gameState);
     updatePaddle(gameState);
     for (auto& brick : gameState.bricks) {
         collideWithBrick(gameState.ball, brick);

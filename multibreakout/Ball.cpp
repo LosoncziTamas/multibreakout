@@ -8,7 +8,11 @@ void initBall(Ball &ball) {
     ball.speed = 100.0f;
 }
 
-void updateBall(Ball& ball, float delta, const GameInput& input) {
+void updateBall(GameState& gameState) {
+    Ball& ball = gameState.ball;
+    GameInput& input = gameState.input;
+    
+    
     if (input.mouseLeft) {
         ball.newPos.x = input.mouseX;
         ball.newPos.y = SCREEN_HEIGHT - input.mouseY;
@@ -21,7 +25,7 @@ void updateBall(Ball& ball, float delta, const GameInput& input) {
         ball.velocity = newVelocity.normalize();
     }
     
-    ball.movementDelta = ball.velocity * ball.speed * delta;
+    ball.movementDelta = ball.velocity * ball.speed * gameState.delta;
     ball.oldPos = ball.newPos;
     ball.newPos = ball.oldPos + ball.movementDelta;
     
@@ -35,12 +39,12 @@ void updateBall(Ball& ball, float delta, const GameInput& input) {
         ball.velocity = ball.velocity - 2 * ball.velocity.dotProduct(wallNorm) * wallNorm;
     }
     
-    if (ball.newPos.x - ball.radius <= 0) {
+    if (ball.newPos.x - ball.radius <= gameState.leftBoundary) {
         Vec2 wallNorm(1.0f, 0.0f);
         ball.velocity = ball.velocity - 2 * ball.velocity.dotProduct(wallNorm) * wallNorm;
     }
     
-    if (ball.newPos.x + ball.radius >= SCREEN_WIDTH) {
+    if (ball.newPos.x + ball.radius >= gameState.rightBoundary) {
         Vec2 wallNorm(-1.0f, 0.0f);
         ball.velocity = ball.velocity - 2 * ball.velocity.dotProduct(wallNorm) * wallNorm;
     }

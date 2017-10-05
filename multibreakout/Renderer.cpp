@@ -29,9 +29,28 @@ void Renderer::drawPaddle(const Paddle& paddle) const {
     SDL_RenderDrawRect(sdlRenderer, &rect);
 }
 
+SDL_Color getDrawColor(PowerUp powerUp) {
+    switch (powerUp) {
+        case speedUp:
+            return BLUE;
+        case slowDown:
+            return RED;
+        case strech:
+            return GREEN;
+        case shrink:
+            return YELLOW;
+        case neutral:
+        default:
+            return BLACK;
+    }
+}
+
 void Renderer::drawBrick(const Brick& brick) const {
-    if (!brick.active) return;
-    SDL_SetRenderDrawColor(sdlRenderer, 0, 255, 0, 255);
+    if (!brick.active) {
+        return;
+    }
+    SDL_Color color = getDrawColor(brick.powerUp);
+    SDL_SetRenderDrawColor(sdlRenderer, color.r, color.g, color.b, color.a);
     int x = brick.center.x - brick.width * 0.5f;
     int y = SCREEN_HEIGHT - (brick.center.y + brick.height * 0.5f);
     SDL_Rect sdlRect = {x, y, brick.width, brick.height};
@@ -48,7 +67,6 @@ void Renderer::drawBoundaries(int left, int right) const {
 }
 
 void Renderer::drawBall(const Ball& ball, SDL_Color color) const {
-    
     int x0 = round(ball.newPos.x);
     int y0 = round(SCREEN_HEIGHT - ball.newPos.y);
     int radius = round(ball.radius);
