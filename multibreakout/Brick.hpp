@@ -1,9 +1,10 @@
 #ifndef Brick_hpp
 #define Brick_hpp
 
+#include "Vec2.hpp"
+
 struct Brick {
-    int x;
-    int y;
+    Vec2 center;
     int width;
     int height;
 };

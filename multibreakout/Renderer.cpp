@@ -31,7 +31,9 @@ void Renderer::drawPaddle(const Paddle& paddle) const {
 
 void Renderer::drawBrick(const Brick& brick) const {
     SDL_SetRenderDrawColor(sdlRenderer, 0, 255, 0, 255);
-    SDL_Rect sdlRect = {brick.x, SCREEN_HEIGHT - brick.y - brick.height, brick.width, brick.height};
+    int x = brick.center.x - brick.width * 0.5f;
+    int y = SCREEN_HEIGHT - (brick.center.y + brick.height * 0.5f);
+    SDL_Rect sdlRect = {x, y, brick.width, brick.height};
     SDL_RenderDrawRect(sdlRenderer, &sdlRect);
 }
 
