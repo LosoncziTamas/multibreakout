@@ -19,6 +19,7 @@ struct GameState {
     std::vector<Brick> bricks;    
     Ball ball;
     Paddle paddle;
+    Paddle enemy;
     
     GameInput input;
 };

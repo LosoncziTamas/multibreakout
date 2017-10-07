@@ -17,6 +17,8 @@ struct Paddle {
     Vec2 newPos;
 };
 
+void initEnemy(Paddle& enemy);
+void updateEnemy(GameState& gameState);
 void initPaddle(Paddle &paddle);
 void updatePaddle(GameState& gameState);
 void resolveCollision(Ball& ball, Paddle& paddle, float delta);

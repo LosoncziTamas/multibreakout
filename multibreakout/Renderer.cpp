@@ -9,8 +9,12 @@ Renderer::Renderer(const Window &window) {
     SDL_assert(sdlRenderer);
 }
 
+Renderer::~Renderer() {
+    SDL_DestroyRenderer(sdlRenderer);
+}
+
 void Renderer::clear() const {
-    SDL_SetRenderDrawColor(sdlRenderer, 255, 255, 255, 0);
+    SDL_SetRenderDrawColor(sdlRenderer, 130, 189, 240, 0);
     SDL_RenderClear(sdlRenderer);
 }
 
@@ -112,9 +116,4 @@ void Renderer::drawPoint(const Vec2& vec, SDL_Color color) const {
 void Renderer::drawPoint(float x, float y, SDL_Color color) const {
     SDL_SetRenderDrawColor(sdlRenderer, color.r, color.g, color.b, color.a);
     SDL_RenderDrawPoint(sdlRenderer, round(x), round(SCREEN_HEIGHT - y));
-}
-
-
-Renderer::~Renderer() {
-    SDL_DestroyRenderer(sdlRenderer);
 }

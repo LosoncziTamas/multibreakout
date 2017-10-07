@@ -33,7 +33,6 @@ struct Renderer {
     void drawBall(const Ball& ball) const;
     void drawPoint(const Vec2& vec, SDL_Color color = RED) const;
     void drawPoint(float x, float y, SDL_Color color = RED) const;
-    
 };
 
 #endif
