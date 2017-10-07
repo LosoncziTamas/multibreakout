@@ -6,12 +6,12 @@ void initBall(Ball &ball) {
     ball.newPos = Vec2(SCREEN_WIDTH / 2, 60);
     ball.radius = 16.0f;
     ball.speed = 100.0f;
+    ball.powerUp = neutral;
 }
 
 void updateBall(GameState& gameState) {
     Ball& ball = gameState.ball;
     GameInput& input = gameState.input;
-    
     
     if (input.mouseLeft) {
         ball.newPos.x = input.mouseX;

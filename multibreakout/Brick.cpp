@@ -22,6 +22,7 @@ void callback(Brick& brick, Ball& ball) {
             printf("neutral \n");
             break;
     }
+    ball.powerUp = brick.powerUp;
     brick.active = false;
 }
 

@@ -75,10 +75,49 @@ bool collide(Vec2& ballCollisionPos, Vec2& paddleCollisionPos, Paddle& paddle, f
     return (dx * dx + dy * dy <= radius * radius);
 }
 
-void resolveCollision(Ball& ball, Paddle& paddle, const Renderer& renderer, float delta) {
-    
-    SDL_Color collisionColor = {0, 0, 0, 255};
-    
+void activatePowerUp(Ball& ball, Paddle& paddle) {
+    switch (ball.powerUp) {
+        case speedUp:
+            if (paddle.speed == 50.0f) {
+                paddle.speed = 100.0f;
+            } else if (paddle.speed == 25.0f) {
+                paddle.speed = 50.0f;
+            }
+            printf("speed up\n");
+            break;
+        case slowDown:
+            if (paddle.speed == 50.0f) {
+                paddle.speed = 25.0f;
+            } else if (paddle.speed == 100.0f) {
+                paddle.speed = 50.0f;
+            }
+            printf("slow down \n");
+            break;
+        case strech:
+            if (paddle.width == 120.0f) {
+                paddle.width = 150.0f;
+            } else if (paddle.width == 80.0f) {
+                paddle.width = 120.0f;
+            }
+            printf("strech \n");
+            break;
+        case shrink:
+            if (paddle.width == 120.0f) {
+                paddle.width = 80.0f;
+            } else if (paddle.width == 150.0f) {
+                paddle.width = 120.0f;
+            }
+            printf("shrink \n");
+            break;
+        case neutral:
+        default:
+            printf("neutral \n");
+            break;
+    }
+    ball.powerUp = neutral;
+}
+
+void resolveCollision(Ball& ball, Paddle& paddle, float delta) {
     if (collide(ball.newPos, paddle.newPos, paddle, ball.radius)) {
         for (int i = 1; i <= 4; ++i) {
             Vec2 ballCollisionLocation = (1.0f / i) * ball.oldPos + (1.0f - 1.0f / i) * ball.newPos;
@@ -88,13 +127,12 @@ void resolveCollision(Ball& ball, Paddle& paddle, const Renderer& renderer, floa
                 reflectionNorm.normalize();
                 ball.velocity = reflectionNorm;
                 ball.movementDelta += reflectionNorm * paddle.movementDelta.length();
-                collisionColor = {255, 0, 0, 255};
+                activatePowerUp(ball, paddle);
                 break;
             }
         }
     }
     
     ball.newPos = ball.oldPos + ball.movementDelta;
-    renderer.drawBall(ball, collisionColor);
     paddle.newPos = paddle.oldPos + paddle.movementDelta;
 }

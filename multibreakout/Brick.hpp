@@ -6,9 +6,7 @@
 
 #include "Vec2.hpp"
 #include "Ball.hpp"
-
-
-enum PowerUp {neutral, speedUp, slowDown, strech, shrink};
+#include "Common.hpp"
 
 struct Brick {
     Vec2 center;

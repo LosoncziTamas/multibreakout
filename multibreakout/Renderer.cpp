@@ -63,10 +63,10 @@ void Renderer::drawBoundaries(int left, int right) const {
     SDL_Rect rightRect = {right, 0, SCREEN_WIDTH - right, SCREEN_HEIGHT};
     SDL_RenderFillRect(sdlRenderer, &leftRect);
     SDL_RenderFillRect(sdlRenderer, &rightRect);
-
 }
 
-void Renderer::drawBall(const Ball& ball, SDL_Color color) const {
+void Renderer::drawBall(const Ball& ball) const {
+    SDL_Color color = getDrawColor(ball.powerUp);
     int x0 = round(ball.newPos.x);
     int y0 = round(SCREEN_HEIGHT - ball.newPos.y);
     int radius = round(ball.radius);

@@ -48,6 +48,7 @@
 		E93D15301F0BCF13007BF3ED /* Vec2.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Vec2.hpp; sourceTree = "<group>"; };
 		E96AD1D91F1A3CF600B66D3A /* Ball.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Ball.hpp; sourceTree = "<group>"; };
 		E96AD1DA1F1A3CF600B66D3A /* Ball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ball.cpp; sourceTree = "<group>"; };
+		E9889C641F88D3CD007106A9 /* Common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Common.hpp; sourceTree = "<group>"; };
 		E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Paddle.cpp; sourceTree = "<group>"; };
 		E9C5A0B21F0CDBC10017FCE6 /* Paddle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Paddle.hpp; sourceTree = "<group>"; };
 		E9D20FAA1F85730E0064A1B3 /* Brick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Brick.cpp; sourceTree = "<group>"; };
@@ -107,6 +108,7 @@
 				E9F606E51F7AE7AD005A405E /* GameState.hpp */,
 				E9D20FAA1F85730E0064A1B3 /* Brick.cpp */,
 				E9D20FAB1F85730E0064A1B3 /* Brick.hpp */,
+				E9889C641F88D3CD007106A9 /* Common.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";

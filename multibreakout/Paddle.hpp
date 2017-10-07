@@ -19,6 +19,6 @@ struct Paddle {
 
 void initPaddle(Paddle &paddle);
 void updatePaddle(GameState& gameState);
-void resolveCollision(Ball& ball, Paddle& paddle, const Renderer& renderer, float delta);
+void resolveCollision(Ball& ball, Paddle& paddle, float delta);
 
 #endif

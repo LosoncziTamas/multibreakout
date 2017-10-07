@@ -29,7 +29,7 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
     for (auto& brick : gameState.bricks) {
         collideWithBrick(gameState.ball, brick);
     }
-    resolveCollision(gameState.ball, gameState.paddle, renderer, gameState.delta);
+    resolveCollision(gameState.ball, gameState.paddle, gameState.delta);
     
     renderer.clear();
     renderer.drawPaddle(gameState.paddle);

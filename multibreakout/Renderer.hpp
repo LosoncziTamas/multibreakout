@@ -30,7 +30,7 @@ struct Renderer {
     void drawPaddle(const Paddle& paddle) const;
     void drawBoundaries(int left, int right) const;
     void drawBrick(const Brick& brick) const;
-    void drawBall(const Ball& ball, SDL_Color color = BLACK) const;
+    void drawBall(const Ball& ball) const;
     void drawPoint(const Vec2& vec, SDL_Color color = RED) const;
     void drawPoint(float x, float y, SDL_Color color = RED) const;
     
