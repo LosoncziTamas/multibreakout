@@ -14,6 +14,25 @@ void initBall(Vec2& position, std::vector<Ball>& balls) {
     balls.push_back(ball);
 }
 
+void collideBalls(std::vector<Ball>& balls) {
+    size_t n = balls.size();
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            Ball& ball1 = balls.at(i);
+            Ball& ball2 = balls.at(j);
+            float distanceSqr = ball1.newPos.distanceSqr(ball2.newPos);
+            //TODO: use square for better results?
+            if (distanceSqr <= ball1.radius * ball1.radius + ball2.radius * ball2.radius) {
+                Vec2 reflection1 = ball1.newPos - ball2.newPos;
+                Vec2 reflection2 = ball2.newPos - ball1.newPos;
+                ball1.velocity = reflection1.normalize();
+                ball2.velocity = reflection2.normalize();
+                ball1.movementDelta += reflection1 * ball1.movementDelta.length();
+                ball2.movementDelta += reflection2 * ball2.movementDelta.length();
+            }
+        }
+    }
+}
 
 void updateBalls(GameState& gameState) {
     GameInput& input = gameState.input;

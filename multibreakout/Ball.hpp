@@ -1,6 +1,8 @@
 #ifndef Ball_hpp
 #define Ball_hpp
 
+#include <vector>
+
 #include "Vec2.hpp"
 #include "Common.hpp"
 
@@ -18,5 +20,6 @@ struct Ball {
 };
 
 void updateBalls(GameState& gameState);
+void collideBalls(std::vector<Ball>& balls);
 
 #endif
