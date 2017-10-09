@@ -19,12 +19,20 @@ void initEnemy(Paddle& enemy) {
     enemy.speed = DEFAULT_SPEED;
 }
 
+Vec2 getTargetPosition(GameState& gameState) {
+    Vec2 target(gameState.enemy.newPos);
+    if (gameState.ball.newPos.y > SCREEN_HEIGHT * 0.5f) {
+        target = gameState.ball.newPos;
+    }
+    return target;
+}
+
 void updateEnemy(GameState& gameState) {
     Paddle &enemy = gameState.enemy;
     float delta = gameState.delta;
     
     Vec2 acceleration;
-    Vec2 diff = gameState.ball.newPos - enemy.newPos;
+    Vec2 diff = getTargetPosition(gameState) - gameState.enemy.newPos;
     if (diff.x > 0) {
         if (enemy.velocity.x < 0){
             enemy.velocity.x = 0.0f;
