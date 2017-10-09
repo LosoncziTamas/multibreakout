@@ -18,6 +18,6 @@ struct Brick {
 };
 
 void initBricks(std::vector<Brick>& bricks);
-void collideWithBrick(Ball& ball, Brick& brick);
+void collideWithBrick(std::vector<Ball>& balls, std::vector<Brick>& bricks);
 
 #endif

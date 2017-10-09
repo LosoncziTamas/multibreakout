@@ -18,9 +18,9 @@ struct Paddle {
 };
 
 void initEnemy(Paddle& enemy);
-void updateEnemy(GameState& gameState);
+void updateEnemy(Paddle& enemy, std::vector<Ball>& balls, float delta, float leftBoundary, float rightBoundary);
 void initPaddle(Paddle &paddle);
 void updatePaddle(GameState& gameState);
-void resolveCollision(Ball& ball, Paddle& paddle, float delta);
+void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta);
 
 #endif

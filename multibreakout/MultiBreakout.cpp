@@ -10,7 +10,6 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
     if (!gameState.init) {
         initPaddle(gameState.paddle);
         initEnemy(gameState.enemy);
-        initBall(gameState.ball);
         gameState.leftBoundary = 10;
         gameState.rightBoundary = SCREEN_WIDTH - 10;
         gameState.init = SDL_TRUE;
@@ -25,19 +24,20 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
         return;
     }
 
-    updateBall(gameState);
+    updateBalls(gameState);
     updatePaddle(gameState);
-    updateEnemy(gameState);
-    for (auto& brick : gameState.bricks) {
-        collideWithBrick(gameState.ball, brick);
-    }
-    resolveCollision(gameState.ball, gameState.enemy, gameState.delta);
-    resolveCollision(gameState.ball, gameState.paddle, gameState.delta);
+    
+    updateEnemy(gameState.enemy, gameState.balls, gameState.delta, gameState.leftBoundary, gameState.rightBoundary);
+    collideWithBrick(gameState.balls, gameState.bricks);
+    resolveCollision(gameState.balls, gameState.enemy, gameState.delta);
+    resolveCollision(gameState.balls, gameState.paddle, gameState.delta);
     
     renderer.clear();
     renderer.drawPaddle(gameState.paddle);
     renderer.drawPaddle(gameState.enemy);
-    renderer.drawBall(gameState.ball);
+    for (auto& ball: gameState.balls) {
+        renderer.drawBall(ball);
+    }
     renderer.drawBoundaries(gameState.leftBoundary, gameState.rightBoundary);
     for (auto& brick : gameState.bricks) {
         renderer.drawBrick(brick);

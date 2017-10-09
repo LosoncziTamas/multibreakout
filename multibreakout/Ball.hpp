@@ -17,7 +17,6 @@ struct Ball {
     float speed;
 };
 
-void initBall(Ball &ball);
-void updateBall(GameState& gameState);
+void updateBalls(GameState& gameState);
 
 #endif

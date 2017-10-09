@@ -16,8 +16,9 @@ struct GameState {
     SDL_bool init;
     SDL_bool paused;
     
-    std::vector<Brick> bricks;    
-    Ball ball;
+    std::vector<Brick> bricks;
+    std::vector<Ball> balls;
+
     Paddle paddle;
     Paddle enemy;
     

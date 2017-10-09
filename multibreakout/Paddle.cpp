@@ -19,20 +19,24 @@ void initEnemy(Paddle& enemy) {
     enemy.speed = DEFAULT_SPEED;
 }
 
-Vec2 getTargetPosition(GameState& gameState) {
-    Vec2 target(gameState.enemy.newPos);
-    if (gameState.ball.newPos.y > SCREEN_HEIGHT * 0.5f) {
-        target = gameState.ball.newPos;
+Vec2 getTargetPosition(Paddle& enemy, std::vector<Ball>& balls) {
+    Vec2 targetPos(enemy.newPos);
+    
+    Ball *target = nullptr;
+    for (auto& ball : balls) {
+        bool betterTarget = target == nullptr || (target->newPos.y < ball.newPos.y && ball.velocity.y > 0);
+        if (ball.newPos.y > SCREEN_HEIGHT * 0.5f && betterTarget) {
+            targetPos = ball.newPos;
+            target = &ball;
+        }
     }
-    return target;
+
+    return targetPos;
 }
 
-void updateEnemy(GameState& gameState) {
-    Paddle &enemy = gameState.enemy;
-    float delta = gameState.delta;
-    
+void updateEnemy(Paddle& enemy, std::vector<Ball>& balls, float delta, float leftBoundary, float rightBoundary) {
     Vec2 acceleration;
-    Vec2 diff = getTargetPosition(gameState) - gameState.enemy.newPos;
+    Vec2 diff = getTargetPosition(enemy, balls) - enemy.newPos;
     if (diff.x > 0) {
         if (enemy.velocity.x < 0){
             enemy.velocity.x = 0.0f;
@@ -55,11 +59,11 @@ void updateEnemy(GameState& gameState) {
     enemy.newPos = enemy.oldPos + enemy.movementDelta;
     
     float offset = enemy.width * 0.5f;
-    if (enemy.newPos.x - offset < gameState.leftBoundary) {
+    if (enemy.newPos.x - offset < leftBoundary) {
         Vec2 wallNorm(1, 0);
         enemy.velocity = enemy.velocity - 2 * enemy.velocity.dotProduct(wallNorm) * wallNorm;
         enemy.movementDelta.x += 1.0f;
-    } else if (enemy.newPos.x + offset > gameState.rightBoundary) {
+    } else if (enemy.newPos.x + offset > rightBoundary) {
         Vec2 wallNorm(-1, 0);
         enemy.velocity = enemy.velocity - 2 * enemy.velocity.dotProduct(wallNorm) * wallNorm;
         enemy.movementDelta.x -= 1.0f;
@@ -93,7 +97,7 @@ void updatePaddle(GameState& gameState) {
     }
     
     acceleration *= paddle.speed;
-
+    
     paddle.oldPos = paddle.newPos;
     paddle.movementDelta = (0.5f * acceleration * pow(delta, 2) + paddle.velocity * delta);
     paddle.velocity += acceleration * delta;
@@ -128,7 +132,7 @@ bool collide(Vec2& ballCollisionPos, Vec2& paddleCollisionPos, Paddle& paddle, f
     if (horizontalDist <= halfWidth) {
         return true;
     }
-
+    
     if (verticalDist <= halfHeight) {
         return true;
     }
@@ -181,22 +185,24 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
     ball.powerUp = neutral;
 }
 
-void resolveCollision(Ball& ball, Paddle& paddle, float delta) {
-    if (collide(ball.newPos, paddle.newPos, paddle, ball.radius)) {
-        for (int i = 1; i <= 4; ++i) {
-            Vec2 ballCollisionLocation = (1.0f / i) * ball.oldPos + (1.0f - 1.0f / i) * ball.newPos;
-            Vec2 paddleCollisionLocation = (1.0f / i) * paddle.oldPos + (1.0f - 1.0f / i) * paddle.newPos;
-            if (collide(ballCollisionLocation, paddleCollisionLocation, paddle, ball.radius)) {
-                Vec2 reflectionNorm = ballCollisionLocation - paddleCollisionLocation;
-                reflectionNorm.normalize();
-                ball.velocity = reflectionNorm;
-                ball.movementDelta += reflectionNorm * paddle.movementDelta.length();
-                activatePowerUp(ball, paddle);
-                break;
+void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta) {
+    for (auto& ball : balls) {
+        if (collide(ball.newPos, paddle.newPos, paddle, ball.radius)) {
+            for (int i = 1; i <= 4; ++i) {
+                Vec2 ballCollisionLocation = (1.0f / i) * ball.oldPos + (1.0f - 1.0f / i) * ball.newPos;
+                Vec2 paddleCollisionLocation = (1.0f / i) * paddle.oldPos + (1.0f - 1.0f / i) * paddle.newPos;
+                if (collide(ballCollisionLocation, paddleCollisionLocation, paddle, ball.radius)) {
+                    Vec2 reflectionNorm = ballCollisionLocation - paddleCollisionLocation;
+                    reflectionNorm.normalize();
+                    ball.velocity = reflectionNorm;
+                    ball.movementDelta += reflectionNorm * paddle.movementDelta.length();
+                    activatePowerUp(ball, paddle);
+                    break;
+                }
             }
         }
+        
+        ball.newPos = ball.oldPos + ball.movementDelta;
+        paddle.newPos = paddle.oldPos + paddle.movementDelta;
     }
-    
-    ball.newPos = ball.oldPos + ball.movementDelta;
-    paddle.newPos = paddle.oldPos + paddle.movementDelta;
 }

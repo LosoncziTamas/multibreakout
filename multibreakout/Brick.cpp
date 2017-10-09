@@ -79,14 +79,18 @@ bool collide(Ball& ball, Brick& brick) {
     return (dx * dx + dy * dy <= ball.radius * ball.radius);
 }
 
-void collideWithBrick(Ball& ball, Brick& brick) {
-    if (!brick.active)
-        return;
-    if (collide(ball, brick)) {
-        Vec2 reflectionNorm = ball.newPos - brick.center;
-        reflectionNorm.normalize();
-        ball.velocity = reflectionNorm;
-        ball.movementDelta += reflectionNorm;
-        brick.callback(brick, ball);
+void collideWithBrick(std::vector<Ball>& balls, std::vector<Brick>& bricks) {
+    for (auto& ball : balls) {
+        for (auto& brick : bricks) {
+            if (!brick.active)
+                continue;
+            if (collide(ball, brick)) {
+                Vec2 reflectionNorm = ball.newPos - brick.center;
+                reflectionNorm.normalize();
+                ball.velocity = reflectionNorm;
+                ball.movementDelta += reflectionNorm;
+                brick.callback(brick, ball);
+            }
+        }
     }
 }
