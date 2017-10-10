@@ -38,8 +38,8 @@ Vec2& Vec2::normalize() {
     return *this;
 }
 
-float Vec2::distanceSqr(const Vec2& other) const {
-    return (x - other.x) * (x - other.x) + (y - other.y) * (y - other.y);
+float Vec2::distance(const Vec2& other) const {
+    return sqrtf((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
 }
 
 

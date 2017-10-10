@@ -19,7 +19,7 @@ void initEnemy(Paddle& enemy) {
     enemy.speed = DEFAULT_SPEED;
 }
 
-Vec2 getTargetPosition(Paddle& enemy, std::vector<Ball>& balls) {
+Vec2 getTargetPosition(Paddle& enemy, std::vector<Ball>& balls, float leftBoundary, float rightBoundary) {
     Vec2 targetPos(enemy.newPos);
     
     Ball *target = nullptr;
@@ -28,15 +28,19 @@ Vec2 getTargetPosition(Paddle& enemy, std::vector<Ball>& balls) {
         if (ball.newPos.y > SCREEN_HEIGHT * 0.5f && betterTarget) {
             targetPos = ball.newPos;
             target = &ball;
+            if (target->newPos.x - target->radius < leftBoundary) {
+                targetPos.x += enemy.width;
+            } else if (target->newPos.x + target->radius > rightBoundary) {
+                targetPos.x -= enemy.width;
+            }
         }
     }
-
     return targetPos;
 }
 
 void updateEnemy(Paddle& enemy, std::vector<Ball>& balls, float delta, float leftBoundary, float rightBoundary) {
     Vec2 acceleration;
-    Vec2 diff = getTargetPosition(enemy, balls) - enemy.newPos;
+    Vec2 diff = getTargetPosition(enemy, balls, leftBoundary, rightBoundary) - enemy.newPos;
     if (diff.x > 0) {
         if (enemy.velocity.x < 0){
             enemy.velocity.x = 0.0f;
@@ -192,10 +196,15 @@ void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta) {
                 Vec2 ballCollisionLocation = (1.0f / i) * ball.oldPos + (1.0f - 1.0f / i) * ball.newPos;
                 Vec2 paddleCollisionLocation = (1.0f / i) * paddle.oldPos + (1.0f - 1.0f / i) * paddle.newPos;
                 if (collide(ballCollisionLocation, paddleCollisionLocation, paddle, ball.radius)) {
-                    Vec2 reflectionNorm = ballCollisionLocation - paddleCollisionLocation;
-                    reflectionNorm.normalize();
-                    ball.velocity = reflectionNorm;
-                    ball.movementDelta += reflectionNorm * paddle.movementDelta.length();
+                    Vec2 reflection = ballCollisionLocation - paddleCollisionLocation;
+                    Vec2 reflectionInverse = paddleCollisionLocation - ballCollisionLocation;
+                    reflection.normalize();
+                    //ignore vertical reflection
+                    reflectionInverse.y = 0.0f;
+                    reflectionInverse.normalize();
+                    ball.velocity = reflection;
+                    ball.movementDelta += reflection * paddle.movementDelta.length();
+                    paddle.movementDelta += reflectionInverse * paddle.movementDelta.length();
                     activatePowerUp(ball, paddle);
                     break;
                 }

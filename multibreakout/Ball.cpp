@@ -20,9 +20,9 @@ void collideBalls(std::vector<Ball>& balls) {
         for (int j = i + 1; j < n; ++j) {
             Ball& ball1 = balls.at(i);
             Ball& ball2 = balls.at(j);
-            float distanceSqr = ball1.newPos.distanceSqr(ball2.newPos);
-            //TODO: use square for better results?
-            if (distanceSqr <= ball1.radius * ball1.radius + ball2.radius * ball2.radius) {
+            float distance = ball1.newPos.distance(ball2.newPos);
+            //TODO: use quadtree or bounding boxes
+            if (distance <= ball1.radius + ball2.radius) {
                 Vec2 reflection1 = ball1.newPos - ball2.newPos;
                 Vec2 reflection2 = ball2.newPos - ball1.newPos;
                 ball1.velocity = reflection1.normalize();
