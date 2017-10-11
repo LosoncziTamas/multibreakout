@@ -17,12 +17,13 @@ void initEnemy(Paddle& enemy) {
     enemy.height = DEFAULT_HEIGHT;
     enemy.newPos = Vec2(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 20);
     enemy.speed = DEFAULT_SPEED;
+    enemy.orientation = upper;
 }
 
 Vec2 getTargetPosition(Paddle& enemy, std::vector<Ball>& balls, float leftBoundary, float rightBoundary) {
     Vec2 targetPos(enemy.newPos);
-    
     Ball *target = nullptr;
+    
     for (auto& ball : balls) {
         bool betterTarget = target == nullptr || (target->newPos.y < ball.newPos.y && ball.velocity.y > 0);
         if (ball.newPos.y > SCREEN_HEIGHT * 0.5f && betterTarget) {
@@ -79,6 +80,7 @@ void initPaddle(Paddle &paddle) {
     paddle.height = DEFAULT_HEIGHT;
     paddle.newPos = Vec2(SCREEN_WIDTH / 2, 20);
     paddle.speed = DEFAULT_SPEED;
+    paddle.orientation = lower;
 }
 
 void updatePaddle(GameState& gameState) {

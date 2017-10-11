@@ -14,14 +14,15 @@ struct GameInput
 {
     union
     {
-        SDL_bool buttons[5];
+        SDL_bool buttons[6];
         struct
         {
-            SDL_bool pause;
+            SDL_bool space;
             SDL_bool up;
             SDL_bool down;
             SDL_bool left;
             SDL_bool right;
+            SDL_bool pause;
         };
     };
     SDL_bool mouseLeft;

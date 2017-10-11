@@ -14,6 +14,10 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
         gameState.rightBoundary = SCREEN_WIDTH - 10;
         gameState.init = SDL_TRUE;
         initBricks(gameState.bricks);
+        Ball ball;
+        initBall(ball, gameState.balls, gameState.paddle);
+        Ball ball2;
+        initBall(ball2, gameState.balls, gameState.enemy);
     }
     
     if (gameState.input.pause) {

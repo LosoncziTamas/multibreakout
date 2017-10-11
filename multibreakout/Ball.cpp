@@ -14,6 +14,20 @@ void initBall(Vec2& position, std::vector<Ball>& balls) {
     balls.push_back(ball);
 }
 
+void initBall(Ball& ball, std::vector<Ball>& balls, Paddle& paddle) {
+    ball.radius = 16.0f;
+    ball.speed = 100.0f;
+    ball.powerUp = neutral;
+    ball.assignedPaddle = &paddle;
+    ball.newPos = paddle.newPos;
+    if (paddle.orientation == lower) {
+        ball.newPos.y += ball.radius + paddle.height * 0.5f + 1;
+    } else if (paddle.orientation == upper) {
+        ball.newPos.y -= ball.radius + paddle.height * 0.5f + 1;
+    }
+    balls.push_back(ball);
+}
+
 void collideBalls(std::vector<Ball>& balls) {
     size_t n = balls.size();
     for (int i = 0; i < n; ++i) {
@@ -50,7 +64,17 @@ void updateBalls(GameState& gameState) {
             ball.velocity = newVelocity.normalize();
         }
         
-        ball.movementDelta = ball.velocity * ball.speed * gameState.delta;
+        if (input.space && ball.assignedPaddle != nullptr && ball.assignedPaddle->orientation == lower) {
+            ball.velocity = Vec2(0.0f, 1.0f);
+            ball.movementDelta = ball.velocity * ball.speed * gameState.delta;
+            ball.assignedPaddle = nullptr;
+        } else if (ball.assignedPaddle != nullptr) {
+            ball.movementDelta = ball.assignedPaddle->movementDelta;
+            ball.velocity = Vec2(0.0f, 0.0f);
+        } else {
+            ball.movementDelta = ball.velocity * ball.speed * gameState.delta;
+        }
+        
         ball.oldPos = ball.newPos;
         ball.newPos = ball.oldPos + ball.movementDelta;
         

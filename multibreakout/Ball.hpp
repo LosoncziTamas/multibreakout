@@ -8,6 +8,7 @@
 
 struct GameInput;
 struct GameState;
+struct Paddle;
 
 struct Ball {
     Vec2 velocity;
@@ -17,9 +18,11 @@ struct Ball {
     PowerUp powerUp;
     float radius;
     float speed;
+    Paddle *assignedPaddle;
 };
 
 void updateBalls(GameState& gameState);
 void collideBalls(std::vector<Ball>& balls);
+void initBall(Ball& ball, std::vector<Ball>& balls, Paddle& paddle);
 
 #endif

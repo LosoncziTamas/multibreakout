@@ -7,6 +7,8 @@
 
 struct GameState;
 
+enum Orientation {upper, lower};
+
 struct Paddle {
     float width;
     float height;
@@ -15,6 +17,7 @@ struct Paddle {
     Vec2 movementDelta;
     Vec2 oldPos;
     Vec2 newPos;
+    Orientation orientation;
 };
 
 void initEnemy(Paddle& enemy);
