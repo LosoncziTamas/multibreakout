@@ -8,16 +8,26 @@
 struct GameState;
 
 enum Orientation {upper, lower};
+enum State {none, steering, defending};
+
+struct Brain {
+    State state;
+    Vec2 steeringPos;
+};
+
+const int INVALID_INDEX = -1;
 
 struct Paddle {
     float width;
     float height;
     float speed;
+    int ballIndex;
     Vec2 velocity;
     Vec2 movementDelta;
     Vec2 oldPos;
     Vec2 newPos;
     Orientation orientation;
+    Brain brain;
 };
 
 void initEnemy(Paddle& enemy);

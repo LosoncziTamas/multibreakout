@@ -19,6 +19,7 @@ void initBall(Ball& ball, std::vector<Ball>& balls, Paddle& paddle) {
     ball.speed = 100.0f;
     ball.powerUp = neutral;
     ball.assignedPaddle = &paddle;
+    paddle.ballIndex = balls.size();
     ball.newPos = paddle.newPos;
     if (paddle.orientation == lower) {
         ball.newPos.y += ball.radius + paddle.height * 0.5f + 1;
@@ -67,6 +68,7 @@ void updateBalls(GameState& gameState) {
         if (input.space && ball.assignedPaddle != nullptr && ball.assignedPaddle->orientation == lower) {
             ball.velocity = Vec2(0.0f, 1.0f);
             ball.movementDelta = ball.velocity * ball.speed * gameState.delta;
+            ball.assignedPaddle->ballIndex = INVALID_INDEX;
             ball.assignedPaddle = nullptr;
         } else if (ball.assignedPaddle != nullptr) {
             ball.movementDelta = ball.assignedPaddle->movementDelta;
@@ -74,7 +76,7 @@ void updateBalls(GameState& gameState) {
         } else {
             ball.movementDelta = ball.velocity * ball.speed * gameState.delta;
         }
-        
+                
         ball.oldPos = ball.newPos;
         ball.newPos = ball.oldPos + ball.movementDelta;
         

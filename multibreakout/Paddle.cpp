@@ -16,8 +16,20 @@ void initEnemy(Paddle& enemy) {
     enemy.width = DEFAULT_WIDTH;
     enemy.height = DEFAULT_HEIGHT;
     enemy.newPos = Vec2(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 20);
+    enemy.oldPos = enemy.newPos;
     enemy.speed = DEFAULT_SPEED;
     enemy.orientation = upper;
+    enemy.brain.state = none;
+    enemy.brain.steeringPos = enemy.newPos;
+}
+
+bool danger(std::vector<Ball>& balls) {
+    for (auto& ball : balls) {
+        if (ball.newPos.y > SCREEN_HEIGHT * 0.5f && ball.assignedPaddle == nullptr) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Vec2 getTargetPosition(Paddle& enemy, std::vector<Ball>& balls, float leftBoundary, float rightBoundary) {
@@ -34,14 +46,15 @@ Vec2 getTargetPosition(Paddle& enemy, std::vector<Ball>& balls, float leftBounda
             } else if (target->newPos.x + target->radius > rightBoundary) {
                 targetPos.x -= enemy.width;
             }
+            SDL_assert(ball.assignedPaddle != &enemy);
         }
     }
     return targetPos;
 }
 
-void updateEnemy(Paddle& enemy, std::vector<Ball>& balls, float delta, float leftBoundary, float rightBoundary) {
+void moveToward(Paddle& enemy, const Vec2& target, float delta, float leftBoundary, float rightBoundary) {
     Vec2 acceleration;
-    Vec2 diff = getTargetPosition(enemy, balls, leftBoundary, rightBoundary) - enemy.newPos;
+    Vec2 diff = target - enemy.newPos;
     if (diff.x > 0) {
         if (enemy.velocity.x < 0){
             enemy.velocity.x = 0.0f;
@@ -72,6 +85,49 @@ void updateEnemy(Paddle& enemy, std::vector<Ball>& balls, float delta, float lef
         Vec2 wallNorm(-1, 0);
         enemy.velocity = enemy.velocity - 2 * enemy.velocity.dotProduct(wallNorm) * wallNorm;
         enemy.movementDelta.x -= 1.0f;
+    }
+    
+}
+
+void updateEnemy(Paddle& enemy, std::vector<Ball>& balls, float delta, float leftBoundary, float rightBoundary) {
+    bool isDanger = danger(balls);
+    switch (enemy.brain.state) {
+        case none: {
+            if (enemy.ballIndex != INVALID_INDEX && !isDanger) {
+                enemy.brain.steeringPos = enemy.newPos;
+                enemy.brain.steeringPos.x = 100.0f; //TODO: select random pos
+                enemy.brain.state = steering;
+            } else if (isDanger) {
+                enemy.brain.state = defending;
+            }
+            std::cout << "none" << std::endl;
+        } break;
+        case steering: {
+            bool reached = enemy.brain.steeringPos.distance(enemy.newPos) < enemy.width * 0.5f;
+            if (!isDanger && !reached) {
+                moveToward(enemy, enemy.brain.steeringPos, delta, leftBoundary, rightBoundary);
+            } else {
+                if (reached) {
+                    Ball& assignedBall = balls.at(enemy.ballIndex);
+                    assignedBall.velocity = Vec2(0.0f, -1.0f);
+                    assignedBall.assignedPaddle = nullptr;
+                    enemy.ballIndex = INVALID_INDEX;
+                }
+                enemy.brain.state = isDanger ? defending : none;
+            }
+            std::cout << "steering" << std::endl;
+        }break;
+        case defending: {
+            if (!isDanger) {
+                enemy.brain.state = none;
+            } else {
+                Vec2 target = getTargetPosition(enemy, balls, leftBoundary, rightBoundary);
+                moveToward(enemy, target, delta, leftBoundary, rightBoundary);
+            }
+            std::cout << "defending" << std::endl;
+        } break;
+        default:
+            break;
     }
 }
 
@@ -121,7 +177,7 @@ void updatePaddle(GameState& gameState) {
     }
 }
 
-bool collide(Vec2& ballCollisionPos, Vec2& paddleCollisionPos, Paddle& paddle, float radius) {
+bool collide(Vec2& ballCollisionPos, Vec2& paddleCollisionPos, const Paddle& paddle, float radius) {
     float verticalDist = fabsf(ballCollisionPos.y - paddleCollisionPos.y);
     float horizontalDist = fabsf(ballCollisionPos.x - paddleCollisionPos.x);
     float halfWidth = paddle.width * 0.5f;
