@@ -95,7 +95,8 @@ void updateEnemy(Paddle& enemy, std::vector<Ball>& balls, float delta, float lef
         case none: {
             if (enemy.ballIndex != INVALID_INDEX && !isDanger) {
                 enemy.brain.steeringPos = enemy.newPos;
-                enemy.brain.steeringPos.x = 100.0f; //TODO: select random pos
+                int randomX = rand() % static_cast<int>(rightBoundary - leftBoundary) + 1;
+                enemy.brain.steeringPos.x = randomX;
                 enemy.brain.state = steering;
             } else if (isDanger) {
                 enemy.brain.state = defending;
@@ -103,7 +104,7 @@ void updateEnemy(Paddle& enemy, std::vector<Ball>& balls, float delta, float lef
             std::cout << "none" << std::endl;
         } break;
         case steering: {
-            bool reached = enemy.brain.steeringPos.distance(enemy.newPos) < enemy.width * 0.5f;
+            bool reached = enemy.brain.steeringPos.distance(enemy.newPos) < enemy.width;
             if (!isDanger && !reached) {
                 moveToward(enemy, enemy.brain.steeringPos, delta, leftBoundary, rightBoundary);
             } else {

@@ -8,6 +8,7 @@ void collideWithBrick(Ball& ball, Brick& brick);
 
 void gameUpdate(GameState& gameState, const Renderer& renderer) {
     if (!gameState.init) {
+        srand(time(NULL));
         initPaddle(gameState.paddle);
         initEnemy(gameState.enemy);
         gameState.leftBoundary = 10;
