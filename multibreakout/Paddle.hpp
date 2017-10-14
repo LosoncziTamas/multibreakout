@@ -7,13 +7,17 @@
 
 struct GameState;
 
-enum Orientation {upper, lower};
-enum State {none, steering, defending};
+const float DEFAULT_WIDTH = 120.0f;
+const float DEFAULT_HEIGHT = 40.0f;
+const float DEFAULT_SPEED = 50.0f;
 
-struct Brain {
-    State state;
-    Vec2 steeringPos;
-};
+const float SMALL_WIDTH = 80.0f;
+const float LARGE_WIDTH = 150.0f;
+
+const float LOW_SPEED = 25.0f;
+const float HIGH_SPEED = 100.0f;
+
+enum Orientation {upper, lower};
 
 const int INVALID_INDEX = -1;
 
@@ -27,11 +31,8 @@ struct Paddle {
     Vec2 oldPos;
     Vec2 newPos;
     Orientation orientation;
-    Brain brain;
 };
 
-void initEnemy(Paddle& enemy);
-void updateEnemy(Paddle& enemy, std::vector<Ball>& balls, float delta, float leftBoundary, float rightBoundary);
 void initPaddle(Paddle &paddle);
 void updatePaddle(GameState& gameState);
 void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta);

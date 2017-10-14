@@ -18,7 +18,7 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
         Ball ball;
         initBall(ball, gameState.balls, gameState.paddle);
         Ball ball2;
-        initBall(ball2, gameState.balls, gameState.enemy);
+        initBall(ball2, gameState.balls, gameState.enemy.paddle);
     }
     
     if (gameState.input.pause) {
@@ -34,13 +34,13 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
     
     updateEnemy(gameState.enemy, gameState.balls, gameState.delta, gameState.leftBoundary, gameState.rightBoundary);
     collideWithBrick(gameState.balls, gameState.bricks);
-    resolveCollision(gameState.balls, gameState.enemy, gameState.delta);
+    resolveCollision(gameState.balls, gameState.enemy.paddle, gameState.delta);
     resolveCollision(gameState.balls, gameState.paddle, gameState.delta);
     collideBalls(gameState.balls);
     
     renderer.clear();
     renderer.drawPaddle(gameState.paddle);
-    renderer.drawPaddle(gameState.enemy);
+    renderer.drawPaddle(gameState.enemy.paddle);
     for (auto& ball: gameState.balls) {
         renderer.drawBall(ball);
     }

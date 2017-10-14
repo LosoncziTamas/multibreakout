@@ -7,6 +7,7 @@
 #include "Paddle.hpp"
 #include "MultiBreakout.hpp"
 #include "Brick.hpp"
+#include "Enemy.hpp"
 
 struct GameState {
     float delta;
@@ -20,7 +21,7 @@ struct GameState {
     std::vector<Ball> balls;
 
     Paddle paddle;
-    Paddle enemy;
+    Enemy enemy;
     
     GameInput input;
 };
