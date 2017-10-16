@@ -15,6 +15,7 @@ struct Brick {
     bool active;
     void (*callback)(Brick& brick, Ball& ball);
     PowerUp powerUp;
+    int textureIndex;
 };
 
 void initBricks(std::vector<Brick>& bricks);

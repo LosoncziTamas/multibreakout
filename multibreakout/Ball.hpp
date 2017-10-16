@@ -19,6 +19,7 @@ struct Ball {
     float radius;
     float speed;
     Paddle *assignedPaddle;
+    int textureIndex;
 };
 
 void updateBalls(GameState& gameState);

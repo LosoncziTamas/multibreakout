@@ -5,7 +5,7 @@
 void initPaddle(Paddle &paddle) {
     paddle.width = DEFAULT_WIDTH;
     paddle.height = DEFAULT_HEIGHT;
-    paddle.newPos = Vec2(SCREEN_WIDTH / 2, 20);
+    paddle.newPos = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f);
     paddle.speed = DEFAULT_SPEED;
     paddle.orientation = lower;
     paddle.textureIndex = INVALID_INDEX;

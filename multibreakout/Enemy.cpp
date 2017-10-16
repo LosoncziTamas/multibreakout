@@ -3,12 +3,13 @@
 void initEnemy(Enemy& enemy) {
     enemy.paddle.width = DEFAULT_WIDTH;
     enemy.paddle.height = DEFAULT_HEIGHT;
-    enemy.paddle.newPos = Vec2(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 20);
+    enemy.paddle.newPos = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - DEFAULT_HEIGHT * 0.5f);
     enemy.paddle.oldPos = enemy.paddle.newPos;
     enemy.paddle.speed = DEFAULT_SPEED;
     enemy.paddle.orientation = upper;
     enemy.state = none;
     enemy.steeringPos = enemy.paddle.newPos;
+    enemy.paddle.textureIndex = INVALID_INDEX;
 }
 
 bool danger(std::vector<Ball>& balls) {

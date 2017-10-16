@@ -2,25 +2,17 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
-static bool guard = true;
-
-void initBall(Vec2& position, std::vector<Ball>& balls) {
-    guard = false;
-    Ball ball;
-    ball.radius = 16.0f;
-    ball.speed = 100.0f;
-    ball.newPos = position;
-    ball.powerUp = neutral;
-    balls.push_back(ball);
-}
+const float BALL_RADIUS = 10.0f;
+const float BALL_SPEED = 100.0f;
 
 void initBall(Ball& ball, std::vector<Ball>& balls, Paddle& paddle) {
-    ball.radius = 16.0f;
-    ball.speed = 100.0f;
+    ball.radius = BALL_RADIUS;
+    ball.speed = BALL_SPEED;
     ball.powerUp = neutral;
     ball.assignedPaddle = &paddle;
     paddle.ballIndex = balls.size();
     ball.newPos = paddle.newPos;
+    ball.textureIndex = INVALID_INDEX;
     if (paddle.orientation == lower) {
         ball.newPos.y += ball.radius + paddle.height * 0.5f + 1;
     } else if (paddle.orientation == upper) {
@@ -52,15 +44,9 @@ void collideBalls(std::vector<Ball>& balls) {
 void updateBalls(GameState& gameState) {
     GameInput& input = gameState.input;
     
-    if (input.mouseLeft && guard) {
-        Vec2 ballPosition(input.mouseX, SCREEN_HEIGHT - input.mouseY);
-        initBall(ballPosition, gameState.balls);
-    }
-    
     for (auto& ball : gameState.balls) {
         
         if (input.mouseRight) {
-            guard = true;
             Vec2 newVelocity(input.mouseX - ball.newPos.x, SCREEN_HEIGHT - input.mouseY - ball.newPos.y);
             ball.velocity = newVelocity.normalize();
         }

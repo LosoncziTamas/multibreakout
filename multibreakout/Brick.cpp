@@ -46,6 +46,7 @@ void initBricks(std::vector<Brick>& bricks) {
             brick.callback = callback;
             brick.powerUp = static_cast<PowerUp>(rand() % shrink + 1);
             bricks.push_back(brick);
+            brick.textureIndex = INVALID_INDEX;
         }
     }
 }
