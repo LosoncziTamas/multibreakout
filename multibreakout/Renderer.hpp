@@ -6,6 +6,7 @@
 #include "Window.hpp"
 #include "Ball.hpp"
 #include "Brick.hpp"
+#include "Texture.hpp"
 
 struct Paddle;
 
@@ -19,6 +20,7 @@ const SDL_Color WHITE = {0, 0, 0, 0};
 struct Renderer {
     
     SDL_Renderer *sdlRenderer;
+    std::vector<Texture*> textures;
     
     Renderer(const Window &window);
     Renderer(const Renderer& other) = delete;
@@ -27,12 +29,13 @@ struct Renderer {
     
     void clear() const;
     void update() const;
-    void drawPaddle(const Paddle& paddle) const;
+    void drawPaddleDebug(const Paddle& paddle) const;
     void drawBoundaries(int left, int right) const;
     void drawBrick(const Brick& brick) const;
     void drawBall(const Ball& ball) const;
     void drawPoint(const Vec2& vec, SDL_Color color = RED) const;
     void drawPoint(float x, float y, SDL_Color color = RED) const;
+    void drawLowerPaddle(const Paddle& paddle) const;
 };
 
 #endif

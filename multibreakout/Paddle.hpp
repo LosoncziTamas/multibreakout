@@ -26,6 +26,7 @@ struct Paddle {
     float height;
     float speed;
     int ballIndex;
+    int textureIndex;
     Vec2 velocity;
     Vec2 movementDelta;
     Vec2 oldPos;

@@ -11,6 +11,9 @@ Renderer::Renderer(const Window &window) {
 
 Renderer::~Renderer() {
     SDL_DestroyRenderer(sdlRenderer);
+    for (auto p : textures) {
+        delete p;
+    }
 }
 
 void Renderer::clear() const {
@@ -22,7 +25,7 @@ void Renderer::update() const {
     SDL_RenderPresent(sdlRenderer);
 }
 
-void Renderer::drawPaddle(const Paddle& paddle) const {
+void Renderer::drawPaddleDebug(const Paddle& paddle) const {
     int w = round(paddle.width);
     int h = round(paddle.height);
     int x = round(paddle.newPos.x - paddle.width * 0.5f);
@@ -116,4 +119,12 @@ void Renderer::drawPoint(const Vec2& vec, SDL_Color color) const {
 void Renderer::drawPoint(float x, float y, SDL_Color color) const {
     SDL_SetRenderDrawColor(sdlRenderer, color.r, color.g, color.b, color.a);
     SDL_RenderDrawPoint(sdlRenderer, round(x), round(SCREEN_HEIGHT - y));
+}
+
+void Renderer::drawLowerPaddle(const Paddle& paddle) const {
+    int x = round(paddle.newPos.x - paddle.width * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
+    SDL_Rect rect = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
+    const Texture* texture = textures.at(paddle.textureIndex);
+    SDL_RenderCopy(sdlRenderer, texture->sdlTexture, NULL, &rect);
 }

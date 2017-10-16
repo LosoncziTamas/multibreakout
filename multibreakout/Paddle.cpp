@@ -8,6 +8,7 @@ void initPaddle(Paddle &paddle) {
     paddle.newPos = Vec2(SCREEN_WIDTH / 2, 20);
     paddle.speed = DEFAULT_SPEED;
     paddle.orientation = lower;
+    paddle.textureIndex = INVALID_INDEX;
 }
 
 void updatePaddle(GameState& gameState) {

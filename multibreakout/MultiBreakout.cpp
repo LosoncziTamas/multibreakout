@@ -4,21 +4,30 @@
 #include "Paddle.hpp"
 #include "GameState.hpp"
 
-void collideWithBrick(Ball& ball, Brick& brick);
+void initGameState(GameState& gameState) {
+    initPaddle(gameState.paddle);
+    initEnemy(gameState.enemy);
+    gameState.leftBoundary = 10;
+    gameState.rightBoundary = SCREEN_WIDTH - 10;
+    gameState.init = SDL_TRUE;
+    initBricks(gameState.bricks);
+    Ball ball;
+    initBall(ball, gameState.balls, gameState.paddle);
+    Ball ball2;
+    initBall(ball2, gameState.balls, gameState.enemy.paddle);
+}
 
-void gameUpdate(GameState& gameState, const Renderer& renderer) {
+void initTextures(Renderer& renderer, GameState& gameState) {
+    Texture *paddle = new Texture("paddle.png", renderer);
+    renderer.textures.push_back(paddle);
+    gameState.paddle.textureIndex = 0;
+}
+
+void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (!gameState.init) {
         srand(time(NULL));
-        initPaddle(gameState.paddle);
-        initEnemy(gameState.enemy);
-        gameState.leftBoundary = 10;
-        gameState.rightBoundary = SCREEN_WIDTH - 10;
-        gameState.init = SDL_TRUE;
-        initBricks(gameState.bricks);
-        Ball ball;
-        initBall(ball, gameState.balls, gameState.paddle);
-        Ball ball2;
-        initBall(ball2, gameState.balls, gameState.enemy.paddle);
+        initGameState(gameState);
+        initTextures(renderer, gameState);
     }
     
     if (gameState.input.pause) {
@@ -39,8 +48,8 @@ void gameUpdate(GameState& gameState, const Renderer& renderer) {
     collideBalls(gameState.balls);
     
     renderer.clear();
-    renderer.drawPaddle(gameState.paddle);
-    renderer.drawPaddle(gameState.enemy.paddle);
+    renderer.drawLowerPaddle(gameState.paddle);
+    renderer.drawPaddleDebug(gameState.enemy.paddle);
     for (auto& ball: gameState.balls) {
         renderer.drawBall(ball);
     }

@@ -31,6 +31,6 @@ struct GameInput
     int32_t mouseY;
 };
 
-void gameUpdate(GameState& gameState, const Renderer& renderer);
+void gameUpdate(GameState& gameState, Renderer& renderer);
 
 #endif
