@@ -6,7 +6,7 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
-const int SCREEN_WIDTH = 640;
+const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 480;
 
 const float targetUpdateHz = 30.0f;

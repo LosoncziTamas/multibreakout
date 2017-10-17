@@ -2,6 +2,7 @@
 #define Renderer_hpp
 
 #include <SDL2/SDL_render.h>
+#include <SDL2_ttf/SDL_ttf.h>
 
 #include "Window.hpp"
 #include "Ball.hpp"
@@ -16,10 +17,12 @@ const SDL_Color BLUE = {0, 0, 255, 255};
 const SDL_Color BLACK = {0, 0, 0, 255};
 const SDL_Color YELLOW = {255, 255, 0, 0};
 const SDL_Color WHITE = {0, 0, 0, 0};
+const SDL_Color BEIGE = {248, 232, 176, 255};
 
 struct Renderer {
     
     SDL_Renderer *sdlRenderer;
+    TTF_Font *sdlFont;
     std::vector<Texture*> textures;
     
     Renderer(const Window &window);
@@ -41,5 +44,5 @@ void drawPoint(const Renderer& renderer, const Vec2& vec, SDL_Color color = RED)
 void drawPoint(const Renderer& renderer, float x, float y, SDL_Color color = RED);
 void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawUpperPaddle(const Renderer& renderer, const Paddle& paddle);
-
+void drawDebugInfo(const Renderer& renderer, const GameState& gameState);
 #endif

@@ -1,12 +1,21 @@
 #include <cmath>
+#include <sstream>
 
 #include "Renderer.hpp"
 #include "Paddle.hpp"
 #include "MultiBreakout.hpp"
+#include "FontTexture.hpp"
+#include "GameState.hpp"
 
 Renderer::Renderer(const Window &window) {
     sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC);
     SDL_assert(sdlRenderer);
+    SDL_assert(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG);
+    if (!TTF_WasInit()) {
+        SDL_assert(TTF_Init() != -1);
+    }
+    sdlFont = TTF_OpenFont("courier_prime_code.ttf", 16);
+    SDL_assert(sdlFont);
 }
 
 Renderer::~Renderer() {
@@ -82,7 +91,7 @@ void drawBricks(const Renderer& renderer, const std::vector<Brick>& bricks) {
 }
 
 void drawBoundaries(const Renderer& renderer, int left, int right) {
-    SDL_SetRenderDrawColor(renderer.sdlRenderer, 128, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer.sdlRenderer, BEIGE.r, BEIGE.g, BEIGE.b, BEIGE.a);
     SDL_Rect leftRect = {0, 0, left, SCREEN_HEIGHT};
     SDL_Rect rightRect = {right, 0, SCREEN_WIDTH - right, SCREEN_HEIGHT};
     SDL_RenderFillRect(renderer.sdlRenderer, &leftRect);
@@ -165,4 +174,12 @@ void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle) {
     SDL_Rect rect = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
     const Texture* texture = renderer.textures.at(paddle.textureIndex);
     SDL_RenderCopy(renderer.sdlRenderer, texture->sdlTexture, NULL, &rect);
+}
+
+void drawDebugInfo(const Renderer& renderer, const GameState& gameState) {
+    std::ostringstream oss;
+    oss << "delta: " << gameState.delta;
+    FontTexture delta(oss.str().c_str(), renderer);
+    SDL_Rect dstRect = {0, 0, delta.width, delta.height};
+    SDL_RenderCopy(renderer.sdlRenderer, delta.sdlTexture, NULL, &dstRect);
 }

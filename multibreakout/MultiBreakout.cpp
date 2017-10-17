@@ -7,8 +7,8 @@
 void initGameState(GameState& gameState) {
     initPaddle(gameState.paddle);
     initEnemy(gameState.enemy);
-    gameState.leftBoundary = 10;
-    gameState.rightBoundary = SCREEN_WIDTH - 10;
+    gameState.leftBoundary = 160;
+    gameState.rightBoundary = SCREEN_WIDTH - 160;
     gameState.init = SDL_TRUE;
     initBricks(gameState.bricks);
     Ball ball;
@@ -34,7 +34,6 @@ void initTextures(Renderer& renderer, GameState& gameState) {
     Texture *enemyTexture = new Texture("enemy_paddle.png", renderer);
     renderer.textures.push_back(enemyTexture);
     gameState.enemy.paddle.textureIndex = 3;
-    
 }
 
 void gameUpdate(GameState& gameState, Renderer& renderer) {
@@ -72,5 +71,6 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawBricks(renderer, gameState.bricks);
     drawBricksDebug(renderer, gameState.bricks);
     drawPoint(renderer, gameState.paddle.newPos);
+    drawDebugInfo(renderer, gameState);
     update(renderer);
 }
