@@ -168,6 +168,31 @@ void drawUpperPaddle(const Renderer& renderer, const Paddle& paddle) {
     SDL_RenderCopyEx(renderer.sdlRenderer, texture, NULL, &rect, 0, NULL, SDL_FLIP_HORIZONTAL);
 }
 
+void drawLeftPaddle(const Renderer& renderer, const Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.height * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.width * 0.5f));
+    
+    SDL_Rect rect = {x, y, static_cast<int>(paddle.height), static_cast<int>(paddle.width)};
+    SDL_Texture* texture = renderer.textures.at(paddle.textureIndex);
+    SDL_RenderCopyEx(renderer.sdlRenderer, texture, NULL, &rect, 90, NULL, SDL_FLIP_NONE);
+    //TODO: correct debug draw
+    SDL_SetRenderDrawColor(renderer.sdlRenderer, 0, 0, 0, 255);
+    SDL_RenderDrawRect(renderer.sdlRenderer, &rect);
+}
+
+void drawRightPaddle(const Renderer& renderer, const Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.height * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.width * 0.5f));
+    
+    SDL_Rect rect = {x, y, static_cast<int>(paddle.height), static_cast<int>(paddle.width)};
+    SDL_Texture* texture = renderer.textures.at(paddle.textureIndex);
+    SDL_RenderCopyEx(renderer.sdlRenderer, texture, NULL, &rect, 270, NULL, SDL_FLIP_VERTICAL);
+    
+    //TODO: correct debug draw
+    SDL_SetRenderDrawColor(renderer.sdlRenderer, 0, 0, 0, 255);
+    SDL_RenderDrawRect(renderer.sdlRenderer, &rect);
+}
+
 void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle) {
     int x = round(paddle.newPos.x - paddle.width * 0.5f);
     int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
@@ -184,5 +209,5 @@ const char *aiStates[] =
 };
 
 void drawDebugInfo(const Renderer& renderer, const GameState& gameState) {
-    FC_Draw(renderer.font, renderer.sdlRenderer, 0, 0, "delta: %f\nai: %s", gameState.delta, aiStates[gameState.enemy.state]);
+    FC_Draw(renderer.font, renderer.sdlRenderer, 0, 0, "delta: %f\nai: %s", gameState.delta, aiStates[gameState.enemyUpper.state]);
 }

@@ -17,7 +17,7 @@ const float LARGE_WIDTH = 150.0f;
 const float LOW_SPEED = 25.0f;
 const float HIGH_SPEED = 100.0f;
 
-enum Orientation {upper, lower};
+enum Orientation {upper, lower, left, right};
 
 struct Paddle {
     float width;

@@ -57,8 +57,8 @@
 		E9D146571F922D1C0074C598 /* Enemy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Enemy.hpp; sourceTree = "<group>"; };
 		E9D20FAA1F85730E0064A1B3 /* Brick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Brick.cpp; sourceTree = "<group>"; };
 		E9D20FAB1F85730E0064A1B3 /* Brick.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Brick.hpp; sourceTree = "<group>"; };
-		E9DDF7141F973956000AE808 /* SDL_FontCache.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_FontCache.c; sourceTree = "<group>"; };
-		E9DDF7151F973956000AE808 /* SDL_FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_FontCache.h; sourceTree = "<group>"; };
+		E9DDF7141F973956000AE808 /* SDL_FontCache.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_FontCache.c; path = multibreakout/SDL_FontCache.c; sourceTree = "<group>"; };
+		E9DDF7151F973956000AE808 /* SDL_FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_FontCache.h; path = multibreakout/SDL_FontCache.h; sourceTree = "<group>"; };
 		E9F606E51F7AE7AD005A405E /* GameState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GameState.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -79,6 +79,7 @@
 		E93D150D1F0B9158007BF3ED = {
 			isa = PBXGroup;
 			children = (
+				E9DDF7171F978626000AE808 /* dependencies */,
 				E93D15201F0B917C007BF3ED /* SDL2_ttf.framework */,
 				E93D15211F0B917C007BF3ED /* SDL2_image.framework */,
 				E93D15221F0B917C007BF3ED /* SDL2.framework */,
@@ -117,10 +118,17 @@
 				E9D146571F922D1C0074C598 /* Enemy.hpp */,
 				E9A7DFAB1F94A2C700083AA4 /* Texture.cpp */,
 				E9A7DFAC1F94A2C700083AA4 /* Texture.hpp */,
+			);
+			path = multibreakout;
+			sourceTree = "<group>";
+		};
+		E9DDF7171F978626000AE808 /* dependencies */ = {
+			isa = PBXGroup;
+			children = (
 				E9DDF7141F973956000AE808 /* SDL_FontCache.c */,
 				E9DDF7151F973956000AE808 /* SDL_FontCache.h */,
 			);
-			path = multibreakout;
+			name = dependencies;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

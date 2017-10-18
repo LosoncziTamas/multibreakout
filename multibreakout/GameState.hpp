@@ -21,8 +21,11 @@ struct GameState {
     std::vector<Ball> balls;
 
     Paddle paddle;
-    Enemy enemy;
-    
+
+    Enemy enemyUpper;
+    Enemy enemyLeft;
+    Enemy enemyRight;
+
     GameInput input;
 };
 

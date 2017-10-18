@@ -2,6 +2,7 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
+
 void initPaddle(Paddle &paddle) {
     paddle.width = DEFAULT_WIDTH;
     paddle.height = DEFAULT_HEIGHT;

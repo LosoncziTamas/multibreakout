@@ -39,6 +39,8 @@ void drawPoint(const Renderer& renderer, float x, float y, SDL_Color color = RED
 void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawUpperPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawDebugInfo(const Renderer& renderer, const GameState& gameState);
+void drawRightPaddle(const Renderer& renderer, const Paddle& paddle);
+void drawLeftPaddle(const Renderer& renderer, const Paddle& paddle);
 void deleteRenderer(Renderer& renderer);
 
 #endif

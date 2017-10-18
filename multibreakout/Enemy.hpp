@@ -12,7 +12,9 @@ struct Enemy {
     Vec2 steeringPos;
 };
 
-void initEnemy(Enemy& enemy);
+void initLeftEnemy(Enemy& enemy, float leftBoundary);
+void initRightEnemy(Enemy& enemy, float rightBoundary);
+void initUpperEnemy(Enemy& enemy);
 void updateEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta, float leftBoundary, float rightBoundary);
 
 #endif 

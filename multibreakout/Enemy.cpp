@@ -1,16 +1,40 @@
 #include "Enemy.hpp"
 #include <SDL2/SDL_assert.h>
 
-void initEnemy(Enemy& enemy) {
+static void initCommon(Enemy& enemy) {
+    enemy.paddle.speed = DEFAULT_SPEED;
+    enemy.state = none;
+    enemy.paddle.textureIndex = INVALID_INDEX;
+}
+
+void initLeftEnemy(Enemy& enemy, float leftBoundary) {
+    initCommon(enemy);
+    enemy.paddle.orientation = left;
+    enemy.paddle.height = DEFAULT_WIDTH;
+    enemy.paddle.width = DEFAULT_HEIGHT;
+    enemy.paddle.newPos = Vec2(leftBoundary + enemy.paddle.width * 0.5f, SCREEN_HEIGHT * 0.5f);
+    enemy.paddle.oldPos = enemy.paddle.newPos;
+    enemy.steeringPos = enemy.paddle.newPos;
+}
+
+void initRightEnemy(Enemy& enemy, float rightBoundary) {
+    initCommon(enemy);
+    enemy.paddle.orientation = right;
+    enemy.paddle.height = DEFAULT_WIDTH;
+    enemy.paddle.width = DEFAULT_HEIGHT;
+    enemy.paddle.newPos = Vec2(rightBoundary - enemy.paddle.width * 0.5f, SCREEN_HEIGHT * 0.5f);
+    enemy.paddle.oldPos = enemy.paddle.newPos;
+    enemy.steeringPos = enemy.paddle.newPos;
+}
+
+void initUpperEnemy(Enemy& enemy) {
+    initCommon(enemy);
+    enemy.paddle.orientation = upper;
     enemy.paddle.width = DEFAULT_WIDTH;
     enemy.paddle.height = DEFAULT_HEIGHT;
-    enemy.paddle.newPos = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - DEFAULT_HEIGHT * 0.5f);
+    enemy.paddle.newPos = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - enemy.paddle.height * 0.5f);
     enemy.paddle.oldPos = enemy.paddle.newPos;
-    enemy.paddle.speed = DEFAULT_SPEED;
-    enemy.paddle.orientation = upper;
-    enemy.state = none;
     enemy.steeringPos = enemy.paddle.newPos;
-    enemy.paddle.textureIndex = INVALID_INDEX;
 }
 
 bool danger(std::vector<Ball>& balls) {

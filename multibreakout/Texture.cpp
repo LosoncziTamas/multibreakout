@@ -14,6 +14,7 @@ void initTextures(Renderer& renderer, GameState& gameState) {
     SDL_Texture *paddleTexture = createTexture("assets/paddle.png", renderer);
     renderer.textures.push_back(paddleTexture);
     gameState.paddle.textureIndex = 0;
+    gameState.enemyLeft.paddle.textureIndex = 0;
     SDL_Texture *ballTexture = createTexture("assets/ball.png", renderer);
     renderer.textures.push_back(ballTexture);
     for (auto& ball : gameState.balls) {
@@ -26,7 +27,9 @@ void initTextures(Renderer& renderer, GameState& gameState) {
     };
     SDL_Texture *enemyTexture = createTexture("assets/enemy_paddle.png", renderer);
     renderer.textures.push_back(enemyTexture);
-    gameState.enemy.paddle.textureIndex = 3;
+    gameState.enemyUpper.paddle.textureIndex = 3;
+    gameState.enemyRight.paddle.textureIndex = 3;
+
 }
 
 

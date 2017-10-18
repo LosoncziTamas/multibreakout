@@ -4,16 +4,18 @@
 #include "Renderer.hpp"
 
 void initGameState(GameState& gameState) {
-    initPaddle(gameState.paddle);
-    initEnemy(gameState.enemy);
     gameState.leftBoundary = 160;
     gameState.rightBoundary = SCREEN_WIDTH - 160;
-    gameState.init = SDL_TRUE;
+    gameState.init = true;
+    initPaddle(gameState.paddle);
+    initUpperEnemy(gameState.enemyUpper);
+    initLeftEnemy(gameState.enemyLeft, gameState.leftBoundary);
+    initRightEnemy(gameState.enemyRight, gameState.rightBoundary);
     initBricks(gameState.bricks);
     Ball ball;
     initBall(ball, gameState.balls, gameState.paddle);
     Ball ball2;
-    initBall(ball2, gameState.balls, gameState.enemy.paddle);
+    initBall(ball2, gameState.balls, gameState.enemyUpper.paddle);
 }
 
 void gameUpdate(GameState& gameState, Renderer& renderer) {
@@ -34,17 +36,19 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     updateBalls(gameState);
     updatePaddle(gameState);
     
-    updateEnemy(gameState.enemy, gameState.balls, gameState.delta, gameState.leftBoundary, gameState.rightBoundary);
+    updateEnemy(gameState.enemyUpper, gameState.balls, gameState.delta, gameState.leftBoundary, gameState.rightBoundary);
     collideWithBrick(gameState.balls, gameState.bricks);
-    resolveCollision(gameState.balls, gameState.enemy.paddle, gameState.delta);
+    resolveCollision(gameState.balls, gameState.enemyUpper.paddle, gameState.delta);
     resolveCollision(gameState.balls, gameState.paddle, gameState.delta);
     collideBalls(gameState.balls);
 
     clear(renderer);
+    drawLeftPaddle(renderer, gameState.enemyLeft.paddle);
+    drawRightPaddle(renderer, gameState.enemyRight.paddle);
     drawLowerPaddle(renderer, gameState.paddle);
     drawPaddleDebug(renderer, gameState.paddle);
-    drawUpperPaddle(renderer, gameState.enemy.paddle);
-    drawPaddleDebug(renderer, gameState.enemy.paddle);
+    drawUpperPaddle(renderer, gameState.enemyUpper.paddle);
+    drawPaddleDebug(renderer, gameState.enemyUpper.paddle);
     drawBalls(renderer, gameState.balls, gameState.delta);
     drawBallsDebug(renderer, gameState.balls);
     drawBoundaries(renderer, gameState.leftBoundary, gameState.rightBoundary);
