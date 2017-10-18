@@ -4,6 +4,8 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2_ttf/SDL_ttf.h>
 
+#include "SDL_FontCache.h"
+
 #include "Window.hpp"
 #include "Ball.hpp"
 #include "Brick.hpp"
@@ -22,7 +24,7 @@ const SDL_Color BEIGE = {248, 232, 176, 255};
 struct Renderer {
     
     SDL_Renderer *sdlRenderer;
-    TTF_Font *sdlFont;
+    FC_Font* font;
     std::vector<Texture*> textures;
     
     Renderer(const Window &window);

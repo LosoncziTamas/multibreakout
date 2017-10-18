@@ -4,7 +4,6 @@
 #include "Renderer.hpp"
 #include "Paddle.hpp"
 #include "MultiBreakout.hpp"
-#include "FontTexture.hpp"
 #include "GameState.hpp"
 
 Renderer::Renderer(const Window &window) {
@@ -14,12 +13,13 @@ Renderer::Renderer(const Window &window) {
     if (!TTF_WasInit()) {
         SDL_assert(TTF_Init() != -1);
     }
-    sdlFont = TTF_OpenFont("courier_prime_code.ttf", 16);
-    SDL_assert(sdlFont);
+    font = FC_CreateFont();
+    FC_LoadFont(font, sdlRenderer, "courier_prime_code.ttf", 16, FC_MakeColor(0, 0, 0, 255), TTF_STYLE_NORMAL);
 }
 
 Renderer::~Renderer() {
     SDL_DestroyRenderer(sdlRenderer);
+    FC_FreeFont(font);
     for (auto p : textures) {
         delete p;
     }
@@ -176,10 +176,13 @@ void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle) {
     SDL_RenderCopy(renderer.sdlRenderer, texture->sdlTexture, NULL, &rect);
 }
 
+const char *aiStates[] =
+{
+    "none",
+    "steering",
+    "defending"
+};
+
 void drawDebugInfo(const Renderer& renderer, const GameState& gameState) {
-    std::ostringstream oss;
-    oss << "delta: " << gameState.delta;
-    FontTexture delta(oss.str().c_str(), renderer);
-    SDL_Rect dstRect = {0, 0, delta.width, delta.height};
-    SDL_RenderCopy(renderer.sdlRenderer, delta.sdlTexture, NULL, &dstRect);
+    FC_Draw(renderer.font, renderer.sdlRenderer, 0, 0, "delta: %f\nai: %s", gameState.delta, aiStates[gameState.enemy.state]);
 }

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E90C40C11F95FE5E00C23034 /* FontTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E90C40BF1F95FE5E00C23034 /* FontTexture.cpp */; };
 		E93D151A1F0B9158007BF3ED /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E93D15191F0B9158007BF3ED /* main.cpp */; };
 		E93D15231F0B917C007BF3ED /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E93D15201F0B917C007BF3ED /* SDL2_ttf.framework */; };
 		E93D15241F0B917C007BF3ED /* SDL2_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E93D15211F0B917C007BF3ED /* SDL2_image.framework */; };
@@ -21,6 +20,7 @@
 		E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */; };
 		E9D146581F922D1C0074C598 /* Enemy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D146561F922D1C0074C598 /* Enemy.cpp */; };
 		E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D20FAA1F85730E0064A1B3 /* Brick.cpp */; };
+		E9DDF7161F973956000AE808 /* SDL_FontCache.c in Sources */ = {isa = PBXBuildFile; fileRef = E9DDF7141F973956000AE808 /* SDL_FontCache.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,8 +36,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		E90C40BF1F95FE5E00C23034 /* FontTexture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FontTexture.cpp; sourceTree = "<group>"; };
-		E90C40C01F95FE5E00C23034 /* FontTexture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FontTexture.hpp; sourceTree = "<group>"; };
 		E93D15161F0B9158007BF3ED /* multibreakout */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = multibreakout; sourceTree = BUILT_PRODUCTS_DIR; };
 		E93D15191F0B9158007BF3ED /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E93D15201F0B917C007BF3ED /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_ttf.framework; path = ../../../Library/Frameworks/SDL2_ttf.framework; sourceTree = "<group>"; };
@@ -62,6 +60,8 @@
 		E9D146571F922D1C0074C598 /* Enemy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Enemy.hpp; sourceTree = "<group>"; };
 		E9D20FAA1F85730E0064A1B3 /* Brick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Brick.cpp; sourceTree = "<group>"; };
 		E9D20FAB1F85730E0064A1B3 /* Brick.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Brick.hpp; sourceTree = "<group>"; };
+		E9DDF7141F973956000AE808 /* SDL_FontCache.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_FontCache.c; sourceTree = "<group>"; };
+		E9DDF7151F973956000AE808 /* SDL_FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_FontCache.h; sourceTree = "<group>"; };
 		E9F606E51F7AE7AD005A405E /* GameState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GameState.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -122,8 +122,8 @@
 				E9D146571F922D1C0074C598 /* Enemy.hpp */,
 				E9A7DFAB1F94A2C700083AA4 /* Texture.cpp */,
 				E9A7DFAC1F94A2C700083AA4 /* Texture.hpp */,
-				E90C40BF1F95FE5E00C23034 /* FontTexture.cpp */,
-				E90C40C01F95FE5E00C23034 /* FontTexture.hpp */,
+				E9DDF7141F973956000AE808 /* SDL_FontCache.c */,
+				E9DDF7151F973956000AE808 /* SDL_FontCache.h */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -191,8 +191,8 @@
 				E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */,
 				E9A7DFAD1F94A2C700083AA4 /* Texture.cpp in Sources */,
 				E93D15281F0B9C13007BF3ED /* Window.cpp in Sources */,
-				E90C40C11F95FE5E00C23034 /* FontTexture.cpp in Sources */,
 				E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */,
+				E9DDF7161F973956000AE808 /* SDL_FontCache.c in Sources */,
 				E93D15311F0BCF13007BF3ED /* Vec2.cpp in Sources */,
 				E96AD1DB1F1A3CF600B66D3A /* Ball.cpp in Sources */,
 			);

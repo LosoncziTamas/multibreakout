@@ -59,7 +59,7 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     resolveCollision(gameState.balls, gameState.enemy.paddle, gameState.delta);
     resolveCollision(gameState.balls, gameState.paddle, gameState.delta);
     collideBalls(gameState.balls);
-    
+
     clear(renderer);
     drawLowerPaddle(renderer, gameState.paddle);
     drawPaddleDebug(renderer, gameState.paddle);
