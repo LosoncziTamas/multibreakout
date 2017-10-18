@@ -6,12 +6,10 @@
 
 #include "SDL_FontCache.h"
 
-#include "Window.hpp"
 #include "Ball.hpp"
 #include "Brick.hpp"
 #include "Texture.hpp"
-
-struct Paddle;
+#include "Paddle.hpp"
 
 const SDL_Color RED = {255, 0, 0, 255};
 const SDL_Color GREEN = {0, 255, 0, 255};
@@ -22,18 +20,12 @@ const SDL_Color WHITE = {0, 0, 0, 0};
 const SDL_Color BEIGE = {248, 232, 176, 255};
 
 struct Renderer {
-    
     SDL_Renderer *sdlRenderer;
-    FC_Font* font;
-    std::vector<Texture*> textures;
-    
-    Renderer(const Window &window);
-    Renderer(const Renderer& other) = delete;
-    Renderer& operator=(const Renderer&) = delete;
-    ~Renderer();
-    
+    FC_Font *font;
+    std::vector<SDL_Texture*> textures;
 };
 
+void createRenderer(Renderer& renderer, SDL_Window *window);
 void clear(const Renderer& renderer);
 void update(const Renderer& renderer);
 void drawPaddleDebug(const Renderer& renderer, const Paddle& paddle);
@@ -47,4 +39,6 @@ void drawPoint(const Renderer& renderer, float x, float y, SDL_Color color = RED
 void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawUpperPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawDebugInfo(const Renderer& renderer, const GameState& gameState);
+void deleteRenderer(Renderer& renderer);
+
 #endif

@@ -3,15 +3,11 @@
 
 #include <SDL2_image/SDL_image.h>
 
+#include "GameState.hpp"
+
 struct Renderer;
 
-struct Texture {
-    SDL_Texture *sdlTexture;
-    
-    Texture(const Texture& other) = delete;
-    Texture& operator=(const Texture&) = delete;
-    Texture(const char *path, const Renderer& renderer);
-    ~Texture();
+SDL_Texture *createTexture(const char *path, const Renderer& renderer);
+void initTextures(Renderer& renderer, GameState& gameState);
 
-};
 #endif

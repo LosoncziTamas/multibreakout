@@ -1,22 +1,15 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 
-#include "Window.hpp"
 #include "Renderer.hpp"
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 480;
+const float TARGET_UPDATE_HZ = 30.0f;
 
-const float targetUpdateHz = 30.0f;
-
-SDL_bool eval(bool expr)
-{
-    return expr ? SDL_TRUE : SDL_FALSE;
-}
-
-static SDL_bool handleEvent(const SDL_Event& event)
+static SDL_bool handleEvent(SDL_Event& event)
 {
     switch (event.type)
     {
@@ -47,12 +40,19 @@ static float secondsElapsed(Uint64 old, Uint64 current)
 int main(void)
 {
     SDL_Init(SDL_INIT_VIDEO);
+    SDL_Window *window = SDL_CreateWindow("Multibreakout",
+                                 SDL_WINDOWPOS_CENTERED_MASK,
+                                 SDL_WINDOWPOS_CENTERED_MASK,
+                                 SCREEN_WIDTH,
+                                 SCREEN_HEIGHT,
+                                 SDL_WINDOW_RESIZABLE);
+    SDL_assert(window);
     
-    Window window(SCREEN_WIDTH, SCREEN_HEIGHT);
-    Renderer renderer(window);
-    SDL_bool running = SDL_TRUE;
+    Renderer renderer;
+    createRenderer(renderer, window);
     
-    float secondsPerFrame = 1.0f / targetUpdateHz;
+    bool running = true;
+    float secondsPerFrame = 1.0f / TARGET_UPDATE_HZ;
     Uint64 startCounter = SDL_GetPerformanceCounter();
     Uint64 perfCountFreq = SDL_GetPerformanceFrequency();
     
@@ -67,30 +67,33 @@ int main(void)
         }
         
         GameInput input = {};
+        
         const Uint8 *state = SDL_GetKeyboardState(NULL);
-        input.left = eval(state[SDL_SCANCODE_LEFT]);
-        input.down = eval(state[SDL_SCANCODE_DOWN]);
-        input.up = eval(state[SDL_SCANCODE_UP]);
-        input.right = eval(state[SDL_SCANCODE_RIGHT]);
-        input.space = eval(state[SDL_SCANCODE_SPACE]);
-        input.pause = eval(state[SDL_SCANCODE_P]);
-
+        input.left = state[SDL_SCANCODE_LEFT];
+        input.down = state[SDL_SCANCODE_DOWN];
+        input.up = state[SDL_SCANCODE_UP];
+        input.right = state[SDL_SCANCODE_RIGHT];
+        input.space = state[SDL_SCANCODE_SPACE];
+        input.pause = state[SDL_SCANCODE_P];
+        
         Uint32 mouseVal = SDL_GetMouseState(&input.mouseX, &input.mouseY);
+        input.mouseLeft = mouseVal & SDL_BUTTON(SDL_BUTTON_LEFT);
+        input.mouseRight = mouseVal & SDL_BUTTON(SDL_BUTTON_RIGHT);
         
-        input.mouseLeft = eval(mouseVal & SDL_BUTTON(SDL_BUTTON_LEFT));
-        input.mouseRight = eval(mouseVal & SDL_BUTTON(SDL_BUTTON_RIGHT));
-        
+        gameState.input = input;
+
         while (secondsElapsed(startCounter, SDL_GetPerformanceCounter()) < secondsPerFrame);
         
         Uint64 end_counter = SDL_GetPerformanceCounter();
-        
         gameState.delta = static_cast<float>(end_counter - startCounter) / static_cast<float>(perfCountFreq);
-        gameState.input = input;
         
         gameUpdate(gameState, renderer);
         
         startCounter = end_counter;
     }
+    
+    deleteRenderer(renderer);
+    SDL_DestroyWindow(window);
     
     SDL_Quit();
 }

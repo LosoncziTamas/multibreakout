@@ -2,8 +2,8 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
-const float BALL_RADIUS = 10.0f;
-const float BALL_SPEED = 100.0f;
+static const float BALL_RADIUS = 10.0f;
+static const float BALL_SPEED = 100.0f;
 
 void initBall(Ball& ball, std::vector<Ball>& balls, Paddle& paddle) {
     ball.radius = BALL_RADIUS;

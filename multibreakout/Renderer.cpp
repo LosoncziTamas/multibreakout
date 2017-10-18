@@ -6,22 +6,22 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
-Renderer::Renderer(const Window &window) {
-    sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC);
-    SDL_assert(sdlRenderer);
+void createRenderer(Renderer& renderer, SDL_Window *window) {
+    renderer.sdlRenderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+    SDL_assert(renderer.sdlRenderer);
     SDL_assert(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG);
     if (!TTF_WasInit()) {
         SDL_assert(TTF_Init() != -1);
     }
-    font = FC_CreateFont();
-    FC_LoadFont(font, sdlRenderer, "courier_prime_code.ttf", 16, FC_MakeColor(0, 0, 0, 255), TTF_STYLE_NORMAL);
+    renderer.font = FC_CreateFont();
+    FC_LoadFont(renderer.font, renderer.sdlRenderer, "assets/courier_prime_code.ttf", 16, FC_MakeColor(0, 0, 0, 255), TTF_STYLE_NORMAL);
 }
 
-Renderer::~Renderer() {
-    SDL_DestroyRenderer(sdlRenderer);
-    FC_FreeFont(font);
-    for (auto p : textures) {
-        delete p;
+void deleteRenderer(Renderer& renderer) {
+    SDL_DestroyRenderer(renderer.sdlRenderer);
+    FC_FreeFont(renderer.font);
+    for (auto texture : renderer.textures) {
+        SDL_DestroyTexture(texture);
     }
 }
 
@@ -85,8 +85,8 @@ void drawBricks(const Renderer& renderer, const std::vector<Brick>& bricks) {
         int x = brick.center.x - brick.width * 0.5f;
         int y = SCREEN_HEIGHT - (brick.center.y + brick.height * 0.5f);
         SDL_Rect sdlRect = {x, y, brick.width, brick.height};
-        const Texture* texture = renderer.textures.at(brick.textureIndex);
-        SDL_RenderCopy(renderer.sdlRenderer, texture->sdlTexture, NULL, &sdlRect);
+        SDL_Texture* texture = renderer.textures.at(brick.textureIndex);
+        SDL_RenderCopy(renderer.sdlRenderer, texture, NULL, &sdlRect);
     }
 }
 
@@ -103,8 +103,8 @@ void drawBalls(const Renderer& renderer, const std::vector<Ball>& balls, float d
         int x = ball.newPos.x - ball.radius;
         int y = SCREEN_HEIGHT - (ball.newPos.y + ball.radius);
         SDL_Rect rect = {x, y, static_cast<int>(ball.radius * 2), static_cast<int>(ball.radius * 2)};
-        const Texture* texture = renderer.textures.at(ball.textureIndex);
-        SDL_RenderCopy(renderer.sdlRenderer, texture->sdlTexture, NULL, &rect);
+        SDL_Texture* texture = renderer.textures.at(ball.textureIndex);
+        SDL_RenderCopy(renderer.sdlRenderer, texture, NULL, &rect);
     }
 }
 
@@ -164,16 +164,16 @@ void drawUpperPaddle(const Renderer& renderer, const Paddle& paddle) {
     int x = round(paddle.newPos.x - paddle.width * 0.5f);
     int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
     SDL_Rect rect = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
-    const Texture* texture = renderer.textures.at(paddle.textureIndex);
-    SDL_RenderCopyEx(renderer.sdlRenderer, texture->sdlTexture, NULL, &rect, 0, NULL, SDL_FLIP_HORIZONTAL);
+    SDL_Texture* texture = renderer.textures.at(paddle.textureIndex);
+    SDL_RenderCopyEx(renderer.sdlRenderer, texture, NULL, &rect, 0, NULL, SDL_FLIP_HORIZONTAL);
 }
 
 void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle) {
     int x = round(paddle.newPos.x - paddle.width * 0.5f);
     int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
     SDL_Rect rect = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
-    const Texture* texture = renderer.textures.at(paddle.textureIndex);
-    SDL_RenderCopy(renderer.sdlRenderer, texture->sdlTexture, NULL, &rect);
+    SDL_Texture* texture = renderer.textures.at(paddle.textureIndex);
+    SDL_RenderCopy(renderer.sdlRenderer, texture, NULL, &rect);
 }
 
 const char *aiStates[] =

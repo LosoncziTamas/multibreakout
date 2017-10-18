@@ -14,8 +14,8 @@ struct GameState {
     int leftBoundary;
     int rightBoundary;
     
-    SDL_bool init;
-    SDL_bool paused;
+    bool init;
+    bool paused;
     
     std::vector<Brick> bricks;
     std::vector<Ball> balls;

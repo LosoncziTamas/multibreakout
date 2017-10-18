@@ -1,4 +1,5 @@
 #include "Enemy.hpp"
+#include <SDL2/SDL_assert.h>
 
 void initEnemy(Enemy& enemy) {
     enemy.paddle.width = DEFAULT_WIDTH;
@@ -90,7 +91,6 @@ void updateEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta, float left
             } else if (isDanger) {
                 enemy.state = defending;
             }
-            std::cout << "none" << std::endl;
         } break;
         case steering: {
             bool reached = enemy.steeringPos.distance(enemy.paddle.newPos) < enemy.paddle.width;
@@ -105,7 +105,6 @@ void updateEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta, float left
                 }
                 enemy.state = isDanger ? defending : none;
             }
-            std::cout << "steering" << std::endl;
         }break;
         case defending: {
             if (!isDanger) {
@@ -114,7 +113,6 @@ void updateEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta, float left
                 Vec2 target = getTargetPosition(enemy.paddle, balls, leftBoundary, rightBoundary);
                 moveToward(enemy.paddle, target, delta, leftBoundary, rightBoundary);
             }
-            std::cout << "defending" << std::endl;
         } break;
         default:
             break;

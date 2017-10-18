@@ -1,8 +1,7 @@
 #include <iostream>
 
 #include "MultiBreakout.hpp"
-#include "Paddle.hpp"
-#include "GameState.hpp"
+#include "Renderer.hpp"
 
 void initGameState(GameState& gameState) {
     initPaddle(gameState.paddle);
@@ -15,25 +14,6 @@ void initGameState(GameState& gameState) {
     initBall(ball, gameState.balls, gameState.paddle);
     Ball ball2;
     initBall(ball2, gameState.balls, gameState.enemy.paddle);
-}
-
-void initTextures(Renderer& renderer, GameState& gameState) {
-    Texture *paddleTexture = new Texture("paddle.png", renderer);
-    renderer.textures.push_back(paddleTexture);
-    gameState.paddle.textureIndex = 0;
-    Texture *ballTexture = new Texture("ball.png", renderer);
-    renderer.textures.push_back(ballTexture);
-    for (auto& ball : gameState.balls) {
-        ball.textureIndex = 1;
-    };
-    Texture *brickTexture = new Texture("brick_yellow.png", renderer);
-    renderer.textures.push_back(brickTexture);
-    for (auto& brick : gameState.bricks) {
-        brick.textureIndex = 2;
-    };
-    Texture *enemyTexture = new Texture("enemy_paddle.png", renderer);
-    renderer.textures.push_back(enemyTexture);
-    gameState.enemy.paddle.textureIndex = 3;
 }
 
 void gameUpdate(GameState& gameState, Renderer& renderer) {

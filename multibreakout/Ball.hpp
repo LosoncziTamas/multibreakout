@@ -6,7 +6,6 @@
 #include "Vec2.hpp"
 #include "Common.hpp"
 
-struct GameInput;
 struct GameState;
 struct Paddle;
 

@@ -3,32 +3,32 @@
 
 #include <SDL2/SDL_stdinc.h>
 
-#include "Renderer.hpp"
-
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
 
 struct GameState;
+struct Renderer;
 
 struct GameInput
 {
-    union
-    {
-        SDL_bool buttons[6];
-        struct
-        {
-            SDL_bool space;
-            SDL_bool up;
-            SDL_bool down;
-            SDL_bool left;
-            SDL_bool right;
-            SDL_bool pause;
-        };
-    };
-    SDL_bool mouseLeft;
-    SDL_bool mouseRight;
+    bool mouseLeft;
+    bool mouseRight;
     int32_t mouseX;
     int32_t mouseY;
+    
+    union
+    {
+        bool buttons[6];
+        struct
+        {
+            bool space;
+            bool up;
+            bool down;
+            bool left;
+            bool right;
+            bool pause;
+        };
+    };
 };
 
 void gameUpdate(GameState& gameState, Renderer& renderer);
