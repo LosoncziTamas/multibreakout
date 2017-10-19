@@ -130,8 +130,13 @@ void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta) {
                     Vec2 reflection = ballCollisionLocation - paddleCollisionLocation;
                     Vec2 reflectionInverse = paddleCollisionLocation - ballCollisionLocation;
                     reflection.normalize();
-                    //ignore vertical reflection
-                    reflectionInverse.y = 0.0f;
+                    if (paddle.orientation == left || paddle.orientation == right) {
+                        //ignore horizontal reflection
+                        reflectionInverse.x = 0.0f;
+                    } else {
+                        //ignore vertical reflection
+                        reflectionInverse.y = 0.0f;
+                    }
                     reflectionInverse.normalize();
                     ball.velocity = reflection;
                     ball.movementDelta += reflection * paddle.movementDelta.length();

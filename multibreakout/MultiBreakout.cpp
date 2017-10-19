@@ -37,24 +37,31 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     updatePaddle(gameState);
     
     updateEnemy(gameState.enemyUpper, gameState.balls, gameState.delta, gameState.leftBoundary, gameState.rightBoundary);
+    updateLeftEnemy(gameState.enemyLeft, gameState.balls, gameState.delta);
+    updateRightEnemy(gameState.enemyRight, gameState.balls, gameState.delta);
     collideWithBrick(gameState.balls, gameState.bricks);
     resolveCollision(gameState.balls, gameState.enemyUpper.paddle, gameState.delta);
     resolveCollision(gameState.balls, gameState.paddle, gameState.delta);
+    resolveCollision(gameState.balls, gameState.enemyLeft.paddle, gameState.delta);
+    resolveCollision(gameState.balls, gameState.enemyRight.paddle, gameState.delta);
     collideBalls(gameState.balls);
 
     clear(renderer);
     drawLeftPaddle(renderer, gameState.enemyLeft.paddle);
     drawRightPaddle(renderer, gameState.enemyRight.paddle);
     drawLowerPaddle(renderer, gameState.paddle);
-    drawPaddleDebug(renderer, gameState.paddle);
     drawUpperPaddle(renderer, gameState.enemyUpper.paddle);
-    drawPaddleDebug(renderer, gameState.enemyUpper.paddle);
     drawBalls(renderer, gameState.balls, gameState.delta);
-    drawBallsDebug(renderer, gameState.balls);
     drawBoundaries(renderer, gameState.leftBoundary, gameState.rightBoundary);
     drawBricks(renderer, gameState.bricks);
     drawBricksDebug(renderer, gameState.bricks);
     drawPoint(renderer, gameState.paddle.newPos);
+    
+    drawPaddleDebug(renderer, gameState.paddle);
+    drawPaddleDebug(renderer, gameState.enemyUpper.paddle);
+    drawPaddleDebug(renderer, gameState.enemyLeft.paddle);
+    drawPaddleDebug(renderer, gameState.enemyRight.paddle);
+    drawBallsDebug(renderer, gameState.balls);
     drawDebugInfo(renderer, gameState);
     update(renderer);
 }
