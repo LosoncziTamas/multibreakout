@@ -53,7 +53,7 @@ Vec2 getTargetPosition(Paddle& enemy, std::vector<Ball>& balls, float leftBounda
     
     for (auto& ball : balls) {
         bool betterTarget = target == nullptr || (target->newPos.y < ball.newPos.y && ball.velocity.y > 0);
-        if (ball.newPos.y > SCREEN_HEIGHT * 0.5f && betterTarget) {
+        if (ball.newPos.y > SCREEN_HEIGHT * 0.5f && betterTarget && ball.assignedPaddle == nullptr) {
             targetPos = ball.newPos;
             target = &ball;
             if (target->newPos.x - target->radius < leftBoundary) {
@@ -109,7 +109,7 @@ Vec2 getLeftTargetPosition(Paddle& enemy, std::vector<Ball>& balls) {
     
     for (auto& ball : balls) {
         bool betterTarget = target == nullptr || (target->newPos.x > ball.newPos.x && ball.velocity.x < 0);
-        if (ball.newPos.x < SCREEN_WIDTH * 0.5f && betterTarget) {
+        if (ball.newPos.x < SCREEN_WIDTH * 0.5f && betterTarget && ball.assignedPaddle == nullptr) {
             targetPos = ball.newPos;
             target = &ball;
             if (target->newPos.y - target->radius < 0) {
@@ -174,7 +174,7 @@ void updateLeftEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta) {
         case none: {
             if (enemy.paddle.ballIndex != INVALID_INDEX && !isDanger) {
                 enemy.steeringPos = enemy.paddle.newPos;
-                int randomY = rand() % SCREEN_HEIGHT + 1;
+                int randomY = SCREEN_HEIGHT * 0.5f;
                 enemy.steeringPos.y = randomY;
                 enemy.state = steering;
             } else if (isDanger) {
@@ -214,7 +214,7 @@ Vec2 getRightTargetPosition(Paddle& enemy, std::vector<Ball>& balls) {
     
     for (auto& ball : balls) {
         bool betterTarget = target == nullptr || (target->newPos.x < ball.newPos.x && ball.velocity.x > 0);
-        if (ball.newPos.x > SCREEN_WIDTH * 0.5f && betterTarget) {
+        if (ball.newPos.x > SCREEN_WIDTH * 0.5f && betterTarget && ball.assignedPaddle == nullptr) {
             targetPos = ball.newPos;
             target = &ball;
             if (target->newPos.y - target->radius < 0) {
@@ -283,7 +283,7 @@ void updateEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta, float left
         case none: {
             if (enemy.paddle.ballIndex != INVALID_INDEX && !isDanger) {
                 enemy.steeringPos = enemy.paddle.newPos;
-                int randomX = rand() % static_cast<int>(rightBoundary - leftBoundary) + 1;
+                int randomX = leftBoundary + (rand() % static_cast<int>(rightBoundary - leftBoundary) + 1);
                 enemy.steeringPos.x = randomX;
                 enemy.state = steering;
             } else if (isDanger) {

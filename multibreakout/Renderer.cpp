@@ -14,7 +14,7 @@ void createRenderer(Renderer& renderer, SDL_Window *window) {
         SDL_assert(TTF_Init() != -1);
     }
     renderer.font = FC_CreateFont();
-    FC_LoadFont(renderer.font, renderer.sdlRenderer, "assets/courier_prime_code.ttf", 16, FC_MakeColor(0, 0, 0, 255), TTF_STYLE_NORMAL);
+    FC_LoadFont(renderer.font, renderer.sdlRenderer, "assets/courier_prime_code.ttf", 14, FC_MakeColor(0, 0, 0, 255), TTF_STYLE_NORMAL);
 }
 
 void deleteRenderer(Renderer& renderer) {
@@ -204,5 +204,9 @@ const char *aiStates[] =
 };
 
 void drawDebugInfo(const Renderer& renderer, const GameState& gameState) {
-    FC_Draw(renderer.font, renderer.sdlRenderer, 0, 0, "delta: %f\nai: %s", gameState.delta, aiStates[gameState.enemyUpper.state]);
+    FC_Draw(renderer.font, renderer.sdlRenderer, 0, 0, "delta: %f\nleft ai: %s\nright ai: %s\ntop ai: %s\n ",
+            gameState.delta,
+            aiStates[gameState.enemyLeft.state],
+            aiStates[gameState.enemyRight.state],
+            aiStates[gameState.enemyUpper.state]);
 }

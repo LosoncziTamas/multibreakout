@@ -17,6 +17,10 @@ void initBall(Ball& ball, std::vector<Ball>& balls, Paddle& paddle) {
         ball.newPos.y += ball.radius + paddle.height * 0.5f + 1;
     } else if (paddle.orientation == upper) {
         ball.newPos.y -= ball.radius + paddle.height * 0.5f + 1;
+    } else if (paddle.orientation == left) {
+        ball.newPos.x += ball.radius + paddle.width * 0.5f + 1;
+    } else if (paddle.orientation == right) {
+        ball.newPos.x -= ball.radius + paddle.width * 0.5f + 1;
     }
     balls.push_back(ball);
 }

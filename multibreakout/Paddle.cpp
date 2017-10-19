@@ -101,6 +101,10 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
                 paddle.width = LARGE_WIDTH;
             } else if (paddle.width == SMALL_WIDTH) {
                 paddle.width = DEFAULT_WIDTH;
+            } else if (paddle.height == DEFAULT_WIDTH) {
+                paddle.height = LARGE_WIDTH;
+            } else if (paddle.height == SMALL_WIDTH) {
+                paddle.height = DEFAULT_WIDTH;
             }
             printf("strech \n");
             break;
@@ -109,6 +113,10 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
                 paddle.width = SMALL_WIDTH;
             } else if (paddle.width == LARGE_WIDTH) {
                 paddle.width = DEFAULT_WIDTH;
+            } else if (paddle.height == DEFAULT_WIDTH) {
+                paddle.height = SMALL_WIDTH;
+            } else if (paddle.height == LARGE_WIDTH) {
+                paddle.height = DEFAULT_WIDTH;
             }
             printf("shrink \n");
             break;
@@ -117,6 +125,7 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
             printf("neutral \n");
             break;
     }
+    
     ball.powerUp = neutral;
 }
 
@@ -131,10 +140,8 @@ void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta) {
                     Vec2 reflectionInverse = paddleCollisionLocation - ballCollisionLocation;
                     reflection.normalize();
                     if (paddle.orientation == left || paddle.orientation == right) {
-                        //ignore horizontal reflection
                         reflectionInverse.x = 0.0f;
                     } else {
-                        //ignore vertical reflection
                         reflectionInverse.y = 0.0f;
                     }
                     reflectionInverse.normalize();
@@ -146,7 +153,6 @@ void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta) {
                 }
             }
         }
-        
         ball.newPos = ball.oldPos + ball.movementDelta;
         paddle.newPos = paddle.oldPos + paddle.movementDelta;
     }
