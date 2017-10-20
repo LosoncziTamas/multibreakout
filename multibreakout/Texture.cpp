@@ -15,20 +15,29 @@ void initTextures(Renderer& renderer, GameState& gameState) {
     renderer.textures.push_back(paddleTexture);
     gameState.paddle.textureIndex = 0;
     gameState.enemyLeft.paddle.textureIndex = 0;
+    
     SDL_Texture *ballTexture = createTexture("assets/ball.png", renderer);
     renderer.textures.push_back(ballTexture);
     for (auto& ball : gameState.balls) {
         ball.textureIndex = 1;
     };
+    
     SDL_Texture *brickTexture = createTexture("assets/brick_yellow.png", renderer);
     renderer.textures.push_back(brickTexture);
     for (auto& brick : gameState.bricks) {
         brick.textureIndex = 2;
     };
+    
     SDL_Texture *enemyTexture = createTexture("assets/enemy_paddle.png", renderer);
     renderer.textures.push_back(enemyTexture);
     gameState.enemyUpper.paddle.textureIndex = 3;
     gameState.enemyRight.paddle.textureIndex = 3;
+    
+    SDL_Texture *obstacleTexture = createTexture("assets/obstacle.png", renderer);
+    renderer.textures.push_back(obstacleTexture);
+    for (int i = 0; i < OBSTACLES_SIZE; ++i) {
+        gameState.obstacles.content[i].textureIndex = 4;
+    }
 
 }
 

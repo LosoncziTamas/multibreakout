@@ -41,6 +41,7 @@ void drawUpperPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawDebugInfo(const Renderer& renderer, const GameState& gameState);
 void drawRightPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawLeftPaddle(const Renderer& renderer, const Paddle& paddle);
+void drawObstacles(const Renderer& renderer, Obstacles& obstacles);
 void deleteRenderer(Renderer& renderer);
 
 #endif

@@ -56,7 +56,7 @@ int main(void)
     Uint64 startCounter = SDL_GetPerformanceCounter();
     Uint64 perfCountFreq = SDL_GetPerformanceFrequency();
     
-    GameState gameState;
+    GameState gameState = {};
     
     while(running)
     {

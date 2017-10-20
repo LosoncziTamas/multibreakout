@@ -8,6 +8,7 @@
 #include "MultiBreakout.hpp"
 #include "Brick.hpp"
 #include "Enemy.hpp"
+#include "Obstacle.hpp"
 
 struct GameState {
     float delta;
@@ -19,9 +20,9 @@ struct GameState {
     
     std::vector<Brick> bricks;
     std::vector<Ball> balls;
-
+    
+    Obstacles obstacles;
     Paddle paddle;
-
     Enemy enemyUpper;
     Enemy enemyLeft;
     Enemy enemyRight;

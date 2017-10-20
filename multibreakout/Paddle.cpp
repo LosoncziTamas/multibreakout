@@ -1,7 +1,8 @@
+#include <SDL2/SDL_assert.h>
+
 #include "Paddle.hpp"
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
-
 
 void initPaddle(Paddle &paddle) {
     paddle.width = DEFAULT_WIDTH;
@@ -39,11 +40,11 @@ void updatePaddle(GameState& gameState) {
     paddle.newPos = paddle.oldPos + paddle.movementDelta;
     
     float offset = paddle.width * 0.5f;
-    if (paddle.newPos.x - offset < gameState.leftBoundary) {
+    if (paddle.newPos.x - offset < (gameState.obstacles.leftBottom.center.x + gameState.obstacles.leftBottom.width * 0.5f)) {
         Vec2 wallNorm(1, 0);
         paddle.velocity = paddle.velocity - 2 * paddle.velocity.dotProduct(wallNorm) * wallNorm;
         paddle.movementDelta.x += 1.0f;
-    } else if (paddle.newPos.x + offset > gameState.rightBoundary) {
+    } else if (paddle.newPos.x + offset > (gameState.obstacles.rightBottom.center.x - gameState.obstacles.leftBottom.width * 0.5f)) {
         Vec2 wallNorm(-1, 0);
         paddle.velocity = paddle.velocity - 2 * paddle.velocity.dotProduct(wallNorm) * wallNorm;
         paddle.movementDelta.x -= 1.0f;
@@ -86,7 +87,6 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
             } else if (paddle.speed == LOW_SPEED) {
                 paddle.speed = DEFAULT_SPEED;
             }
-            printf("speed up\n");
             break;
         case slowDown:
             if (paddle.speed == DEFAULT_SPEED) {
@@ -94,7 +94,6 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
             } else if (paddle.speed == HIGH_SPEED) {
                 paddle.speed = DEFAULT_SPEED;
             }
-            printf("slow down \n");
             break;
         case strech:
             if (paddle.width == DEFAULT_WIDTH) {
@@ -106,7 +105,6 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
             } else if (paddle.height == SMALL_WIDTH) {
                 paddle.height = DEFAULT_WIDTH;
             }
-            printf("strech \n");
             break;
         case shrink:
             if (paddle.width == DEFAULT_WIDTH) {
@@ -118,11 +116,11 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
             } else if (paddle.height == LARGE_WIDTH) {
                 paddle.height = DEFAULT_WIDTH;
             }
-            printf("shrink \n");
             break;
         case neutral:
+            break;
         default:
-            printf("neutral \n");
+            SDL_assert(false);
             break;
     }
     

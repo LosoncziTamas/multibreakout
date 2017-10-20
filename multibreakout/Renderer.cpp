@@ -75,13 +75,22 @@ void drawBricksDebug(const Renderer& renderer, const std::vector<Brick>& bricks)
     }
 }
 
+void drawObstacles(const Renderer& renderer, Obstacles& obstacles) {
+    for (int i = 0; i < OBSTACLES_SIZE; ++i) {
+        Obstacle &obstacle = obstacles.content[i];
+        int x = obstacle.center.x - obstacle.width * 0.5f;
+        int y = SCREEN_HEIGHT - (obstacle.center.y + obstacle.height * 0.5f);
+        SDL_Rect sdlRect = {x, y, obstacle.width, obstacle.height};
+        SDL_Texture* texture = renderer.textures.at(obstacle.textureIndex);
+        SDL_RenderCopy(renderer.sdlRenderer, texture, NULL, &sdlRect);
+    }
+}
+
 void drawBricks(const Renderer& renderer, const std::vector<Brick>& bricks) {
     for (auto& brick : bricks) {
         if (!brick.active) {
             continue;
         }
-        SDL_Color color = getDrawColor(brick.powerUp);
-        SDL_SetRenderDrawColor(renderer.sdlRenderer, color.r, color.g, color.b, color.a);
         int x = brick.center.x - brick.width * 0.5f;
         int y = SCREEN_HEIGHT - (brick.center.y + brick.height * 0.5f);
         SDL_Rect sdlRect = {x, y, brick.width, brick.height};
