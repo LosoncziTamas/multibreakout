@@ -17,6 +17,7 @@
 		E96AD1DB1F1A3CF600B66D3A /* Ball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E96AD1DA1F1A3CF600B66D3A /* Ball.cpp */; };
 		E9A7DFAD1F94A2C700083AA4 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9A7DFAB1F94A2C700083AA4 /* Texture.cpp */; };
 		E9BC8BF01F99D74300B19AFC /* Obstacle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9BC8BEE1F99D74300B19AFC /* Obstacle.cpp */; };
+		E9BC8BF31F99F95800B19AFC /* Physics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9BC8BF11F99F95800B19AFC /* Physics.cpp */; };
 		E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */; };
 		E9D146581F922D1C0074C598 /* Enemy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D146561F922D1C0074C598 /* Enemy.cpp */; };
 		E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D20FAA1F85730E0064A1B3 /* Brick.cpp */; };
@@ -54,6 +55,8 @@
 		E9A7DFAC1F94A2C700083AA4 /* Texture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Texture.hpp; sourceTree = "<group>"; };
 		E9BC8BEE1F99D74300B19AFC /* Obstacle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obstacle.cpp; sourceTree = "<group>"; };
 		E9BC8BEF1F99D74300B19AFC /* Obstacle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Obstacle.hpp; sourceTree = "<group>"; };
+		E9BC8BF11F99F95800B19AFC /* Physics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Physics.cpp; sourceTree = "<group>"; };
+		E9BC8BF21F99F95800B19AFC /* Physics.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Physics.hpp; sourceTree = "<group>"; };
 		E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Paddle.cpp; sourceTree = "<group>"; };
 		E9C5A0B21F0CDBC10017FCE6 /* Paddle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Paddle.hpp; sourceTree = "<group>"; };
 		E9D146561F922D1C0074C598 /* Enemy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Enemy.cpp; sourceTree = "<group>"; };
@@ -123,6 +126,8 @@
 				E9A7DFAC1F94A2C700083AA4 /* Texture.hpp */,
 				E9BC8BEE1F99D74300B19AFC /* Obstacle.cpp */,
 				E9BC8BEF1F99D74300B19AFC /* Obstacle.hpp */,
+				E9BC8BF11F99F95800B19AFC /* Physics.cpp */,
+				E9BC8BF21F99F95800B19AFC /* Physics.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -195,6 +200,7 @@
 				E93D152B1F0B9F84007BF3ED /* Renderer.cpp in Sources */,
 				E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */,
 				E93D151A1F0B9158007BF3ED /* main.cpp in Sources */,
+				E9BC8BF31F99F95800B19AFC /* Physics.cpp in Sources */,
 				E9D146581F922D1C0074C598 /* Enemy.cpp in Sources */,
 				E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */,
 				E9A7DFAD1F94A2C700083AA4 /* Texture.cpp in Sources */,

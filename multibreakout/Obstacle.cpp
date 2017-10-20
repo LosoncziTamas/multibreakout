@@ -2,7 +2,7 @@
 
 #include "Obstacle.hpp"
 #include "MultiBreakout.hpp"
-
+#include "Physics.hpp"
 
 void initObstacles(Obstacles& obstacles) {
     const int width = 30;
@@ -29,39 +29,11 @@ void initObstacles(Obstacles& obstacles) {
     obstacles.rightTop.center.y = SCREEN_HEIGHT - height * 0.5f;
 }
 
-bool collide(Ball& ball, Obstacle& obstacle) {
-    float verticalDist = fabsf(ball.newPos.y - obstacle.center.y);
-    float horizontalDist = fabsf(ball.newPos.x - obstacle.center.x);
-    float halfWidth = obstacle.width * 0.5f;
-    float halfHeight = obstacle.height * 0.5f;
-    
-    if (horizontalDist > ball.radius + halfWidth) {
-        return false;
-    }
-    
-    if (verticalDist > ball.radius + halfHeight) {
-        return false;
-    }
-    
-    if (horizontalDist <= halfWidth) {
-        return true;
-    }
-    
-    if (verticalDist <= halfHeight) {
-        return true;
-    }
-    
-    float dx = horizontalDist - halfWidth;
-    float dy = verticalDist - halfHeight;
-    
-    return (dx * dx + dy * dy <= ball.radius * ball.radius);
-}
-
 void collideWithObstacle(std::vector<Ball>& balls, Obstacles& obstacles) {
     for (auto& ball : balls) {
         for (int i = 0; i < OBSTACLES_SIZE; ++i) {
-            if (collide(ball, obstacles.content[i])) {
-                Obstacle& obstacle = obstacles.content[i];
+            Obstacle& obstacle = obstacles.content[i];
+            if (circleRectIntersect(ball.newPos, ball.radius, obstacle.center, obstacle.width, obstacle.height)) {
                 Vec2 reflectionNorm = ball.newPos - obstacle.center;
                 reflectionNorm.normalize();
                 ball.velocity = reflectionNorm;

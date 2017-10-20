@@ -1,6 +1,7 @@
 #include "Ball.hpp"
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
+#include "Physics.hpp"
 
 static const float BALL_RADIUS = 10.0f;
 static const float BALL_SPEED = 100.0f;
@@ -73,28 +74,28 @@ void updateBalls(GameState& gameState) {
         float ballTop = ball.newPos.y + ball.radius;
         if (ballTop >= SCREEN_HEIGHT) {
             Vec2 wallNorm(0.0f, -1.0f);
-            ball.velocity = ball.velocity - 2 * ball.velocity.dotProduct(wallNorm) * wallNorm;
+            ball.velocity = reflect(ball.velocity, wallNorm);
             ball.movementDelta.y += SCREEN_HEIGHT - ballTop;
         }
         
         float ballBottom = ball.newPos.y - ball.radius;
         if (ball.newPos.y - ball.radius <= 0) {
             Vec2 wallNorm(0.0f, 1.0f);
-            ball.velocity = ball.velocity - 2 * ball.velocity.dotProduct(wallNorm) * wallNorm;
+            ball.velocity = reflect(ball.velocity, wallNorm);
             ball.movementDelta.y -= ballBottom;
         }
         
         float ballLeft = ball.newPos.x - ball.radius;
         if (ballLeft <= gameState.leftBoundary) {
             Vec2 wallNorm(1.0f, 0.0f);
-            ball.velocity = ball.velocity - 2 * ball.velocity.dotProduct(wallNorm) * wallNorm;
+            ball.velocity = reflect(ball.velocity, wallNorm);
             ball.movementDelta.x += gameState.leftBoundary - ballLeft;
         }
         
         float ballRight = ball.newPos.x + ball.radius;
         if (ballRight >= gameState.rightBoundary) {
             Vec2 wallNorm(-1.0f, 0.0f);
-            ball.velocity = ball.velocity - 2 * ball.velocity.dotProduct(wallNorm) * wallNorm;
+            ball.velocity = reflect(ball.velocity, wallNorm);
             ball.movementDelta.x += gameState.rightBoundary - ballRight;
         }
     }

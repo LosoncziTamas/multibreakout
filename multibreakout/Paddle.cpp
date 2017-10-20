@@ -3,6 +3,7 @@
 #include "Paddle.hpp"
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
+#include "Physics.hpp"
 
 void initPaddle(Paddle &paddle) {
     paddle.width = DEFAULT_WIDTH;
@@ -32,51 +33,18 @@ void updatePaddle(GameState& gameState) {
         paddle.velocity += - 0.02 * paddle.velocity;
     }
     
-    acceleration *= paddle.speed;
-    
-    paddle.oldPos = paddle.newPos;
-    paddle.movementDelta = (0.5f * acceleration * pow(delta, 2) + paddle.velocity * delta);
-    paddle.velocity += acceleration * delta;
-    paddle.newPos = paddle.oldPos + paddle.movementDelta;
+    acceleratePaddle(acceleration, paddle, delta);
     
     float offset = paddle.width * 0.5f;
     if (paddle.newPos.x - offset < (gameState.obstacles.leftBottom.center.x + gameState.obstacles.leftBottom.width * 0.5f)) {
         Vec2 wallNorm(1, 0);
-        paddle.velocity = paddle.velocity - 2 * paddle.velocity.dotProduct(wallNorm) * wallNorm;
+        paddle.velocity = reflect(paddle.velocity, wallNorm);
         paddle.movementDelta.x += 1.0f;
     } else if (paddle.newPos.x + offset > (gameState.obstacles.rightBottom.center.x - gameState.obstacles.leftBottom.width * 0.5f)) {
         Vec2 wallNorm(-1, 0);
-        paddle.velocity = paddle.velocity - 2 * paddle.velocity.dotProduct(wallNorm) * wallNorm;
+        paddle.velocity = reflect(paddle.velocity, wallNorm);
         paddle.movementDelta.x -= 1.0f;
     }
-}
-
-bool collide(Vec2& ballCollisionPos, Vec2& paddleCollisionPos, const Paddle& paddle, float radius) {
-    float verticalDist = fabsf(ballCollisionPos.y - paddleCollisionPos.y);
-    float horizontalDist = fabsf(ballCollisionPos.x - paddleCollisionPos.x);
-    float halfWidth = paddle.width * 0.5f;
-    float halfHeight = paddle.height * 0.5f;
-    
-    if (horizontalDist > radius + halfWidth) {
-        return false;
-    }
-    
-    if (verticalDist > radius + halfHeight) {
-        return false;
-    }
-    
-    if (horizontalDist <= halfWidth) {
-        return true;
-    }
-    
-    if (verticalDist <= halfHeight) {
-        return true;
-    }
-    
-    float dx = horizontalDist - halfWidth;
-    float dy = verticalDist - halfHeight;
-    
-    return (dx * dx + dy * dy <= radius * radius);
 }
 
 void activatePowerUp(Ball& ball, Paddle& paddle) {
@@ -129,11 +97,11 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
 
 void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta) {
     for (auto& ball : balls) {
-        if (collide(ball.newPos, paddle.newPos, paddle, ball.radius)) {
+        if (circleRectIntersect(ball.newPos, ball.radius, paddle.newPos, paddle.width, paddle.height)) {
             for (int i = 1; i <= 4; ++i) {
                 Vec2 ballCollisionLocation = (1.0f / i) * ball.oldPos + (1.0f - 1.0f / i) * ball.newPos;
                 Vec2 paddleCollisionLocation = (1.0f / i) * paddle.oldPos + (1.0f - 1.0f / i) * paddle.newPos;
-                if (collide(ballCollisionLocation, paddleCollisionLocation, paddle, ball.radius)) {
+                if (circleRectIntersect(ballCollisionLocation, ball.radius, paddleCollisionLocation, paddle.width, paddle.height)) {
                     Vec2 reflection = ballCollisionLocation - paddleCollisionLocation;
                     Vec2 reflectionInverse = paddleCollisionLocation - ballCollisionLocation;
                     reflection.normalize();

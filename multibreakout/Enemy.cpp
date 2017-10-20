@@ -1,5 +1,8 @@
-#include "Enemy.hpp"
 #include <SDL2/SDL_assert.h>
+
+#include "Physics.hpp"
+#include "Enemy.hpp"
+
 
 static void initCommon(Enemy& enemy) {
     enemy.paddle.speed = DEFAULT_SPEED;
@@ -84,21 +87,16 @@ void moveTowardHorizontal(Paddle& enemy, const Vec2& target, float delta, float 
         enemy.velocity += -0.02 * enemy.velocity;
     }
     
-    acceleration *= enemy.speed;
-    
-    enemy.oldPos = enemy.newPos;
-    enemy.movementDelta = (0.5f * acceleration * pow(delta, 2) + enemy.velocity * delta);
-    enemy.velocity += acceleration * delta;
-    enemy.newPos = enemy.oldPos + enemy.movementDelta;
+    acceleratePaddle(acceleration, enemy, delta);
     
     float offset = enemy.width * 0.5f;
     if (enemy.newPos.x - offset < leftBoundary) {
         Vec2 wallNorm(1, 0);
-        enemy.velocity = enemy.velocity - 2 * enemy.velocity.dotProduct(wallNorm) * wallNorm;
+        enemy.velocity = reflect(enemy.velocity, wallNorm);
         enemy.movementDelta.x += 1.0f;
     } else if (enemy.newPos.x + offset > rightBoundary) {
         Vec2 wallNorm(-1, 0);
-        enemy.velocity = enemy.velocity - 2 * enemy.velocity.dotProduct(wallNorm) * wallNorm;
+        enemy.velocity = reflect(enemy.velocity, wallNorm);
         enemy.movementDelta.x -= 1.0f;
     }
 }
@@ -140,21 +138,16 @@ void moveTowardVertical(Paddle& enemy, const Vec2& target, float delta, float to
         enemy.velocity += -0.02 * enemy.velocity;
     }
     
-    acceleration *= enemy.speed;
-    
-    enemy.oldPos = enemy.newPos;
-    enemy.movementDelta = (0.5f * acceleration * pow(delta, 2) + enemy.velocity * delta);
-    enemy.velocity += acceleration * delta;
-    enemy.newPos = enemy.oldPos + enemy.movementDelta;
+    acceleratePaddle(acceleration, enemy, delta);
     
     float offset = enemy.height * 0.5f;
     if (enemy.newPos.y - offset < bottomBoundary) {
         Vec2 wallNorm(0.0f, 1.0f);
-        enemy.velocity = enemy.velocity - 2 * enemy.velocity.dotProduct(wallNorm) * wallNorm;
+        enemy.velocity = reflect(enemy.velocity, wallNorm);
         enemy.movementDelta.y += 1.0f;
     } else if (enemy.newPos.y + offset > topBoundary) {
         Vec2 wallNorm(0.0f, -1.0f);
-        enemy.velocity = enemy.velocity - 2 * enemy.velocity.dotProduct(wallNorm) * wallNorm;
+        enemy.velocity = reflect(enemy.velocity, wallNorm);
         enemy.movementDelta.y -= 1.0f;
     }
 }
