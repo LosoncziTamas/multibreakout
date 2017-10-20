@@ -1,4 +1,5 @@
 #include <math.h>
+#include <SDL2/SDL_assert.h>
 
 #include "Brick.hpp"
 #include "MultiBreakout.hpp"
@@ -6,20 +7,13 @@
 void callback(Brick& brick, Ball& ball) {
     switch (brick.powerUp) {
         case speedUp:
-            printf("speed up \n");
-            break;
         case slowDown:
-            printf("slow down \n");
-            break;
         case strech:
-            printf("strech \n");
-            break;
         case shrink:
-            printf("shrink \n");
-            break;
         case neutral:
+            break;
         default:
-            printf("neutral \n");
+            SDL_assert(false);
             break;
     }
     ball.powerUp = brick.powerUp;

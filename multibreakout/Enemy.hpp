@@ -3,6 +3,7 @@
 
 #include "Vec2.hpp"
 #include "Paddle.hpp"
+#include "Obstacle.hpp"
 
 enum State {none, steering, defending};
 
@@ -15,8 +16,8 @@ struct Enemy {
 void initLeftEnemy(Enemy& enemy, float leftBoundary);
 void initRightEnemy(Enemy& enemy, float rightBoundary);
 void initUpperEnemy(Enemy& enemy);
-void updateEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta, float leftBoundary, float rightBoundary);
-void updateLeftEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta);
-void updateRightEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta);
+void updateEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta, Obstacles& obstacles);
+void updateLeftEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta, Obstacles& obstacles);
+void updateRightEnemy(Enemy& enemy, std::vector<Ball>& balls, float delta, Obstacles& obstacles);
 
 #endif 

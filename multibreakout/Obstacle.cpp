@@ -1,5 +1,8 @@
+#include <SDL2/SDL_assert.h>
+
 #include "Obstacle.hpp"
 #include "MultiBreakout.hpp"
+
 
 void initObstacles(Obstacles& obstacles) {
     const int width = 30;
@@ -24,7 +27,6 @@ void initObstacles(Obstacles& obstacles) {
     obstacles.rightTop.height = height;
     obstacles.rightTop.center.x = SCREEN_WIDTH - 160 - width * 0.5f;
     obstacles.rightTop.center.y = SCREEN_HEIGHT - height * 0.5f;
-
 }
 
 bool collide(Ball& ball, Obstacle& obstacle) {
@@ -59,9 +61,14 @@ void collideWithObstacle(std::vector<Ball>& balls, Obstacles& obstacles) {
     for (auto& ball : balls) {
         for (int i = 0; i < OBSTACLES_SIZE; ++i) {
             if (collide(ball, obstacles.content[i])) {
-                Vec2 reflectionNorm = ball.newPos - obstacles.content[i].center;
+                Obstacle& obstacle = obstacles.content[i];
+                Vec2 reflectionNorm = ball.newPos - obstacle.center;
                 reflectionNorm.normalize();
                 ball.velocity = reflectionNorm;
+                float magnitude = (obstacle.width * 0.5f + ball.radius) - ball.newPos.distance(obstacle.center);
+                if(magnitude > 0.0f) {
+                    ball.movementDelta += reflectionNorm * magnitude;
+                }
                 ball.movementDelta += reflectionNorm;
             }
         }
