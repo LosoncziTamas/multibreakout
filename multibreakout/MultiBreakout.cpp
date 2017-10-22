@@ -40,9 +40,9 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
 
     updateBalls(gameState);
     updatePaddle(gameState);
-    updateEnemy(gameState.enemyUpper, gameState.balls, gameState.delta, gameState.obstacles);
-    updateLeftEnemy(gameState.enemyLeft, gameState.balls, gameState.delta, gameState.obstacles);
-    updateRightEnemy(gameState.enemyRight, gameState.balls, gameState.delta, gameState.obstacles);
+    updateEnemy(gameState.enemyUpper, gameState.obstacles, gameState.balls, gameState.delta);
+    updateEnemy(gameState.enemyLeft, gameState.obstacles, gameState.balls, gameState.delta);
+    updateEnemy(gameState.enemyRight, gameState.obstacles, gameState.balls, gameState.delta);
     
     collideWithBrick(gameState.balls, gameState.bricks);
     collideWithObstacle(gameState.balls, gameState.obstacles);
