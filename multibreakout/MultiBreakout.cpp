@@ -2,6 +2,28 @@
 
 #include "MultiBreakout.hpp"
 #include "Renderer.hpp"
+#include "Atlas.hpp"
+
+void readFile(const char* path, std::string& content) {
+    char *fileContent = NULL;
+    SDL_RWops *file = SDL_RWFromFile(path, "r");
+    if (file) {
+        Sint64 size = SDL_RWsize(file);
+        fileContent = (char*) malloc(size + 1);
+        if(SDL_RWread(file, fileContent, sizeof(char), size)) {
+            fileContent[size] = '\0';
+            content.assign(fileContent);
+        } else {
+            printf("Error: Unable to read file! SDL Error: %s\n", SDL_GetError());
+            free(fileContent);
+        }
+        free(fileContent);
+        SDL_RWclose(file);
+    }
+    else {
+        printf("Error: Unable to open file! SDL Error: %s\n", SDL_GetError());
+    }
+}
 
 void initGameState(GameState& gameState) {
     gameState.leftBoundary = 160;
@@ -23,26 +45,32 @@ void initGameState(GameState& gameState) {
     initObstacles(gameState.obstacles);
 }
 
+static Atlas atlas;
+
 void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (!gameState.init) {
         srand(time(NULL));
         initGameState(gameState);
         initTextures(renderer, gameState);
+        std::string json;
+        readFile("texture_atlas.json", json);
+        initAtlas(atlas, json, renderer);
     }
     
     if (gameState.input.pause) {
-        gameState.paused = gameState.paused == SDL_TRUE ? SDL_FALSE : SDL_TRUE;
+        gameState.paused = gameState.paused == true ? false : true;
     }
-
+    
     if (gameState.paused) {
         return;
     }
-
+    
     updateBalls(gameState);
     updatePaddle(gameState);
     updateEnemy(gameState.enemyUpper, gameState.obstacles, gameState.balls, gameState.delta);
     updateEnemy(gameState.enemyLeft, gameState.obstacles, gameState.balls, gameState.delta);
     updateEnemy(gameState.enemyRight, gameState.obstacles, gameState.balls, gameState.delta);
+    
     
     collideWithBrick(gameState.balls, gameState.bricks);
     collideWithObstacle(gameState.balls, gameState.obstacles);
@@ -51,7 +79,7 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     resolveCollision(gameState.balls, gameState.enemyLeft.paddle, gameState.delta);
     resolveCollision(gameState.balls, gameState.enemyRight.paddle, gameState.delta);
     collideBalls(gameState.balls);
-
+    
     clear(renderer);
     drawLeftPaddle(renderer, gameState.enemyLeft.paddle);
     drawRightPaddle(renderer, gameState.enemyRight.paddle);
@@ -59,6 +87,9 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawUpperPaddle(renderer, gameState.enemyUpper.paddle);
     drawBalls(renderer, gameState.balls, gameState.delta);
     drawBoundaries(renderer, gameState.leftBoundary, gameState.rightBoundary);
+    
+    drawBallFromTextureAtlas(renderer, gameState.balls[0], atlas);
+    
     drawBricks(renderer, gameState.bricks);
     drawObstacles(renderer, gameState.obstacles);
     

@@ -10,6 +10,7 @@
 #include "Brick.hpp"
 #include "Texture.hpp"
 #include "Paddle.hpp"
+#include "Atlas.hpp"
 
 const SDL_Color RED = {255, 0, 0, 255};
 const SDL_Color GREEN = {0, 255, 0, 255};
@@ -43,5 +44,6 @@ void drawRightPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawLeftPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawObstacles(const Renderer& renderer, Obstacles& obstacles);
 void deleteRenderer(Renderer& renderer);
+void drawBallFromTextureAtlas(const Renderer& renderer, Ball& ball, Atlas& atlas);
 
 #endif

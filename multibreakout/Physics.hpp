@@ -6,6 +6,5 @@
 
 bool circleRectIntersect(Vec2 circleCenter, float radius, Vec2 rectCenter, float rectWidth, float rectHeight);
 Vec2 reflect(const Vec2& vec, const Vec2& norm);
-void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta);
 
 #endif

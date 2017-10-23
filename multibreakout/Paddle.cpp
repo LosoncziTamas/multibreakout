@@ -14,6 +14,14 @@ void initPaddle(Paddle &paddle) {
     paddle.textureIndex = INVALID_INDEX;
 }
 
+void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta) {
+    acceleration *= paddle.speed;
+    paddle.oldPos = paddle.newPos;
+    paddle.movementDelta = (0.5f * acceleration * pow(delta, 2) + paddle.velocity * delta);
+    paddle.velocity += acceleration * delta;
+    paddle.newPos = paddle.oldPos + paddle.movementDelta;
+}
+
 void updatePaddle(GameState& gameState) {
     Paddle &paddle = gameState.paddle;
     float delta = gameState.delta;

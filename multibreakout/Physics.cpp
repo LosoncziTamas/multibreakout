@@ -32,11 +32,3 @@ bool circleRectIntersect(Vec2 circleCenter, float radius, Vec2 rectCenter, float
 Vec2 reflect(const Vec2& vec, const Vec2& norm) {
     return vec - 2 * vec.dotProduct(norm) * norm;
 }
-
-void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta) {
-    acceleration *= paddle.speed;
-    paddle.oldPos = paddle.newPos;
-    paddle.movementDelta = (0.5f * acceleration * pow(delta, 2) + paddle.velocity * delta);
-    paddle.velocity += acceleration * delta;
-    paddle.newPos = paddle.oldPos + paddle.movementDelta;
-}

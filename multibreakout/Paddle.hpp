@@ -35,5 +35,6 @@ struct Paddle {
 void initPaddle(Paddle &paddle);
 void updatePaddle(GameState& gameState);
 void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta);
+void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta);
 
 #endif

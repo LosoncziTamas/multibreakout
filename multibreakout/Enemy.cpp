@@ -135,7 +135,7 @@ void setTarget(Ball *target, Orientation orientation, float leftBoundary, float 
             target->newPos.y -= enemy.height;
         }
     }
-
+    
 }
 
 Vec2 getTarget(Paddle& enemy, std::vector<Ball>& balls, float leftBoundary, float rightBoundary) {
@@ -172,19 +172,19 @@ bool danger(std::vector<Ball>& balls, Orientation orientation) {
     return false;
 }
 
-Vec2 generateSteeringPos(const Vec2& paddlePos, Orientation orientation, float leftBoundary, float rightBoundary) {
+Vec2 generateSteeringPos(const Vec2& paddlePos, Orientation orientation, float leftBoundary, float rightBoundary, float bottomBoundary, float topBoundary) {
     Vec2 steeringPos(paddlePos);
     if (orientation == upper) {
         steeringPos.x = leftBoundary + (rand() % static_cast<int>(rightBoundary - leftBoundary) + 1);
     } else if (orientation == left || orientation == right) {
-        steeringPos.y = rand() % SCREEN_HEIGHT + 1;
+        steeringPos.y = bottomBoundary + (rand() % static_cast<int>(topBoundary - bottomBoundary) + 1);
     }
     return steeringPos;
 }
 
 bool reachedTarget(Enemy& enemy) {
     if (enemy.paddle.orientation == upper) {
-        return enemy.steeringPos.distance(enemy.paddle.newPos) < enemy.paddle.width;
+        return enemy.steeringPos.distance(enemy.paddle.newPos) <= enemy.paddle.width;
     } else {
         return enemy.steeringPos.distance(enemy.paddle.newPos) <= enemy.paddle.height;
     }
@@ -216,7 +216,7 @@ void updateEnemy(Enemy& enemy, Obstacles& obstacles, std::vector<Ball>& balls, f
     switch (enemy.state) {
         case none: {
             if (enemy.paddle.ballIndex != INVALID_INDEX && !isDanger) {
-                enemy.steeringPos = generateSteeringPos(enemy.paddle.newPos, enemy.paddle.orientation, leftBoundary, rightBoundary);
+                enemy.steeringPos = generateSteeringPos(enemy.paddle.newPos, enemy.paddle.orientation, leftBoundary, rightBoundary, bottomBoundary, topBoundary);
                 enemy.state = steering;
             } else if (isDanger) {
                 enemy.state = defending;
@@ -224,7 +224,7 @@ void updateEnemy(Enemy& enemy, Obstacles& obstacles, std::vector<Ball>& balls, f
         } break;
         case steering: {
             bool reached = reachedTarget(enemy);
-            if (!isDanger && !reached) {
+            if (isDanger && !reached) {
                 moveToward(enemy.paddle, enemy.steeringPos, delta, topBoundary, bottomBoundary, leftBoundary, rightBoundary);
             } else {
                 if (reached) {
