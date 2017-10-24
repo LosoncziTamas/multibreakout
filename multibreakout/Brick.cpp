@@ -3,6 +3,7 @@
 #include "Brick.hpp"
 #include "MultiBreakout.hpp"
 #include "Physics.hpp"
+#include "Texture.hpp"
 
 void callback(Brick& brick, Ball& ball) {
     switch (brick.powerUp) {
@@ -17,6 +18,7 @@ void callback(Brick& brick, Ball& ball) {
             break;
     }
     ball.powerUp = brick.powerUp;
+    ball.textureIndex = getBallTexture(ball.powerUp);
     brick.active = false;
 }
 
@@ -38,7 +40,7 @@ void initBricks(std::vector<Brick>& bricks) {
             brick.height = brickHeight;
             brick.active = true;
             brick.callback = callback;
-            brick.powerUp = static_cast<PowerUp>(rand() % shrink + 1);
+            brick.powerUp = static_cast<PowerUp>(rand() % (shrink + 1));
             bricks.push_back(brick);
             brick.textureIndex = INVALID_INDEX;
         }

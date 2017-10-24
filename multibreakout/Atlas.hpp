@@ -12,6 +12,6 @@ struct Atlas {
     SDL_Texture *texture;
 };
 
-void initAtlas(Atlas& atlas, std::string& json, const Renderer& renderer);
+void initAtlas(std::string& json, Renderer& renderer);
 
 #endif 

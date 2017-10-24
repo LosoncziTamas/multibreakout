@@ -4,6 +4,7 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 #include "Physics.hpp"
+#include "Texture.hpp"
 
 void initPaddle(Paddle &paddle) {
     paddle.width = DEFAULT_WIDTH;
@@ -99,7 +100,7 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
             SDL_assert(false);
             break;
     }
-    
+    ball.textureIndex = GREY_BALL;
     ball.powerUp = neutral;
 }
 

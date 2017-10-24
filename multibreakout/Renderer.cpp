@@ -20,9 +20,7 @@ void createRenderer(Renderer& renderer, SDL_Window *window) {
 void deleteRenderer(Renderer& renderer) {
     SDL_DestroyRenderer(renderer.sdlRenderer);
     FC_FreeFont(renderer.font);
-    for (auto texture : renderer.textures) {
-        SDL_DestroyTexture(texture);
-    }
+    SDL_DestroyTexture(renderer.atlas.texture);
 }
 
 void clear(const Renderer& renderer) {
@@ -80,9 +78,9 @@ void drawObstacles(const Renderer& renderer, Obstacles& obstacles) {
         Obstacle &obstacle = obstacles.content[i];
         int x = obstacle.center.x - obstacle.width * 0.5f;
         int y = SCREEN_HEIGHT - (obstacle.center.y + obstacle.height * 0.5f);
-        SDL_Rect sdlRect = {x, y, obstacle.width, obstacle.height};
-        SDL_Texture* texture = renderer.textures.at(obstacle.textureIndex);
-        SDL_RenderCopy(renderer.sdlRenderer, texture, NULL, &sdlRect);
+        SDL_Rect dstRec = {x, y, obstacle.width, obstacle.height};
+        SDL_Rect srcRect = renderer.atlas.frames[obstacle.textureIndex];
+        SDL_RenderCopy(renderer.sdlRenderer, renderer.atlas.texture, &srcRect, &dstRec);
     }
 }
 
@@ -93,9 +91,9 @@ void drawBricks(const Renderer& renderer, const std::vector<Brick>& bricks) {
         }
         int x = brick.center.x - brick.width * 0.5f;
         int y = SCREEN_HEIGHT - (brick.center.y + brick.height * 0.5f);
-        SDL_Rect sdlRect = {x, y, brick.width, brick.height};
-        SDL_Texture* texture = renderer.textures.at(brick.textureIndex);
-        SDL_RenderCopy(renderer.sdlRenderer, texture, NULL, &sdlRect);
+        SDL_Rect dstRec = {x, y, brick.width, brick.height};
+        SDL_Rect srcRect = renderer.atlas.frames[brick.textureIndex];
+        SDL_RenderCopy(renderer.sdlRenderer, renderer.atlas.texture, &srcRect, &dstRec);
     }
 }
 
@@ -111,19 +109,46 @@ void drawBalls(const Renderer& renderer, const std::vector<Ball>& balls, float d
     for (auto& ball : balls) {
         int x = ball.newPos.x - ball.radius;
         int y = SCREEN_HEIGHT - (ball.newPos.y + ball.radius);
-        SDL_Rect rect = {x, y, static_cast<int>(ball.radius * 2), static_cast<int>(ball.radius * 2)};
-        SDL_Texture* texture = renderer.textures.at(ball.textureIndex);
-        SDL_RenderCopy(renderer.sdlRenderer, texture, NULL, &rect);
+        SDL_Rect dstRec = {x, y, static_cast<int>(ball.radius * 2), static_cast<int>(ball.radius * 2)};
+        SDL_Rect srcRect = renderer.atlas.frames[ball.textureIndex];
+        SDL_RenderCopy(renderer.sdlRenderer, renderer.atlas.texture, &srcRect, &dstRec);
     }
 }
 
-void drawBallFromTextureAtlas(const Renderer& renderer, Ball& ball, Atlas& atlas) {
-    int x = ball.newPos.x - ball.radius;
-    int y = SCREEN_HEIGHT - (ball.newPos.y + ball.radius);
-    SDL_Rect rect = {x, y, static_cast<int>(ball.radius * 2), static_cast<int>(ball.radius * 2)};
-    SDL_Texture* texture = renderer.textures.at(ball.textureIndex);
-    SDL_RenderCopy(renderer.sdlRenderer, atlas.texture, &atlas.frames[1], &rect);
+void drawUpperPaddle(const Renderer& renderer, const Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.width * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
+    
+    SDL_Rect dstRec = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
+    SDL_Rect srcRect = renderer.atlas.frames[paddle.textureIndex];
+    SDL_RenderCopyEx(renderer.sdlRenderer, renderer.atlas.texture, &srcRect, &dstRec, 0, NULL, SDL_FLIP_HORIZONTAL);
+}
 
+void drawLeftPaddle(const Renderer& renderer, const Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.height * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.width * 0.5f));
+    
+    SDL_Rect dstRec = {x, y, static_cast<int>(paddle.height), static_cast<int>(paddle.width)};
+    SDL_Rect srcRect = renderer.atlas.frames[paddle.textureIndex];
+    SDL_RenderCopyEx(renderer.sdlRenderer, renderer.atlas.texture, &srcRect, &dstRec, 90, NULL, SDL_FLIP_NONE);
+}
+
+void drawRightPaddle(const Renderer& renderer, const Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.height * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.width * 0.5f));
+    
+    SDL_Rect dstRec = {x, y, static_cast<int>(paddle.height), static_cast<int>(paddle.width)};
+    SDL_Rect srcRect = renderer.atlas.frames[paddle.textureIndex];
+    SDL_RenderCopyEx(renderer.sdlRenderer, renderer.atlas.texture, &srcRect, &dstRec, 270, NULL, SDL_FLIP_VERTICAL);
+}
+
+void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.width * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
+    
+    SDL_Rect dstRec = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
+    SDL_Rect srcRect = renderer.atlas.frames[paddle.textureIndex];
+    SDL_RenderCopy(renderer.sdlRenderer, renderer.atlas.texture, &srcRect, &dstRec);
 }
 
 void drawBallsDebug(const Renderer& renderer, const std::vector<Ball>& balls) {
@@ -176,42 +201,6 @@ void drawPoint(const Renderer& renderer, const Vec2& vec, SDL_Color color) {
 void drawPoint(const Renderer& renderer, float x, float y, SDL_Color color) {
     SDL_SetRenderDrawColor(renderer.sdlRenderer, color.r, color.g, color.b, color.a);
     SDL_RenderDrawPoint(renderer.sdlRenderer, round(x), round(SCREEN_HEIGHT - y));
-}
-
-void drawUpperPaddle(const Renderer& renderer, const Paddle& paddle) {
-    int x = round(paddle.newPos.x - paddle.width * 0.5f);
-    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
-    
-    SDL_Rect rect = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
-    SDL_Texture* texture = renderer.textures.at(paddle.textureIndex);
-    SDL_RenderCopyEx(renderer.sdlRenderer, texture, NULL, &rect, 0, NULL, SDL_FLIP_HORIZONTAL);
-}
-
-void drawLeftPaddle(const Renderer& renderer, const Paddle& paddle) {
-    int x = round(paddle.newPos.x - paddle.height * 0.5f);
-    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.width * 0.5f));
-    
-    SDL_Rect rect = {x, y, static_cast<int>(paddle.height), static_cast<int>(paddle.width)};
-    SDL_Texture* texture = renderer.textures.at(paddle.textureIndex);
-    SDL_RenderCopyEx(renderer.sdlRenderer, texture, NULL, &rect, 90, NULL, SDL_FLIP_NONE);
-}
-
-void drawRightPaddle(const Renderer& renderer, const Paddle& paddle) {
-    int x = round(paddle.newPos.x - paddle.height * 0.5f);
-    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.width * 0.5f));
-    
-    SDL_Rect rect = {x, y, static_cast<int>(paddle.height), static_cast<int>(paddle.width)};
-    SDL_Texture* texture = renderer.textures.at(paddle.textureIndex);
-    SDL_RenderCopyEx(renderer.sdlRenderer, texture, NULL, &rect, 270, NULL, SDL_FLIP_VERTICAL);
-}
-
-void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle) {
-    int x = round(paddle.newPos.x - paddle.width * 0.5f);
-    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
-    
-    SDL_Rect rect = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
-    SDL_Texture* texture = renderer.textures.at(paddle.textureIndex);
-    SDL_RenderCopy(renderer.sdlRenderer, texture, NULL, &rect);
 }
 
 const char *aiStates[] =

@@ -23,7 +23,7 @@ const SDL_Color BEIGE = {248, 232, 176, 255};
 struct Renderer {
     SDL_Renderer *sdlRenderer;
     FC_Font *font;
-    std::vector<SDL_Texture*> textures;
+    Atlas atlas;
 };
 
 void createRenderer(Renderer& renderer, SDL_Window *window);
@@ -44,6 +44,5 @@ void drawRightPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawLeftPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawObstacles(const Renderer& renderer, Obstacles& obstacles);
 void deleteRenderer(Renderer& renderer);
-void drawBallFromTextureAtlas(const Renderer& renderer, Ball& ball, Atlas& atlas);
-
+ 
 #endif

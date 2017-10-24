@@ -4,27 +4,6 @@
 #include "Renderer.hpp"
 #include "Atlas.hpp"
 
-void readFile(const char* path, std::string& content) {
-    char *fileContent = NULL;
-    SDL_RWops *file = SDL_RWFromFile(path, "r");
-    if (file) {
-        Sint64 size = SDL_RWsize(file);
-        fileContent = (char*) malloc(size + 1);
-        if(SDL_RWread(file, fileContent, sizeof(char), size)) {
-            fileContent[size] = '\0';
-            content.assign(fileContent);
-        } else {
-            printf("Error: Unable to read file! SDL Error: %s\n", SDL_GetError());
-            free(fileContent);
-        }
-        free(fileContent);
-        SDL_RWclose(file);
-    }
-    else {
-        printf("Error: Unable to open file! SDL Error: %s\n", SDL_GetError());
-    }
-}
-
 void initGameState(GameState& gameState) {
     gameState.leftBoundary = 160;
     gameState.rightBoundary = SCREEN_WIDTH - 160;
@@ -52,9 +31,6 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
         srand(time(NULL));
         initGameState(gameState);
         initTextures(renderer, gameState);
-        std::string json;
-        readFile("texture_atlas.json", json);
-        initAtlas(atlas, json, renderer);
     }
     
     if (gameState.input.pause) {
@@ -87,20 +63,20 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawUpperPaddle(renderer, gameState.enemyUpper.paddle);
     drawBalls(renderer, gameState.balls, gameState.delta);
     drawBoundaries(renderer, gameState.leftBoundary, gameState.rightBoundary);
-    
-    drawBallFromTextureAtlas(renderer, gameState.balls[0], atlas);
-    
+        
     drawBricks(renderer, gameState.bricks);
     drawObstacles(renderer, gameState.obstacles);
     
+#if 0
     drawBricksDebug(renderer, gameState.bricks);
     drawPaddleDebug(renderer, gameState.paddle);
     drawPaddleDebug(renderer, gameState.enemyUpper.paddle);
     drawPaddleDebug(renderer, gameState.enemyLeft.paddle);
     drawPaddleDebug(renderer, gameState.enemyRight.paddle);
     drawBallsDebug(renderer, gameState.balls);
+#endif
     drawDebugInfo(renderer, gameState);
-    
+
     drawPoint(renderer, gameState.enemyUpper.steeringPos);
     drawPoint(renderer, gameState.enemyRight.steeringPos);
     drawPoint(renderer, gameState.enemyLeft.steeringPos);

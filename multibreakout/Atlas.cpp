@@ -14,29 +14,25 @@ int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
     return -1;
 }
 
-int countFrames(jsmntok_t *tokens, int num_of_tokens, const char *json_str)
-{
+int countFrames(jsmntok_t *tokens, int numOfTokens, const char *jsonStr) {
     int ret = 0;
-    for (int i = 1; i < num_of_tokens; i++)
-    {
-        if (jsoneq(json_str, &tokens[i], "frame") == 0)
-        {
+    for (int i = 1; i < numOfTokens; i++) {
+        if (jsoneq(jsonStr, &tokens[i], "frame") == 0) {
             ++ret;
         }
     }
     return ret;
 }
 
-int tokenToInt(jsmntok_t* token, const char* json_str)
-{
-    char *tmp = strndup(json_str + token->start, token->end - token->start);
+int tokenToInt(jsmntok_t* token, const char* jsonStr) {
+    char *tmp = strndup(jsonStr + token->start, token->end - token->start);
     int ret = atoi(tmp);
     free(tmp);
     
     return ret;
 }
 
-void initAtlas(Atlas& atlas, std::string& json, const Renderer& renderer) {
+void initAtlas(std::string& json, Renderer& renderer) {
     int bufferSize = 512;
     
     const char* json_c = json.c_str();
@@ -52,45 +48,40 @@ void initAtlas(Atlas& atlas, std::string& json, const Renderer& renderer) {
         ret = jsmn_parse(&parser, json_c, json.length(), tokens, bufferSize);
     }
     
-    if (ret == JSMN_ERROR_INVAL)
-    {
+    if (ret == JSMN_ERROR_INVAL) {
         printf("Invalid JSON string.");
     }
-    if (ret == JSMN_ERROR_PART)
-    {
+    if (ret == JSMN_ERROR_PART) {
         printf("Truncated JSON string.");
     }
     
     SDL_assert(tokens[0].type == JSMN_OBJECT);
     
+    //TODO: use it for animations
+#if 0
     int framesSize = countFrames(tokens, ret, json_c);
+#endif
     
-    for (int i = 1; i < ret; i++)
-    {
-        if (jsoneq(json_c, &tokens[i], "filename") == 0)
-        {
-            if(jsoneq(json_c, &tokens[i+2], "frame") == 0)
-            {
+    for (int i = 1; i < ret; i++) {
+        if (jsoneq(json_c, &tokens[i], "filename") == 0) {
+            if(jsoneq(json_c, &tokens[i+2], "frame") == 0) {
                 int x = tokenToInt(&tokens[i+5], json_c);
                 int y = tokenToInt(&tokens[i+7], json_c);
                 int w = tokenToInt(&tokens[i+9], json_c);
                 int h = tokenToInt(&tokens[i+11], json_c);
                 
                 SDL_Rect src_rect = {x, y, w, h};
-                atlas.frames.push_back(src_rect);
+                renderer.atlas.frames.push_back(src_rect);
                 i += 11;
-            }
-            else
-            {
+            } else {
                 printf("Unexpected key.");
                 SDL_assert(false);
             }
         }
         
-        if (jsoneq(json_c, &tokens[i], "image") == 0)
-        {
+        if (jsoneq(json_c, &tokens[i], "image") == 0) {
             char* texturePath = strndup(json_c + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
-            atlas.texture = createTexture(texturePath, renderer);
+            renderer.atlas.texture = createTexture(texturePath, renderer);
             free(texturePath);
         }
     }
