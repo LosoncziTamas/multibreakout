@@ -4,6 +4,8 @@
 #include "Renderer.hpp"
 #include "Atlas.hpp"
 
+#include "kiss_sdl.h"
+
 void initGameState(GameState& gameState) {
     gameState.leftBoundary = 160;
     gameState.rightBoundary = SCREEN_WIDTH - 160;
@@ -24,8 +26,6 @@ void initGameState(GameState& gameState) {
     initObstacles(gameState.obstacles);
 }
 
-static Atlas atlas;
-
 void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (!gameState.init) {
         srand(time(NULL));
@@ -40,7 +40,9 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (gameState.paused) {
         return;
     }
-    
+    clear(renderer);
+
+#if 0
     updateBalls(gameState);
     updatePaddle(gameState);
     updateEnemy(gameState.enemyUpper, gameState.obstacles, gameState.balls, gameState.delta);
@@ -56,7 +58,6 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     resolveCollision(gameState.balls, gameState.enemyRight.paddle, gameState.delta);
     collideBalls(gameState.balls);
     
-    clear(renderer);
     drawLeftPaddle(renderer, gameState.enemyLeft.paddle);
     drawRightPaddle(renderer, gameState.enemyRight.paddle);
     drawLowerPaddle(renderer, gameState.paddle);
@@ -67,19 +68,19 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawBricks(renderer, gameState.bricks);
     drawObstacles(renderer, gameState.obstacles);
     
-#if 0
+
     drawBricksDebug(renderer, gameState.bricks);
     drawPaddleDebug(renderer, gameState.paddle);
     drawPaddleDebug(renderer, gameState.enemyUpper.paddle);
     drawPaddleDebug(renderer, gameState.enemyLeft.paddle);
     drawPaddleDebug(renderer, gameState.enemyRight.paddle);
     drawBallsDebug(renderer, gameState.balls);
-#endif
+
     drawDebugInfo(renderer, gameState);
 
     drawPoint(renderer, gameState.enemyUpper.steeringPos);
     drawPoint(renderer, gameState.enemyRight.steeringPos);
     drawPoint(renderer, gameState.enemyLeft.steeringPos);
-    
+#endif
     update(renderer);
 }
