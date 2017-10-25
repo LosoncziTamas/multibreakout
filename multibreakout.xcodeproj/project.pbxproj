@@ -19,10 +19,7 @@
 		E9BC8BF01F99D74300B19AFC /* Obstacle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9BC8BEE1F99D74300B19AFC /* Obstacle.cpp */; };
 		E9BC8BF31F99F95800B19AFC /* Physics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9BC8BF11F99F95800B19AFC /* Physics.cpp */; };
 		E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */; };
-		E9CD36D41FA0A1FC00B380D3 /* kiss_draw.c in Sources */ = {isa = PBXBuildFile; fileRef = E9CD36D31FA0A1FC00B380D3 /* kiss_draw.c */; };
-		E9CD36D61FA0A21F00B380D3 /* kiss_posix.c in Sources */ = {isa = PBXBuildFile; fileRef = E9CD36D51FA0A21F00B380D3 /* kiss_posix.c */; };
-		E9CD36D81FA0A23B00B380D3 /* kiss_general.c in Sources */ = {isa = PBXBuildFile; fileRef = E9CD36D71FA0A23B00B380D3 /* kiss_general.c */; };
-		E9CD36DB1FA0A27C00B380D3 /* kiss_widgets.c in Sources */ = {isa = PBXBuildFile; fileRef = E9CD36D91FA0A27C00B380D3 /* kiss_widgets.c */; };
+		E9CD36DE1FA0D33400B380D3 /* Button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9CD36DC1FA0D33400B380D3 /* Button.cpp */; };
 		E9D146581F922D1C0074C598 /* Enemy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D146561F922D1C0074C598 /* Enemy.cpp */; };
 		E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D20FAA1F85730E0064A1B3 /* Brick.cpp */; };
 		E9DDF7161F973956000AE808 /* SDL_FontCache.c in Sources */ = {isa = PBXBuildFile; fileRef = E9DDF7141F973956000AE808 /* SDL_FontCache.c */; };
@@ -65,11 +62,8 @@
 		E9BC8BF21F99F95800B19AFC /* Physics.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Physics.hpp; sourceTree = "<group>"; };
 		E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Paddle.cpp; sourceTree = "<group>"; };
 		E9C5A0B21F0CDBC10017FCE6 /* Paddle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Paddle.hpp; sourceTree = "<group>"; };
-		E9CD36D31FA0A1FC00B380D3 /* kiss_draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kiss_draw.c; path = multibreakout/kiss_draw.c; sourceTree = "<group>"; };
-		E9CD36D51FA0A21F00B380D3 /* kiss_posix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kiss_posix.c; path = multibreakout/kiss_posix.c; sourceTree = "<group>"; };
-		E9CD36D71FA0A23B00B380D3 /* kiss_general.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kiss_general.c; path = multibreakout/kiss_general.c; sourceTree = "<group>"; };
-		E9CD36D91FA0A27C00B380D3 /* kiss_widgets.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kiss_widgets.c; path = multibreakout/kiss_widgets.c; sourceTree = "<group>"; };
-		E9CD36DA1FA0A27C00B380D3 /* kiss_sdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kiss_sdl.h; path = multibreakout/kiss_sdl.h; sourceTree = "<group>"; };
+		E9CD36DC1FA0D33400B380D3 /* Button.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Button.cpp; sourceTree = "<group>"; };
+		E9CD36DD1FA0D33400B380D3 /* Button.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Button.hpp; sourceTree = "<group>"; };
 		E9D146561F922D1C0074C598 /* Enemy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Enemy.cpp; sourceTree = "<group>"; };
 		E9D146571F922D1C0074C598 /* Enemy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Enemy.hpp; sourceTree = "<group>"; };
 		E9D20FAA1F85730E0064A1B3 /* Brick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Brick.cpp; sourceTree = "<group>"; };
@@ -145,6 +139,8 @@
 				E9BC8BF21F99F95800B19AFC /* Physics.hpp */,
 				E9FD54161F9DDD8800B80EA3 /* Atlas.cpp */,
 				E9FD54171F9DDD8800B80EA3 /* Atlas.hpp */,
+				E9CD36DC1FA0D33400B380D3 /* Button.cpp */,
+				E9CD36DD1FA0D33400B380D3 /* Button.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -152,15 +148,10 @@
 		E9DDF7171F978626000AE808 /* dependencies */ = {
 			isa = PBXGroup;
 			children = (
-				E9CD36D91FA0A27C00B380D3 /* kiss_widgets.c */,
-				E9CD36DA1FA0A27C00B380D3 /* kiss_sdl.h */,
 				E9DDF7141F973956000AE808 /* SDL_FontCache.c */,
 				E9DDF7151F973956000AE808 /* SDL_FontCache.h */,
 				E9FD54131F9DDCE400B80EA3 /* jsmn.c */,
 				E9FD54141F9DDCE400B80EA3 /* jsmn.h */,
-				E9CD36D31FA0A1FC00B380D3 /* kiss_draw.c */,
-				E9CD36D51FA0A21F00B380D3 /* kiss_posix.c */,
-				E9CD36D71FA0A23B00B380D3 /* kiss_general.c */,
 			);
 			name = dependencies;
 			sourceTree = "<group>";
@@ -222,23 +213,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				E9FD54151F9DDCE400B80EA3 /* jsmn.c in Sources */,
-				E9CD36D41FA0A1FC00B380D3 /* kiss_draw.c in Sources */,
 				E93D152B1F0B9F84007BF3ED /* Renderer.cpp in Sources */,
 				E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */,
 				E93D151A1F0B9158007BF3ED /* main.cpp in Sources */,
 				E9BC8BF31F99F95800B19AFC /* Physics.cpp in Sources */,
+				E9CD36DE1FA0D33400B380D3 /* Button.cpp in Sources */,
 				E9D146581F922D1C0074C598 /* Enemy.cpp in Sources */,
 				E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */,
 				E9A7DFAD1F94A2C700083AA4 /* Texture.cpp in Sources */,
 				E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */,
 				E9FD54181F9DDD8800B80EA3 /* Atlas.cpp in Sources */,
-				E9CD36D81FA0A23B00B380D3 /* kiss_general.c in Sources */,
 				E9DDF7161F973956000AE808 /* SDL_FontCache.c in Sources */,
-				E9CD36DB1FA0A27C00B380D3 /* kiss_widgets.c in Sources */,
 				E93D15311F0BCF13007BF3ED /* Vec2.cpp in Sources */,
 				E9BC8BF01F99D74300B19AFC /* Obstacle.cpp in Sources */,
 				E96AD1DB1F1A3CF600B66D3A /* Ball.cpp in Sources */,
-				E9CD36D61FA0A21F00B380D3 /* kiss_posix.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -3,8 +3,7 @@
 #include "MultiBreakout.hpp"
 #include "Renderer.hpp"
 #include "Atlas.hpp"
-
-#include "kiss_sdl.h"
+#include "Button.hpp"
 
 void initGameState(GameState& gameState) {
     gameState.leftBoundary = 160;
@@ -26,6 +25,8 @@ void initGameState(GameState& gameState) {
     initObstacles(gameState.obstacles);
 }
 
+static Button button = {200, 200, 100, 40, BEIGE, WHITE, YELLOW, unpressed};
+
 void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (!gameState.init) {
         srand(time(NULL));
@@ -41,7 +42,8 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
         return;
     }
     clear(renderer);
-
+    drawButton(button, renderer);
+    updateButton(button, gameState.input);
 #if 0
     updateBalls(gameState);
     updatePaddle(gameState);
@@ -64,20 +66,20 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawUpperPaddle(renderer, gameState.enemyUpper.paddle);
     drawBalls(renderer, gameState.balls, gameState.delta);
     drawBoundaries(renderer, gameState.leftBoundary, gameState.rightBoundary);
-        
+    
     drawBricks(renderer, gameState.bricks);
     drawObstacles(renderer, gameState.obstacles);
     
-
+    
     drawBricksDebug(renderer, gameState.bricks);
     drawPaddleDebug(renderer, gameState.paddle);
     drawPaddleDebug(renderer, gameState.enemyUpper.paddle);
     drawPaddleDebug(renderer, gameState.enemyLeft.paddle);
     drawPaddleDebug(renderer, gameState.enemyRight.paddle);
     drawBallsDebug(renderer, gameState.balls);
-
+    
     drawDebugInfo(renderer, gameState);
-
+    
     drawPoint(renderer, gameState.enemyUpper.steeringPos);
     drawPoint(renderer, gameState.enemyRight.steeringPos);
     drawPoint(renderer, gameState.enemyLeft.steeringPos);
