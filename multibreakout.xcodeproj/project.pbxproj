@@ -22,6 +22,8 @@
 		E9CD36DE1FA0D33400B380D3 /* Button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9CD36DC1FA0D33400B380D3 /* Button.cpp */; };
 		E9D146581F922D1C0074C598 /* Enemy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D146561F922D1C0074C598 /* Enemy.cpp */; };
 		E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D20FAA1F85730E0064A1B3 /* Brick.cpp */; };
+		E9D397C41FA1CC5F002EA223 /* TextureButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D397C21FA1CC5F002EA223 /* TextureButton.cpp */; };
+		E9D397C71FA1D4A6002EA223 /* FontButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D397C51FA1D4A6002EA223 /* FontButton.cpp */; };
 		E9DDF7161F973956000AE808 /* SDL_FontCache.c in Sources */ = {isa = PBXBuildFile; fileRef = E9DDF7141F973956000AE808 /* SDL_FontCache.c */; };
 		E9FD54151F9DDCE400B80EA3 /* jsmn.c in Sources */ = {isa = PBXBuildFile; fileRef = E9FD54131F9DDCE400B80EA3 /* jsmn.c */; };
 		E9FD54181F9DDD8800B80EA3 /* Atlas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9FD54161F9DDD8800B80EA3 /* Atlas.cpp */; };
@@ -68,6 +70,10 @@
 		E9D146571F922D1C0074C598 /* Enemy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Enemy.hpp; sourceTree = "<group>"; };
 		E9D20FAA1F85730E0064A1B3 /* Brick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Brick.cpp; sourceTree = "<group>"; };
 		E9D20FAB1F85730E0064A1B3 /* Brick.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Brick.hpp; sourceTree = "<group>"; };
+		E9D397C21FA1CC5F002EA223 /* TextureButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextureButton.cpp; sourceTree = "<group>"; };
+		E9D397C31FA1CC5F002EA223 /* TextureButton.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TextureButton.hpp; sourceTree = "<group>"; };
+		E9D397C51FA1D4A6002EA223 /* FontButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FontButton.cpp; sourceTree = "<group>"; };
+		E9D397C61FA1D4A6002EA223 /* FontButton.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FontButton.hpp; sourceTree = "<group>"; };
 		E9DDF7141F973956000AE808 /* SDL_FontCache.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_FontCache.c; path = multibreakout/SDL_FontCache.c; sourceTree = "<group>"; };
 		E9DDF7151F973956000AE808 /* SDL_FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_FontCache.h; path = multibreakout/SDL_FontCache.h; sourceTree = "<group>"; };
 		E9F606E51F7AE7AD005A405E /* GameState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GameState.hpp; sourceTree = "<group>"; };
@@ -141,6 +147,10 @@
 				E9FD54171F9DDD8800B80EA3 /* Atlas.hpp */,
 				E9CD36DC1FA0D33400B380D3 /* Button.cpp */,
 				E9CD36DD1FA0D33400B380D3 /* Button.hpp */,
+				E9D397C21FA1CC5F002EA223 /* TextureButton.cpp */,
+				E9D397C31FA1CC5F002EA223 /* TextureButton.hpp */,
+				E9D397C51FA1D4A6002EA223 /* FontButton.cpp */,
+				E9D397C61FA1D4A6002EA223 /* FontButton.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -217,6 +227,7 @@
 				E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */,
 				E93D151A1F0B9158007BF3ED /* main.cpp in Sources */,
 				E9BC8BF31F99F95800B19AFC /* Physics.cpp in Sources */,
+				E9D397C71FA1D4A6002EA223 /* FontButton.cpp in Sources */,
 				E9CD36DE1FA0D33400B380D3 /* Button.cpp in Sources */,
 				E9D146581F922D1C0074C598 /* Enemy.cpp in Sources */,
 				E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */,
@@ -227,6 +238,7 @@
 				E93D15311F0BCF13007BF3ED /* Vec2.cpp in Sources */,
 				E9BC8BF01F99D74300B19AFC /* Obstacle.cpp in Sources */,
 				E96AD1DB1F1A3CF600B66D3A /* Ball.cpp in Sources */,
+				E9D397C41FA1CC5F002EA223 /* TextureButton.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

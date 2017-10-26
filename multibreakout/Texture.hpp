@@ -19,7 +19,9 @@ const int GREEN_BRICK   = 8;
 const int PURPLE_BRICK  = 9;
 const int YELLOW_BRICK  = 10;
 const int PLAYER_PADDLE = 11;
-const int ENEMY_PADDLE  = 12;
+const int LEFT_BUTTON   = 12;
+const int ENEMY_PADDLE  = 13;
+const int RIGHT_BUTTON  = 14;
 
 SDL_Texture *createTexture(const char *path, const Renderer& renderer);
 void initTextures(Renderer& renderer, GameState& gameState);

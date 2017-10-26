@@ -6,6 +6,10 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
+int flipY(int y, int height) {
+    return SCREEN_HEIGHT - (y + height);
+}
+
 void createRenderer(Renderer& renderer, SDL_Window *window) {
     renderer.sdlRenderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
     SDL_assert(renderer.sdlRenderer);

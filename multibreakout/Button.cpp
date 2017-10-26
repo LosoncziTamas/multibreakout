@@ -1,10 +1,6 @@
 #include "Button.hpp"
 #include "Renderer.hpp"
 
-int flipY(int y, int height = 0) {
-    return SCREEN_HEIGHT - (y + height);
-}
-
 void drawButton(Button& button, Renderer& renderer) {
     SDL_Rect rect;
     rect.w = button.w;

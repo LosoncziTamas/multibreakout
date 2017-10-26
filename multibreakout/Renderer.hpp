@@ -26,6 +26,8 @@ struct Renderer {
     Atlas atlas;
 };
 
+int flipY(int y, int height = 0);
+
 void createRenderer(Renderer& renderer, SDL_Window *window);
 void clear(const Renderer& renderer);
 void update(const Renderer& renderer);

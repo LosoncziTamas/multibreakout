@@ -3,7 +3,9 @@
 #include "MultiBreakout.hpp"
 #include "Renderer.hpp"
 #include "Atlas.hpp"
+
 #include "Button.hpp"
+#include "TextureButton.hpp"
 
 void initGameState(GameState& gameState) {
     gameState.leftBoundary = 160;
@@ -25,7 +27,12 @@ void initGameState(GameState& gameState) {
     initObstacles(gameState.obstacles);
 }
 
+void onClick() {
+    printf("onClick");
+}
+
 static Button button = {200, 200, 100, 40, BEIGE, WHITE, YELLOW, unpressed};
+static TextureButton textureButton = {300, 300, 100, 100, LEFT_BUTTON, onClick};
 
 void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (!gameState.init) {
@@ -43,7 +50,9 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     }
     clear(renderer);
     drawButton(button, renderer);
+    drawButton(textureButton, renderer);
     updateButton(button, gameState.input);
+    updateButton(textureButton, gameState.input);
 #if 0
     updateBalls(gameState);
     updatePaddle(gameState);
