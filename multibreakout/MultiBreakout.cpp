@@ -6,6 +6,7 @@
 
 #include "Button.hpp"
 #include "TextureButton.hpp"
+#include "FontButton.hpp"
 
 void initGameState(GameState& gameState) {
     gameState.leftBoundary = 160;
@@ -33,12 +34,14 @@ void onClick() {
 
 static Button button = {200, 200, 100, 40, BEIGE, WHITE, YELLOW, unpressed};
 static TextureButton textureButton = {300, 300, 100, 100, LEFT_BUTTON, onClick};
+static FontButton fontButton;
 
 void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (!gameState.init) {
         srand(time(NULL));
         initGameState(gameState);
         initTextures(renderer, gameState);
+        initFontButton(fontButton, renderer, 400, 100, "multiline \n string", onClick);
     }
     
     if (gameState.input.pause) {
@@ -51,8 +54,10 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     clear(renderer);
     drawButton(button, renderer);
     drawButton(textureButton, renderer);
+    drawButton(fontButton, renderer);
     updateButton(button, gameState.input);
     updateButton(textureButton, gameState.input);
+    updateButton(fontButton, gameState.input);
 #if 0
     updateBalls(gameState);
     updatePaddle(gameState);
