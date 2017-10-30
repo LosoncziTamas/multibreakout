@@ -8,6 +8,37 @@
 #include "TextureButton.hpp"
 #include "FontButton.hpp"
 
+struct BitmapBuffer {
+    SDL_Texture* texture;
+    int w;
+    int h;
+    int pitch;
+    void *pixels;
+    Uint8 bytesPerPixel;
+};
+
+static BitmapBuffer buffer = {};
+
+void readNinePatch(Renderer& renderer) {
+    SDL_Surface* img = IMG_Load("panelhdpi.9.png");
+    buffer.texture = SDL_CreateTexture(renderer.sdlRenderer,
+                                       SDL_PIXELFORMAT_ARGB8888,
+                                       SDL_TEXTUREACCESS_STREAMING,
+                                       img->w,
+                                       img->h);
+    buffer.w = img->w;
+    buffer.h = img->h;
+    buffer.pixels = malloc(img->w * img->h * img->format->BytesPerPixel);
+    buffer.pitch = img->pitch;
+    buffer.bytesPerPixel = img->format->BytesPerPixel;
+    
+    SDL_LockTexture(buffer.texture, &img->clip_rect, &buffer.pixels, &img->pitch);
+    
+    memcpy(buffer.pixels, img->pixels, img->w * img->h * img->format->BytesPerPixel);
+    
+    SDL_UnlockTexture(buffer.texture);
+}
+
 void initGameState(GameState& gameState) {
     gameState.leftBoundary = 160;
     gameState.rightBoundary = SCREEN_WIDTH - 160;
@@ -42,6 +73,7 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
         initGameState(gameState);
         initTextures(renderer, gameState);
         initFontButton(fontButton, renderer, 400, 100, "multiline \n string", onClick);
+        readNinePatch(renderer);
     }
     
     if (gameState.input.pause) {
@@ -98,5 +130,18 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawPoint(renderer, gameState.enemyRight.steeringPos);
     drawPoint(renderer, gameState.enemyLeft.steeringPos);
 #endif
+    
+    SDL_Rect dstRect = {0, 0, buffer.w, buffer.h};
+    
+    SDL_UpdateTexture(buffer.texture,
+                      NULL,
+                      buffer.pixels,
+                      buffer.w * buffer.bytesPerPixel);
+    
+    SDL_RenderCopy(renderer.sdlRenderer,
+                   buffer.texture,
+                   NULL,
+                   &dstRect);
+    
     update(renderer);
 }
