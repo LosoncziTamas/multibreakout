@@ -17,15 +17,23 @@ struct BitmapBuffer {
     Uint8 bytesPerPixel;
 };
 
+static SDL_Rect topLeft = {};
+static SDL_Rect bottomLeft = {};
+static SDL_Rect topRight = {};
+static SDL_Rect bottomRight = {};
+
 static BitmapBuffer buffer = {};
 
 void readNinePatch(Renderer& renderer) {
     SDL_Surface* img = IMG_Load("panelhdpi.9.png");
     buffer.texture = SDL_CreateTexture(renderer.sdlRenderer,
-                                       SDL_PIXELFORMAT_ARGB8888,
+                                       img->format->format,
                                        SDL_TEXTUREACCESS_STREAMING,
                                        img->w,
                                        img->h);
+    
+    SDL_SetTextureBlendMode(buffer.texture, SDL_BLENDMODE_BLEND);
+    
     buffer.w = img->w;
     buffer.h = img->h;
     buffer.pixels = malloc(img->w * img->h * img->format->BytesPerPixel);
@@ -37,6 +45,55 @@ void readNinePatch(Renderer& renderer) {
     memcpy(buffer.pixels, img->pixels, img->w * img->h * img->format->BytesPerPixel);
     
     SDL_UnlockTexture(buffer.texture);
+    
+    Uint32 *pixels = (Uint32*) buffer.pixels;
+    
+    int leftRectWidth = 0;
+    int rightRectStart = 0;
+    int topRectHeight = 0;
+    int bottomRectStart = 0;
+    
+    for (int i = 0; i < buffer.h - 1; ++i) {
+        for (int j = 0; j < buffer.w - 1; ++j) {
+            Uint32 color = pixels[i * buffer.w + j];
+            Uint8 r, g, b, a;
+            SDL_GetRGBA(color, img->format, &r, &g, &b, &a);
+            if (r == 0 && g == 0 && b == 0 && a == 255) {
+                if (i == 0) {
+                    leftRectWidth = leftRectWidth == 0 ? j : leftRectWidth;
+                    rightRectStart = leftRectWidth == 0 ? 0 : j + 1;
+                } else if (j == 0) {
+                    topRectHeight = topRectHeight == 0 ? i : topRectHeight;
+                    bottomRectStart = topRectHeight == 0 ? 0 : i + 1;
+                }
+                printf("i: %d j: %d \n", i, j);
+            }
+        }
+    }
+    
+    topLeft.x = 0;
+    topLeft.y = 0;
+    topLeft.w = leftRectWidth;
+    topLeft.h = topRectHeight;
+    
+    bottomLeft.x = 0;
+    bottomLeft.y = bottomRectStart;
+    bottomLeft.w = leftRectWidth;
+    bottomLeft.h = (buffer.h - 1) - bottomRectStart;
+    
+    topRight.x = rightRectStart;
+    topRight.y = 0;
+    topRight.w = leftRectWidth - 1;
+    topRight.h = topRectHeight;
+    
+    bottomRight.x = rightRectStart;
+    bottomRight.y = bottomRectStart;
+    bottomRight.w = leftRectWidth - 1;
+    bottomRight.h = (buffer.h - 1) - bottomRectStart;
+    
+    printf("leftRectWidth: %d rightRectStart: %d topRectHeight: %d bottomRectStart: %d \n", leftRectWidth, rightRectStart, topRectHeight, bottomRectStart);
+
+    
 }
 
 void initGameState(GameState& gameState) {
@@ -131,7 +188,7 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawPoint(renderer, gameState.enemyLeft.steeringPos);
 #endif
     
-    SDL_Rect dstRect = {0, 0, buffer.w, buffer.h};
+    SDL_Rect dstRect = {0, 0, bottomRight.w * 4, bottomRight.h * 4};
     
     SDL_UpdateTexture(buffer.texture,
                       NULL,
@@ -140,7 +197,7 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     
     SDL_RenderCopy(renderer.sdlRenderer,
                    buffer.texture,
-                   NULL,
+                   &bottomRight,
                    &dstRect);
     
     update(renderer);
