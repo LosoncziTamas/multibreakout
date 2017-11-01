@@ -19,6 +19,7 @@ const SDL_Color BLACK = {0, 0, 0, 255};
 const SDL_Color YELLOW = {255, 255, 0, 0};
 const SDL_Color WHITE = {255, 255, 255, 255};
 const SDL_Color BEIGE = {248, 232, 176, 255};
+const SDL_Color SKY_BLUE = {130, 189, 240, 0};
 
 struct Renderer {
     SDL_Renderer *sdlRenderer;
@@ -29,7 +30,7 @@ struct Renderer {
 int flipY(int y, int height = 0);
 
 void createRenderer(Renderer& renderer, SDL_Window *window);
-void clear(const Renderer& renderer);
+void clear(const Renderer& renderer, const SDL_Color& color = SKY_BLUE);
 void update(const Renderer& renderer);
 void drawPaddleDebug(const Renderer& renderer, const Paddle& paddle);
 void drawBoundaries(const Renderer& renderer, int left, int right);

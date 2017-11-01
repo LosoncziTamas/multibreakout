@@ -27,8 +27,8 @@ void deleteRenderer(Renderer& renderer) {
     SDL_DestroyTexture(renderer.atlas.texture);
 }
 
-void clear(const Renderer& renderer) {
-    SDL_SetRenderDrawColor(renderer.sdlRenderer, 130, 189, 240, 0);
+void clear(const Renderer& renderer, const SDL_Color& color) {
+    SDL_SetRenderDrawColor(renderer.sdlRenderer, color.r, color.g, color.b, color.a);
     SDL_RenderClear(renderer.sdlRenderer);
 }
 
