@@ -187,13 +187,14 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
         return;
     }
     clear(renderer, WHITE);
+#if 0
     drawButton(button, renderer);
     drawButton(textureButton, renderer);
     drawButton(fontButton, renderer);
     updateButton(button, gameState.input);
     updateButton(textureButton, gameState.input);
     updateButton(fontButton, gameState.input);
-#if 0
+    
     updateBalls(gameState);
     updatePaddle(gameState);
     updateEnemy(gameState.enemyUpper, gameState.obstacles, gameState.balls, gameState.delta);
@@ -235,31 +236,62 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
 #endif
     
     int multiplier = 1;
+    int targetWidth = 400;
+    int targetHeight = 400;
+    int minWidth = buffer.w - 2; //TODO: add fillable width
+    SDL_assert(targetWidth >= minWidth);
+    int minHeight = buffer.h - 2;
     
+    int repeatHorizontal = (targetWidth - (topLeft.w + topRight.w)) / fillableTop.w;
+    int repeatVertical = (targetHeight - (topLeft.h + bottomLeft.h)) / fillableLeft.h;
+    
+    //top
     SDL_Rect dstRectTopLeft = {0, 0, topLeft.w * multiplier, topLeft.h * multiplier};
-    SDL_Rect dstRectFillableTop = {dstRectTopLeft.w + multiplier, 0, fillableTop.w * multiplier, fillableTop.h * multiplier};
-    SDL_Rect dstRectTopRight = {dstRectFillableTop.x + dstRectFillableTop.w + multiplier, 0, topRight.w * multiplier, topRight.h * multiplier};
-    
-    SDL_Rect dstRectFillableLeft = {0, dstRectTopLeft.h + multiplier, fillableLeft.w * multiplier, fillableLeft.h * multiplier};
-    SDL_Rect dstRectBottomLeft = {0, dstRectFillableLeft.y + dstRectFillableLeft.h + multiplier, bottomLeft.w * multiplier, bottomLeft.h * multiplier};
-    SDL_Rect dstRectFillableBottom = {dstRectBottomLeft.x + dstRectBottomLeft.w + multiplier, dstRectFillableLeft.y + dstRectFillableLeft.h + multiplier, fillableBottom.w * multiplier, fillableBottom.h * multiplier};
-    
-    SDL_Rect dstRectBottomRight = {dstRectFillableBottom.x + dstRectFillableBottom.w + multiplier, dstRectFillableBottom.y, bottomRight.w * multiplier, bottomRight.h * multiplier};
-    SDL_Rect dstRectFillableRight = {dstRectTopRight.x, dstRectTopRight.y + dstRectTopRight.h + multiplier, fillableRight.w * multiplier, fillableRight.h * multiplier};
-    SDL_Rect dstRectFillableCenter = {dstRectFillableLeft.x + dstRectFillableLeft.w + multiplier, dstRectFillableTop.y + dstRectFillableTop.h + multiplier, fillableCenter.w * multiplier, fillableCenter.h * multiplier};
-
-    
     renderRect(topLeft, dstRectTopLeft, renderer);
-    renderRect(fillableTop, dstRectFillableTop, renderer);
+    
+    SDL_Rect dstRectFillableTop;
+    for (int i = 0; i < repeatHorizontal; ++i) {
+        dstRectFillableTop = {dstRectTopLeft.w + i * (fillableTop.w * multiplier), 0, fillableTop.w * multiplier, fillableTop.h * multiplier};
+        renderRect(fillableTop, dstRectFillableTop, renderer);
+    }
+    
+    SDL_Rect dstRectTopRight = {dstRectFillableTop.x + dstRectFillableTop.w, 0, topRight.w * multiplier, topRight.h * multiplier};
     renderRect(topRight, dstRectTopRight, renderer);
     
-    renderRect(fillableLeft, dstRectFillableLeft, renderer);
-    renderRect(bottomLeft, dstRectBottomLeft, renderer);
-    renderRect(fillableBottom, dstRectFillableBottom, renderer);
+    //left
+    SDL_Rect dstRectFillableLeft;
+    for (int i = 0; i < repeatVertical; ++i) {
+        dstRectFillableLeft = {0, dstRectTopLeft.h + i * (fillableLeft.h * multiplier), fillableLeft.w * multiplier, fillableLeft.h * multiplier};
+        renderRect(fillableLeft, dstRectFillableLeft, renderer);
+    }
     
+    SDL_Rect dstRectBottomLeft = {0, dstRectFillableLeft.y + dstRectFillableLeft.h, bottomLeft.w * multiplier, bottomLeft.h * multiplier};
+    renderRect(bottomLeft, dstRectBottomLeft, renderer);
+    
+    //bottom
+    SDL_Rect dstRectFillableBottom;
+    for (int i = 0; i < repeatHorizontal; ++i) {
+        dstRectFillableBottom = {dstRectBottomLeft.x + dstRectBottomLeft.w + i * (fillableTop.w * multiplier), dstRectFillableLeft.y + dstRectFillableLeft.h, fillableBottom.w * multiplier, fillableBottom.h * multiplier};
+        renderRect(fillableBottom, dstRectFillableBottom, renderer);
+    }
+    
+    SDL_Rect dstRectBottomRight = {dstRectFillableBottom.x + dstRectFillableBottom.w, dstRectFillableBottom.y, bottomRight.w * multiplier, bottomRight.h * multiplier};
     renderRect(bottomRight, dstRectBottomRight, renderer);
-    renderRect(fillableRight, dstRectFillableRight, renderer);
-    renderRect(fillableCenter, dstRectFillableCenter, renderer);
+    
+    //right
+    SDL_Rect dstRectFillableRight;
+    for (int i = 0; i < repeatVertical; ++i) {
+        dstRectFillableRight = {dstRectTopRight.x, dstRectTopRight.y + dstRectTopRight.h + i * (fillableLeft.h * multiplier), fillableRight.w * multiplier, fillableRight.h * multiplier};
+        renderRect(fillableRight, dstRectFillableRight, renderer);
+    }
+    
+    //TODO: use the correct width and height values
+    for (int i = 0; i < repeatVertical; ++i) {
+        for (int j = 0; j < repeatHorizontal; ++j) {
+            SDL_Rect dstRectFillableCenter = {dstRectFillableLeft.x + dstRectFillableLeft.w + j * (fillableTop.w * multiplier), dstRectFillableTop.y + dstRectFillableTop.h + i * (fillableLeft.h * multiplier), fillableCenter.w * multiplier, fillableCenter.h * multiplier};
+            renderRect(fillableCenter, dstRectFillableCenter, renderer);
+        }
+    }
     
     update(renderer);
 }
