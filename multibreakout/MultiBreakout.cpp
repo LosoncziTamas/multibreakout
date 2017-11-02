@@ -17,29 +17,29 @@ struct BitmapBuffer {
     Uint8 bytesPerPixel;
 };
 
-static SDL_Rect topLeft = {};
-static SDL_Rect bottomLeft = {};
-static SDL_Rect topRight = {};
-static SDL_Rect bottomRight = {};
+struct NinePatch {
+    BitmapBuffer buffer;
+    
+    int targetWidth;
+    int targetHeight;
+    
+    SDL_Rect topLeft;
+    SDL_Rect bottomLeft;
+    SDL_Rect topRight;
+    SDL_Rect bottomRight;
+    SDL_Rect fillableLeft;
+    SDL_Rect fillableTop;
+    SDL_Rect fillableRight;
+    SDL_Rect fillableBottom;
+    SDL_Rect fillableCenter;
+};
 
-static SDL_Rect fillableLeft = {};
-static SDL_Rect fillableTop = {};
-static SDL_Rect fillableRight = {};
-static SDL_Rect fillableBottom = {};
-static SDL_Rect fillableCenter = {};
-
-static BitmapBuffer buffer = {};
-
-void readNinePatch(Renderer& renderer) {
+void readNinePatch(NinePatch& ninePatch, Renderer& renderer) {
     SDL_Surface* img = IMG_Load("panelhdpitest.9.png");
-    buffer.texture = SDL_CreateTexture(renderer.sdlRenderer,
-                                       img->format->format,
-                                       SDL_TEXTUREACCESS_STREAMING,
-                                       img->w,
-                                       img->h);
+    BitmapBuffer& buffer = ninePatch.buffer;
     
+    buffer.texture = SDL_CreateTexture(renderer.sdlRenderer, img->format->format, SDL_TEXTUREACCESS_STREAMING, img->w,img->h);
     SDL_SetTextureBlendMode(buffer.texture, SDL_BLENDMODE_BLEND);
-    
     buffer.w = img->w;
     buffer.h = img->h;
     buffer.pixels = malloc(img->w * img->h * img->format->BytesPerPixel);
@@ -47,10 +47,10 @@ void readNinePatch(Renderer& renderer) {
     buffer.bytesPerPixel = img->format->BytesPerPixel;
     
     SDL_LockTexture(buffer.texture, &img->clip_rect, &buffer.pixels, &img->pitch);
-    
     memcpy(buffer.pixels, img->pixels, img->w * img->h * img->format->BytesPerPixel);
-    
     SDL_UnlockTexture(buffer.texture);
+    Uint32 black = SDL_MapRGBA(img->format, 0, 0, 0, 255);
+    SDL_FreeSurface(img);
     
     Uint32 *pixels = (Uint32*) buffer.pixels;
     
@@ -59,73 +59,65 @@ void readNinePatch(Renderer& renderer) {
     int topRectHeight = 0;
     int bottomRectStart = 0;
     
-    //TODO: reorganize the loop
     
-    for (int i = 0; i < buffer.h - 1; ++i) {
-        for (int j = 0; j < buffer.w - 1; ++j) {
-            Uint32 color = pixels[i * buffer.w + j];
-            Uint8 r, g, b, a;
-            SDL_GetRGBA(color, img->format, &r, &g, &b, &a);
-            if (r == 0 && g == 0 && b == 0 && a == 255) {
-                if (i == 0) {
-                    leftRectWidth = leftRectWidth == 0 ? j : leftRectWidth;
-                    rightRectStart = leftRectWidth == 0 ? 0 : j + 1;
-                } else if (j == 0) {
-                    topRectHeight = topRectHeight == 0 ? i : topRectHeight;
-                    bottomRectStart = topRectHeight == 0 ? 0 : i + 1;
-                }
-                printf("i: %d j: %d \n", i, j);
-            }
+    for (int i = 0; i < buffer.w - 1; ++i) {
+        if (pixels[i] == black) {
+            leftRectWidth = leftRectWidth == 0 ? i : leftRectWidth;
+            rightRectStart = leftRectWidth == 0 ? 0 : i + 1;
         }
     }
     
-    topLeft.x = 1;
-    topLeft.y = 1;
-    topLeft.w = leftRectWidth - 1;
-    topLeft.h = topRectHeight - 1;
+    for (int i = 0; i < buffer.h - 1; ++i) {
+        if (pixels[i * buffer.w] == black) {
+            topRectHeight = topRectHeight == 0 ? i : topRectHeight;
+            bottomRectStart = topRectHeight == 0 ? 0 : i + 1;
+        }
+    }
     
-    bottomLeft.x = 1;
-    bottomLeft.y = bottomRectStart;
-    bottomLeft.w = leftRectWidth - 1;
-    bottomLeft.h = (buffer.h - 1) - bottomRectStart;
+    ninePatch.topLeft.x = 1;
+    ninePatch.topLeft.y = 1;
+    ninePatch.topLeft.w = leftRectWidth - 1;
+    ninePatch.topLeft.h = topRectHeight - 1;
     
-    topRight.x = rightRectStart;
-    topRight.y = 1;
-    topRight.w = (buffer.w - 1) - rightRectStart;
-    topRight.h = topRectHeight - 1;
+    ninePatch.bottomLeft.x = 1;
+    ninePatch.bottomLeft.y = bottomRectStart;
+    ninePatch.bottomLeft.w = leftRectWidth - 1;
+    ninePatch.bottomLeft.h = (buffer.h - 1) - bottomRectStart;
     
-    bottomRight.x = rightRectStart;
-    bottomRight.y = bottomRectStart;
-    bottomRight.w = (buffer.w - 1) - rightRectStart;
-    bottomRight.h = (buffer.h - 1) - bottomRectStart;
+    ninePatch.topRight.x = rightRectStart;
+    ninePatch.topRight.y = 1;
+    ninePatch.topRight.w = (buffer.w - 1) - rightRectStart;
+    ninePatch.topRight.h = topRectHeight - 1;
     
-    fillableRight.x = rightRectStart;
-    fillableRight.y = topRectHeight;
-    fillableRight.w = (buffer.w - 1) - rightRectStart;
-    fillableRight.h = bottomRectStart - topRectHeight;
+    ninePatch.bottomRight.x = rightRectStart;
+    ninePatch.bottomRight.y = bottomRectStart;
+    ninePatch.bottomRight.w = (buffer.w - 1) - rightRectStart;
+    ninePatch.bottomRight.h = (buffer.h - 1) - bottomRectStart;
     
-    fillableTop.x = leftRectWidth;
-    fillableTop.y = 1;
-    fillableTop.w = rightRectStart - leftRectWidth;
-    fillableTop.h = topRectHeight - 1;
+    ninePatch.fillableRight.x = rightRectStart;
+    ninePatch.fillableRight.y = topRectHeight;
+    ninePatch.fillableRight.w = (buffer.w - 1) - rightRectStart;
+    ninePatch.fillableRight.h = bottomRectStart - topRectHeight;
     
-    fillableLeft.x = 1;
-    fillableLeft.y = topRectHeight;
-    fillableLeft.w = leftRectWidth - 1;
-    fillableLeft.h = bottomRectStart - topRectHeight;
+    ninePatch.fillableTop.x = leftRectWidth;
+    ninePatch.fillableTop.y = 1;
+    ninePatch.fillableTop.w = rightRectStart - leftRectWidth;
+    ninePatch.fillableTop.h = topRectHeight - 1;
     
-    fillableBottom.x = leftRectWidth;
-    fillableBottom.y = bottomRectStart;
-    fillableBottom.w = rightRectStart - leftRectWidth;
-    fillableBottom.h = (buffer.h - 1) - bottomRectStart;
+    ninePatch.fillableLeft.x = 1;
+    ninePatch.fillableLeft.y = topRectHeight;
+    ninePatch.fillableLeft.w = leftRectWidth - 1;
+    ninePatch.fillableLeft.h = bottomRectStart - topRectHeight;
     
-    fillableCenter.x = leftRectWidth;
-    fillableCenter.y = topRectHeight;
-    fillableCenter.w = rightRectStart - leftRectWidth;
-    fillableCenter.h = bottomRectStart - topRectHeight;
+    ninePatch.fillableBottom.x = leftRectWidth;
+    ninePatch.fillableBottom.y = bottomRectStart;
+    ninePatch.fillableBottom.w = rightRectStart - leftRectWidth;
+    ninePatch.fillableBottom.h = (buffer.h - 1) - bottomRectStart;
     
-    printf("leftRectWidth: %d rightRectStart: %d topRectHeight: %d bottomRectStart: %d \n", leftRectWidth, rightRectStart, topRectHeight, bottomRectStart);
-    
+    ninePatch.fillableCenter.x = leftRectWidth;
+    ninePatch.fillableCenter.y = topRectHeight;
+    ninePatch.fillableCenter.w = rightRectStart - leftRectWidth;
+    ninePatch.fillableCenter.h = bottomRectStart - topRectHeight;
     
 }
 
@@ -157,17 +149,24 @@ static Button button = {200, 200, 100, 40, BEIGE, WHITE, YELLOW, unpressed};
 static TextureButton textureButton = {300, 300, 100, 100, LEFT_BUTTON, onClick};
 static FontButton fontButton;
 
+static NinePatch ninePatch;
+
 void renderRect(SDL_Rect& srcRect, SDL_Rect& dstRect, Renderer& renderer) {
     
-    SDL_UpdateTexture(buffer.texture,
+    SDL_UpdateTexture(ninePatch.buffer.texture,
                       NULL,
-                      buffer.pixels,
-                      buffer.w * buffer.bytesPerPixel);
+                      ninePatch.buffer.pixels,
+                      ninePatch.buffer.w * ninePatch.buffer.bytesPerPixel);
     
     SDL_RenderCopy(renderer.sdlRenderer,
-                   buffer.texture,
+                   ninePatch.buffer.texture,
                    &srcRect,
                    &dstRect);
+}
+
+
+void renderNinePatch(NinePatch& ninePatch) {
+    
 }
 
 void gameUpdate(GameState& gameState, Renderer& renderer) {
@@ -176,7 +175,7 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
         initGameState(gameState);
         initTextures(renderer, gameState);
         initFontButton(fontButton, renderer, 400, 100, "multiline \n string", onClick);
-        readNinePatch(renderer);
+        readNinePatch(ninePatch, renderer);
     }
     
     if (gameState.input.pause) {
@@ -235,61 +234,61 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawPoint(renderer, gameState.enemyLeft.steeringPos);
 #endif
     
-    int multiplier = 1;
     int targetWidth = 400;
     int targetHeight = 400;
-    int minWidth = buffer.w - 2; //TODO: add fillable width
+    int minWidth = ninePatch.buffer.w - 2; //TODO: add fillable width
     SDL_assert(targetWidth >= minWidth);
-    int minHeight = buffer.h - 2;
+    int minHeight = ninePatch.buffer.h - 2;
+    SDL_assert(targetHeight >= minHeight);
     
-    int repeatHorizontal = (targetWidth - (topLeft.w + topRight.w)) / fillableTop.w;
-    int repeatVertical = (targetHeight - (topLeft.h + bottomLeft.h)) / fillableLeft.h;
+    int repeatHorizontal = (targetWidth - (ninePatch.topLeft.w + ninePatch.topRight.w)) / ninePatch.fillableTop.w;
+    int repeatVertical = (targetHeight - (ninePatch.topLeft.h + ninePatch.bottomLeft.h)) / ninePatch.fillableLeft.h;
     
     //top
-    SDL_Rect dstRectTopLeft = {0, 0, topLeft.w * multiplier, topLeft.h * multiplier};
-    renderRect(topLeft, dstRectTopLeft, renderer);
+    SDL_Rect dstRectTopLeft = {0, 0, ninePatch.topLeft.w, ninePatch.topLeft.h};
+    renderRect(ninePatch.topLeft, dstRectTopLeft, renderer);
     
     SDL_Rect dstRectFillableTop;
     for (int i = 0; i < repeatHorizontal; ++i) {
-        dstRectFillableTop = {dstRectTopLeft.w + i * (fillableTop.w * multiplier), 0, fillableTop.w * multiplier, fillableTop.h * multiplier};
-        renderRect(fillableTop, dstRectFillableTop, renderer);
+        dstRectFillableTop = {dstRectTopLeft.w + i * (ninePatch.fillableTop.w), 0, ninePatch.fillableTop.w, ninePatch.fillableTop.h};
+        renderRect(ninePatch.fillableTop, dstRectFillableTop, renderer);
     }
     
-    SDL_Rect dstRectTopRight = {dstRectFillableTop.x + dstRectFillableTop.w, 0, topRight.w * multiplier, topRight.h * multiplier};
-    renderRect(topRight, dstRectTopRight, renderer);
+    SDL_Rect dstRectTopRight = {dstRectFillableTop.x + dstRectFillableTop.w, 0, ninePatch.topRight.w, ninePatch.topRight.h};
+    renderRect(ninePatch.topRight, dstRectTopRight, renderer);
     
     //left
     SDL_Rect dstRectFillableLeft;
     for (int i = 0; i < repeatVertical; ++i) {
-        dstRectFillableLeft = {0, dstRectTopLeft.h + i * (fillableLeft.h * multiplier), fillableLeft.w * multiplier, fillableLeft.h * multiplier};
-        renderRect(fillableLeft, dstRectFillableLeft, renderer);
+        dstRectFillableLeft = {0, dstRectTopLeft.h + i * (ninePatch.fillableLeft.h), ninePatch.fillableLeft.w, ninePatch.fillableLeft.h};
+        renderRect(ninePatch.fillableLeft, dstRectFillableLeft, renderer);
     }
     
-    SDL_Rect dstRectBottomLeft = {0, dstRectFillableLeft.y + dstRectFillableLeft.h, bottomLeft.w * multiplier, bottomLeft.h * multiplier};
-    renderRect(bottomLeft, dstRectBottomLeft, renderer);
+    SDL_Rect dstRectBottomLeft = {0, dstRectFillableLeft.y + dstRectFillableLeft.h, ninePatch.bottomLeft.w, ninePatch.bottomLeft.h};
+    renderRect(ninePatch.bottomLeft, dstRectBottomLeft, renderer);
     
     //bottom
     SDL_Rect dstRectFillableBottom;
     for (int i = 0; i < repeatHorizontal; ++i) {
-        dstRectFillableBottom = {dstRectBottomLeft.x + dstRectBottomLeft.w + i * (fillableTop.w * multiplier), dstRectFillableLeft.y + dstRectFillableLeft.h, fillableBottom.w * multiplier, fillableBottom.h * multiplier};
-        renderRect(fillableBottom, dstRectFillableBottom, renderer);
+        dstRectFillableBottom = {dstRectBottomLeft.x + dstRectBottomLeft.w + i * (ninePatch.fillableTop.w), dstRectFillableLeft.y + dstRectFillableLeft.h, ninePatch.fillableBottom.w, ninePatch.fillableBottom.h};
+        renderRect(ninePatch.fillableBottom, dstRectFillableBottom, renderer);
     }
     
-    SDL_Rect dstRectBottomRight = {dstRectFillableBottom.x + dstRectFillableBottom.w, dstRectFillableBottom.y, bottomRight.w * multiplier, bottomRight.h * multiplier};
-    renderRect(bottomRight, dstRectBottomRight, renderer);
+    SDL_Rect dstRectBottomRight = {dstRectFillableBottom.x + dstRectFillableBottom.w, dstRectFillableBottom.y, ninePatch.bottomRight.w, ninePatch.bottomRight.h};
+    renderRect(ninePatch.bottomRight, dstRectBottomRight, renderer);
     
     //right
     SDL_Rect dstRectFillableRight;
     for (int i = 0; i < repeatVertical; ++i) {
-        dstRectFillableRight = {dstRectTopRight.x, dstRectTopRight.y + dstRectTopRight.h + i * (fillableLeft.h * multiplier), fillableRight.w * multiplier, fillableRight.h * multiplier};
-        renderRect(fillableRight, dstRectFillableRight, renderer);
+        dstRectFillableRight = {dstRectTopRight.x, dstRectTopRight.y + dstRectTopRight.h + i * (ninePatch.fillableLeft.h), ninePatch.fillableRight.w, ninePatch.fillableRight.h};
+        renderRect(ninePatch.fillableRight, dstRectFillableRight, renderer);
     }
     
     //TODO: use the correct width and height values
     for (int i = 0; i < repeatVertical; ++i) {
         for (int j = 0; j < repeatHorizontal; ++j) {
-            SDL_Rect dstRectFillableCenter = {dstRectFillableLeft.x + dstRectFillableLeft.w + j * (fillableTop.w * multiplier), dstRectFillableTop.y + dstRectFillableTop.h + i * (fillableLeft.h * multiplier), fillableCenter.w * multiplier, fillableCenter.h * multiplier};
-            renderRect(fillableCenter, dstRectFillableCenter, renderer);
+            SDL_Rect dstRectFillableCenter = {dstRectFillableLeft.x + dstRectFillableLeft.w + j * (ninePatch.fillableTop.w), dstRectFillableTop.y + dstRectFillableTop.h + i * (ninePatch.fillableLeft.h), ninePatch.fillableCenter.w, ninePatch.fillableCenter.h};
+            renderRect(ninePatch.fillableCenter, dstRectFillableCenter, renderer);
         }
     }
     
