@@ -59,7 +59,6 @@ void readNinePatch(NinePatch& ninePatch, Renderer& renderer) {
     int topRectHeight = 0;
     int bottomRectStart = 0;
     
-    
     for (int i = 0; i < buffer.w - 1; ++i) {
         if (pixels[i] == black) {
             leftRectWidth = leftRectWidth == 0 ? i : leftRectWidth;
@@ -164,76 +163,83 @@ void renderRect(SDL_Rect& srcRect, SDL_Rect& dstRect, Renderer& renderer) {
                    &dstRect);
 }
 
+static SDL_Texture* finalTexture;
 
-void renderNinePatch(NinePatch& ninePatch) {
+void blitNinePatch(Renderer& renderer) {
+    int targetWidth = 400;
+    int targetHeight = 400;
     
-}
-
-void gameUpdate(GameState& gameState, Renderer& renderer) {
-    if (!gameState.init) {
-        srand(time(NULL));
-        initGameState(gameState);
-        initTextures(renderer, gameState);
-        initFontButton(fontButton, renderer, 400, 100, "multiline \n string", onClick);
-        readNinePatch(ninePatch, renderer);
-    }
+    int repeatHorizontal = (targetWidth - (ninePatch.topLeft.w + ninePatch.topRight.w)) / ninePatch.fillableTop.w;
+    int repeatVertical = (targetHeight - (ninePatch.topLeft.h + ninePatch.bottomLeft.h)) / ninePatch.fillableLeft.h;
     
-    if (gameState.input.pause) {
-        gameState.paused = gameState.paused == true ? false : true;
-    }
+    Uint32 rmask, gmask, bmask, amask;
     
-    if (gameState.paused) {
-        return;
-    }
-    clear(renderer, WHITE);
-#if 0
-    drawButton(button, renderer);
-    drawButton(textureButton, renderer);
-    drawButton(fontButton, renderer);
-    updateButton(button, gameState.input);
-    updateButton(textureButton, gameState.input);
-    updateButton(fontButton, gameState.input);
-    
-    updateBalls(gameState);
-    updatePaddle(gameState);
-    updateEnemy(gameState.enemyUpper, gameState.obstacles, gameState.balls, gameState.delta);
-    updateEnemy(gameState.enemyLeft, gameState.obstacles, gameState.balls, gameState.delta);
-    updateEnemy(gameState.enemyRight, gameState.obstacles, gameState.balls, gameState.delta);
-    
-    
-    collideWithBrick(gameState.balls, gameState.bricks);
-    collideWithObstacle(gameState.balls, gameState.obstacles);
-    resolveCollision(gameState.balls, gameState.enemyUpper.paddle, gameState.delta);
-    resolveCollision(gameState.balls, gameState.paddle, gameState.delta);
-    resolveCollision(gameState.balls, gameState.enemyLeft.paddle, gameState.delta);
-    resolveCollision(gameState.balls, gameState.enemyRight.paddle, gameState.delta);
-    collideBalls(gameState.balls);
-    
-    drawLeftPaddle(renderer, gameState.enemyLeft.paddle);
-    drawRightPaddle(renderer, gameState.enemyRight.paddle);
-    drawLowerPaddle(renderer, gameState.paddle);
-    drawUpperPaddle(renderer, gameState.enemyUpper.paddle);
-    drawBalls(renderer, gameState.balls, gameState.delta);
-    drawBoundaries(renderer, gameState.leftBoundary, gameState.rightBoundary);
-    
-    drawBricks(renderer, gameState.bricks);
-    drawObstacles(renderer, gameState.obstacles);
-    
-    
-    drawBricksDebug(renderer, gameState.bricks);
-    drawPaddleDebug(renderer, gameState.paddle);
-    drawPaddleDebug(renderer, gameState.enemyUpper.paddle);
-    drawPaddleDebug(renderer, gameState.enemyLeft.paddle);
-    drawPaddleDebug(renderer, gameState.enemyRight.paddle);
-    drawBallsDebug(renderer, gameState.balls);
-    
-    drawDebugInfo(renderer, gameState);
-    
-    drawPoint(renderer, gameState.enemyUpper.steeringPos);
-    drawPoint(renderer, gameState.enemyRight.steeringPos);
-    drawPoint(renderer, gameState.enemyLeft.steeringPos);
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+#else
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
 #endif
     
+    SDL_Surface *final = SDL_CreateRGBSurface(0, targetWidth, targetHeight, 32, rmask, gmask, bmask, amask);
+    SDL_assert(final);
+    SDL_Surface* img = IMG_Load("panelhdpitest.9.png");
+    SDL_assert(img);
+    
+    SDL_Rect dstRectTopLeft = {0, 0, ninePatch.topLeft.w, ninePatch.topLeft.h};
+    
+    SDL_BlitSurface(img, &ninePatch.topLeft, final, &dstRectTopLeft);
+    
+    SDL_Rect dstRectFillableTop;
+    for (int i = 0; i < repeatHorizontal; ++i) {
+        dstRectFillableTop = {dstRectTopLeft.w + i * (ninePatch.fillableTop.w), 0, ninePatch.fillableTop.w, ninePatch.fillableTop.h};
+        SDL_BlitSurface(img, &ninePatch.fillableTop, final, &dstRectFillableTop);
+    }
+    
+    SDL_Rect dstRectTopRight = {dstRectFillableTop.x + dstRectFillableTop.w, 0, ninePatch.topRight.w, ninePatch.topRight.h};
+    SDL_BlitSurface(img, &ninePatch.topRight, final, &dstRectTopRight);
+    
+    SDL_Rect dstRectFillableLeft;
+    for (int i = 0; i < repeatVertical; ++i) {
+        dstRectFillableLeft = {0, dstRectTopLeft.h + i * (ninePatch.fillableLeft.h), ninePatch.fillableLeft.w, ninePatch.fillableLeft.h};
+        SDL_BlitSurface(img, &ninePatch.fillableLeft, final, &dstRectFillableLeft);
+    }
+    
+    SDL_Rect dstRectBottomLeft = {0, dstRectFillableLeft.y + dstRectFillableLeft.h, ninePatch.bottomLeft.w, ninePatch.bottomLeft.h};
+    SDL_BlitSurface(img, &ninePatch.bottomLeft, final, &dstRectBottomLeft);
+    
+    SDL_Rect dstRectFillableBottom;
+    for (int i = 0; i < repeatHorizontal; ++i) {
+        dstRectFillableBottom = {dstRectBottomLeft.x + dstRectBottomLeft.w + i * (ninePatch.fillableTop.w), dstRectFillableLeft.y + dstRectFillableLeft.h, ninePatch.fillableBottom.w, ninePatch.fillableBottom.h};
+        SDL_BlitSurface(img, &ninePatch.fillableBottom, final, &dstRectFillableBottom);
+    }
+    
+    SDL_Rect dstRectBottomRight = {dstRectFillableBottom.x + dstRectFillableBottom.w, dstRectFillableBottom.y, ninePatch.bottomRight.w, ninePatch.bottomRight.h};
+    SDL_BlitSurface(img, &ninePatch.bottomRight, final, &dstRectBottomRight);
+
+    SDL_Rect dstRectFillableRight;
+    for (int i = 0; i < repeatVertical; ++i) {
+        dstRectFillableRight = {dstRectTopRight.x, dstRectTopRight.y + dstRectTopRight.h + i * (ninePatch.fillableLeft.h), ninePatch.fillableRight.w, ninePatch.fillableRight.h};
+        SDL_BlitSurface(img, &ninePatch.fillableRight, final, &dstRectFillableRight);
+    }
+    
+    for (int i = 0; i < repeatVertical; ++i) {
+        for (int j = 0; j < repeatHorizontal; ++j) {
+            SDL_Rect dstRectFillableCenter = {dstRectFillableLeft.x + dstRectFillableLeft.w + j * (ninePatch.fillableTop.w), dstRectFillableTop.y + dstRectFillableTop.h + i * (ninePatch.fillableLeft.h), ninePatch.fillableCenter.w, ninePatch.fillableCenter.h};
+            SDL_BlitSurface(img, &ninePatch.fillableCenter, final, &dstRectFillableCenter);
+        }
+    }
+    
+    finalTexture = SDL_CreateTextureFromSurface(renderer.sdlRenderer, final);
+}
+
+
+void renderNinePatch(Renderer& renderer) {
     int targetWidth = 400;
     int targetHeight = 400;
     int minWidth = ninePatch.buffer.w - 2; //TODO: add fillable width
@@ -292,5 +298,74 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
         }
     }
     
+}
+
+void gameUpdate(GameState& gameState, Renderer& renderer) {
+    if (!gameState.init) {
+        srand(time(NULL));
+        initGameState(gameState);
+        initTextures(renderer, gameState);
+        initFontButton(fontButton, renderer, 400, 100, "multiline \n string", onClick);
+        readNinePatch(ninePatch, renderer);
+        blitNinePatch(renderer);
+    }
+    
+    if (gameState.input.pause) {
+        gameState.paused = gameState.paused == true ? false : true;
+    }
+    
+    if (gameState.paused) {
+        return;
+    }
+    clear(renderer, WHITE);
+#if 0
+    drawButton(button, renderer);
+    drawButton(textureButton, renderer);
+    drawButton(fontButton, renderer);
+    updateButton(button, gameState.input);
+    updateButton(textureButton, gameState.input);
+    updateButton(fontButton, gameState.input);
+    
+    updateBalls(gameState);
+    updatePaddle(gameState);
+    updateEnemy(gameState.enemyUpper, gameState.obstacles, gameState.balls, gameState.delta);
+    updateEnemy(gameState.enemyLeft, gameState.obstacles, gameState.balls, gameState.delta);
+    updateEnemy(gameState.enemyRight, gameState.obstacles, gameState.balls, gameState.delta);
+    
+    
+    collideWithBrick(gameState.balls, gameState.bricks);
+    collideWithObstacle(gameState.balls, gameState.obstacles);
+    resolveCollision(gameState.balls, gameState.enemyUpper.paddle, gameState.delta);
+    resolveCollision(gameState.balls, gameState.paddle, gameState.delta);
+    resolveCollision(gameState.balls, gameState.enemyLeft.paddle, gameState.delta);
+    resolveCollision(gameState.balls, gameState.enemyRight.paddle, gameState.delta);
+    collideBalls(gameState.balls);
+    
+    drawLeftPaddle(renderer, gameState.enemyLeft.paddle);
+    drawRightPaddle(renderer, gameState.enemyRight.paddle);
+    drawLowerPaddle(renderer, gameState.paddle);
+    drawUpperPaddle(renderer, gameState.enemyUpper.paddle);
+    drawBalls(renderer, gameState.balls, gameState.delta);
+    drawBoundaries(renderer, gameState.leftBoundary, gameState.rightBoundary);
+    
+    drawBricks(renderer, gameState.bricks);
+    drawObstacles(renderer, gameState.obstacles);
+    
+    
+    drawBricksDebug(renderer, gameState.bricks);
+    drawPaddleDebug(renderer, gameState.paddle);
+    drawPaddleDebug(renderer, gameState.enemyUpper.paddle);
+    drawPaddleDebug(renderer, gameState.enemyLeft.paddle);
+    drawPaddleDebug(renderer, gameState.enemyRight.paddle);
+    drawBallsDebug(renderer, gameState.balls);
+    
+    drawDebugInfo(renderer, gameState);
+    
+    drawPoint(renderer, gameState.enemyUpper.steeringPos);
+    drawPoint(renderer, gameState.enemyRight.steeringPos);
+    drawPoint(renderer, gameState.enemyLeft.steeringPos);
+#endif
+    //    renderNinePatch(renderer);
+    SDL_RenderCopy(renderer.sdlRenderer, finalTexture, NULL, NULL);
     update(renderer);
 }
