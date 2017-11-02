@@ -10,7 +10,7 @@ struct TextureButton {
     int w;
     int h;
     int textureIndex;
-    void (*onclick)(void);
+    void (*onclick)(GameInput& input);
 };
 
 void drawButton(TextureButton& button, Renderer& renderer);

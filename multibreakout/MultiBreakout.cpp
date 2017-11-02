@@ -28,13 +28,17 @@ void initGameState(GameState& gameState) {
     initObstacles(gameState.obstacles);
 }
 
-void onClick() {
-    printf("onClick");
+void onLeftClick(GameInput& gameInput) {
+    gameInput.left = true;
 }
 
-static Button button = {200, 200, 100, 40, BEIGE, WHITE, YELLOW, unpressed};
-static TextureButton textureButton = {300, 300, 100, 100, LEFT_BUTTON, onClick};
-static FontButton fontButton;
+void onRightClick(GameInput& gameInput) {
+    gameInput.right = true;
+}
+
+static TextureButton leftButton = {15, 15, 130, 130, LEFT_BUTTON, onLeftClick};
+static TextureButton rightButton = {SCREEN_WIDTH - 145, 15, 130, 130, RIGHT_BUTTON, onRightClick};
+
 static NinePatch ninePatchLeft = {0, 0, 160, SCREEN_HEIGHT, nullptr};
 static NinePatch ninePatchRight = {SCREEN_WIDTH - 160, 0, 160, SCREEN_HEIGHT, nullptr};
 
@@ -44,7 +48,6 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
         srand(time(NULL));
         initGameState(gameState);
         initTextures(renderer, gameState);
-        initFontButton(fontButton, renderer, 400, 100, "multiline \n string", onClick);
         initNinePatch(ninePatchLeft, renderer);
         initNinePatch(ninePatchRight, renderer);
     }
@@ -56,21 +59,15 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (gameState.paused) {
         return;
     }
-    clear(renderer, SKY_BLUE);
-#if 0
-    drawButton(button, renderer);
-    drawButton(textureButton, renderer);
-    drawButton(fontButton, renderer);
-    updateButton(button, gameState.input);
-    updateButton(textureButton, gameState.input);
-    updateButton(fontButton, gameState.input);
+    
+    updateButton(leftButton, gameState.input);
+    updateButton(rightButton, gameState.input);
     
     updateBalls(gameState);
     updatePaddle(gameState);
     updateEnemy(gameState.enemyUpper, gameState.obstacles, gameState.balls, gameState.delta);
     updateEnemy(gameState.enemyLeft, gameState.obstacles, gameState.balls, gameState.delta);
     updateEnemy(gameState.enemyRight, gameState.obstacles, gameState.balls, gameState.delta);
-    
     
     collideWithBrick(gameState.balls, gameState.bricks);
     collideWithObstacle(gameState.balls, gameState.obstacles);
@@ -80,16 +77,16 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     resolveCollision(gameState.balls, gameState.enemyRight.paddle, gameState.delta);
     collideBalls(gameState.balls);
     
+    clear(renderer, SKY_BLUE);
+    
     drawLeftPaddle(renderer, gameState.enemyLeft.paddle);
     drawRightPaddle(renderer, gameState.enemyRight.paddle);
     drawLowerPaddle(renderer, gameState.paddle);
     drawUpperPaddle(renderer, gameState.enemyUpper.paddle);
     drawBalls(renderer, gameState.balls, gameState.delta);
     drawBoundaries(renderer, gameState.leftBoundary, gameState.rightBoundary);
-    
     drawBricks(renderer, gameState.bricks);
     drawObstacles(renderer, gameState.obstacles);
-    
     
     drawBricksDebug(renderer, gameState.bricks);
     drawPaddleDebug(renderer, gameState.paddle);
@@ -97,14 +94,16 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawPaddleDebug(renderer, gameState.enemyLeft.paddle);
     drawPaddleDebug(renderer, gameState.enemyRight.paddle);
     drawBallsDebug(renderer, gameState.balls);
-    
     drawDebugInfo(renderer, gameState);
     
     drawPoint(renderer, gameState.enemyUpper.steeringPos);
     drawPoint(renderer, gameState.enemyRight.steeringPos);
     drawPoint(renderer, gameState.enemyLeft.steeringPos);
-#endif
+
     drawNinePatch(ninePatchLeft, renderer);
     drawNinePatch(ninePatchRight, renderer);
+    drawButton(leftButton, renderer);
+    drawButton(rightButton, renderer);
+
     update(renderer);
 }

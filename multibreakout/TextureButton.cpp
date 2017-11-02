@@ -17,7 +17,7 @@ void updateButton(TextureButton& button, GameInput& gameInput) {
     float dy = flipY(gameInput.mouseY) - button.y;
     if (dx >= 0 && dx <= button.w && dy >= 0 && dy <= button.h) {
         if (gameInput.mouseLeft) {
-            button.onclick();
+            button.onclick(gameInput);
         }
     }
 }
