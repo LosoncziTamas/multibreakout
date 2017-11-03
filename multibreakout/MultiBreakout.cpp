@@ -43,7 +43,7 @@ static NinePatch ninePatchLeft = {0, 0, 160, SCREEN_HEIGHT, nullptr};
 static NinePatch ninePatchRight = {SCREEN_WIDTH - 160, 0, 160, SCREEN_HEIGHT, nullptr};
 
 
-void gameUpdate(GameState& gameState, Renderer& renderer) {
+extern "C" void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (!gameState.init) {
         srand(time(NULL));
         initGameState(gameState);
@@ -70,11 +70,11 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     updateEnemy(gameState.enemyRight, gameState.obstacles, gameState.balls, gameState.delta);
     
     collideWithBrick(gameState.balls, gameState.bricks);
-    collideWithObstacle(gameState.balls, gameState.obstacles);
     resolveCollision(gameState.balls, gameState.enemyUpper.paddle, gameState.delta);
     resolveCollision(gameState.balls, gameState.paddle, gameState.delta);
     resolveCollision(gameState.balls, gameState.enemyLeft.paddle, gameState.delta);
     resolveCollision(gameState.balls, gameState.enemyRight.paddle, gameState.delta);
+    collideWithObstacle(gameState.balls, gameState.obstacles);
     collideBalls(gameState.balls);
     
     clear(renderer, SKY_BLUE);
@@ -94,7 +94,6 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawPaddleDebug(renderer, gameState.enemyLeft.paddle);
     drawPaddleDebug(renderer, gameState.enemyRight.paddle);
     drawBallsDebug(renderer, gameState.balls);
-    drawDebugInfo(renderer, gameState);
     
     drawPoint(renderer, gameState.enemyUpper.steeringPos);
     drawPoint(renderer, gameState.enemyRight.steeringPos);
@@ -104,6 +103,8 @@ void gameUpdate(GameState& gameState, Renderer& renderer) {
     drawNinePatch(ninePatchRight, renderer);
     drawButton(leftButton, renderer);
     drawButton(rightButton, renderer);
+    drawDebugInfo(renderer, gameState);
+
 
     update(renderer);
 }

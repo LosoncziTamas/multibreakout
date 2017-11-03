@@ -5,7 +5,7 @@
 #include "NinePatch.hpp"
 
 void initNinePatch(NinePatch& ninePatch, Renderer& renderer) {
-    SDL_Surface* img = IMG_Load("panelhdpi.9.png");
+    SDL_Surface* img = IMG_Load("assets/panelhdpi.9.png");
     SDL_assert(img);
     SDL_Texture* texture = SDL_CreateTexture(renderer.sdlRenderer, img->format->format, SDL_TEXTUREACCESS_STREAMING, img->w, img->h);
     SDL_assert(texture);

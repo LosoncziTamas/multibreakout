@@ -138,7 +138,7 @@
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
 	"version": "1.0",
-	"image": "texture_atlas.png",
+	"image": "assets/texture_atlas.png",
 	"format": "RGBA8888",
 	"size": {"w":250,"h":290},
 	"scale": "1",

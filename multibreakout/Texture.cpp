@@ -65,7 +65,7 @@ int getBrickTexture(PowerUp powerUp) {
 
 void initTextures(Renderer& renderer, GameState& gameState) {
     std::string json;
-    readFile("texture_atlas.json", json);
+    readFile("assets/texture_atlas.json", json);
     initAtlas(json, renderer);
     
     gameState.paddle.textureIndex = PLAYER_PADDLE;

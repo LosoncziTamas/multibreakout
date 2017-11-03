@@ -18,7 +18,7 @@ void createRenderer(Renderer& renderer, SDL_Window *window) {
         SDL_assert(TTF_Init() != -1);
     }
     renderer.font = FC_CreateFont();
-    FC_LoadFont(renderer.font, renderer.sdlRenderer, "courier_prime_code.ttf", 14, FC_MakeColor(0, 0, 0, 255), TTF_STYLE_NORMAL);
+    FC_LoadFont(renderer.font, renderer.sdlRenderer, "assets/courier_prime_code.ttf", 14, FC_MakeColor(0, 0, 0, 255), TTF_STYLE_NORMAL);
 }
 
 void deleteRenderer(Renderer& renderer) {

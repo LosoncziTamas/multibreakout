@@ -31,6 +31,6 @@ struct GameInput
     };
 };
 
-void gameUpdate(GameState& gameState, Renderer& renderer);
+extern "C" void gameUpdate(GameState& gameState, Renderer& renderer);
 
 #endif

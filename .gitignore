@@ -5,6 +5,10 @@
 build/
 DerivedData/
 
+#c/c++
+*.so
+*.o
+
 ## Various settings
 *.pbxuser
 !default.pbxuser

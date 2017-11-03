@@ -1,5 +1,6 @@
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <sys/stat.h>
 
 #include "Renderer.hpp"
 #include "MultiBreakout.hpp"
@@ -8,6 +9,46 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 480;
 const float TARGET_UPDATE_HZ = 30.0f;
+
+typedef void (*gameUpdateFn)(GameState& gameState, Renderer& renderer);
+
+struct GameCode {
+    void *dll;
+    time_t lastLoadTime;
+    gameUpdateFn update;
+};
+
+time_t getLastWriteTime(const char *fileName) {
+    struct stat fileAttrs;
+    if (stat(fileName, &fileAttrs) < 0) {
+        return 0;
+    }
+    
+    return fileAttrs.st_mtime;
+}
+
+bool loadDll(GameCode& appDll, const char *dllPath)
+{
+    time_t time = getLastWriteTime(dllPath);
+    
+    if (appDll.lastLoadTime >= time) {
+        return false;
+    } else {
+        if (appDll.dll) {
+            SDL_UnloadObject(appDll.dll);
+            appDll.dll = 0;
+        }
+    }
+    void *lib = SDL_LoadObject(dllPath);
+    if (!lib) {
+        return false;
+    }
+    
+    appDll.dll = lib;
+    appDll.update = (gameUpdateFn)SDL_LoadFunction(lib, "gameUpdate");
+    appDll.lastLoadTime = time;
+    return true;
+}
 
 static SDL_bool handleEvent(SDL_Event& event)
 {
@@ -41,11 +82,11 @@ int main(void)
 {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window *window = SDL_CreateWindow("Multibreakout",
-                                 SDL_WINDOWPOS_CENTERED_MASK,
-                                 SDL_WINDOWPOS_CENTERED_MASK,
-                                 SCREEN_WIDTH,
-                                 SCREEN_HEIGHT,
-                                 SDL_WINDOW_RESIZABLE);
+                                          SDL_WINDOWPOS_CENTERED_MASK,
+                                          SDL_WINDOWPOS_CENTERED_MASK,
+                                          SCREEN_WIDTH,
+                                          SCREEN_HEIGHT,
+                                          SDL_WINDOW_RESIZABLE);
     SDL_assert(window);
     
     Renderer renderer;
@@ -57,6 +98,11 @@ int main(void)
     Uint64 perfCountFreq = SDL_GetPerformanceFrequency();
     
     GameState gameState = {};
+    
+    GameCode gameCode = {};
+    time_t lastWrite = 0;
+    bool loadingDll = true;
+    const char *dllPath = "game.so";
     
     while(running)
     {
@@ -81,13 +127,31 @@ int main(void)
         input.mouseRight = mouseVal & SDL_BUTTON(SDL_BUTTON_RIGHT);
         
         gameState.input = input;
-
+        
         while (secondsElapsed(startCounter, SDL_GetPerformanceCounter()) < secondsPerFrame);
         
         Uint64 end_counter = SDL_GetPerformanceCounter();
         gameState.delta = static_cast<float>(end_counter - startCounter) / static_cast<float>(perfCountFreq);
         
-        gameUpdate(gameState, renderer);
+        time_t time = getLastWriteTime(dllPath);
+        
+        if (time > lastWrite)
+        {
+            lastWrite = time;
+            loadingDll = true;
+        }
+        
+        if (loadingDll)
+        {
+            if(loadDll(gameCode, dllPath))
+            {
+                loadingDll = false;
+            }
+        }
+        else if(gameCode.dll)
+        {
+            gameCode.update(gameState, renderer);
+        }
         
         startCounter = end_counter;
     }
