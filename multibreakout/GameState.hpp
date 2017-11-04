@@ -10,13 +10,15 @@
 #include "Enemy.hpp"
 #include "Obstacle.hpp"
 
-struct GameState {
-    float delta;
+enum Screen {
+    menu, game
+};
+
+struct World {
+    bool init;
+    
     int leftBoundary;
     int rightBoundary;
-    
-    bool init;
-    bool paused;
     
     std::vector<Brick> bricks;
     std::vector<Ball> balls;
@@ -26,7 +28,14 @@ struct GameState {
     Enemy enemyUpper;
     Enemy enemyLeft;
     Enemy enemyRight;
+};
 
+struct GameState {
+    float delta;
+    bool assetsLoaded;
+    bool paused;
+    Screen currScreen;
+    World world;
     GameInput input;
 };
 

@@ -24,7 +24,8 @@ const int ENEMY_PADDLE  = 13;
 const int RIGHT_BUTTON  = 14;
 
 SDL_Texture *createTexture(const char *path, const Renderer& renderer);
-void initTextures(Renderer& renderer, GameState& gameState);
+void initTextures(Renderer& renderer, World& world);
+int getBrickTexture(PowerUp powerUp);
 int getBallTexture(PowerUp powerUp);
 
 #endif

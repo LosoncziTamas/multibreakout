@@ -214,10 +214,10 @@ const char *aiStates[] =
     "defending"
 };
 
-void drawDebugInfo(const Renderer& renderer, const GameState& gameState) {
+void drawDebugInfo(Renderer& renderer, World& world, float delta) {
     FC_Draw(renderer.font, renderer.sdlRenderer, 0, 0, "delta: %f\nleft ai: %s\nright ai: %s\ntop ai: %s\n ",
-            gameState.delta,
-            aiStates[gameState.enemyLeft.state],
-            aiStates[gameState.enemyRight.state],
-            aiStates[gameState.enemyUpper.state]);
+            delta,
+            aiStates[world.enemyLeft.state],
+            aiStates[world.enemyRight.state],
+            aiStates[world.enemyUpper.state]);
 }

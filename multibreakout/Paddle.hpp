@@ -5,7 +5,7 @@
 #include "Ball.hpp"
 #include "MultiBreakout.hpp"
 
-struct GameState;
+struct World;
 
 const float DEFAULT_WIDTH = 90.0f;
 const float DEFAULT_HEIGHT = 25.0f;
@@ -33,7 +33,7 @@ struct Paddle {
 };
 
 void initPaddle(Paddle &paddle);
-void updatePaddle(GameState& gameState);
+void updatePaddle(World& world, GameInput& input, float delta);
 void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta);
 void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta);
 

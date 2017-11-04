@@ -6,7 +6,8 @@
 #include "Vec2.hpp"
 #include "Common.hpp"
 
-struct GameState;
+struct World;
+struct GameInput;
 struct Paddle;
 
 struct Ball {
@@ -21,7 +22,7 @@ struct Ball {
     int textureIndex;
 };
 
-void updateBalls(GameState& gameState);
+void updateBalls(World& world, GameInput& input, float delta);
 void collideBalls(std::vector<Ball>& balls);
 void initBall(Ball& ball, std::vector<Ball>& balls, Paddle& paddle);
 

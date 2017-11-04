@@ -23,17 +23,16 @@ void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta) {
     paddle.newPos = paddle.oldPos + paddle.movementDelta;
 }
 
-void updatePaddle(GameState& gameState) {
-    Paddle &paddle = gameState.paddle;
-    float delta = gameState.delta;
+void updatePaddle(World& world, GameInput& input, float delta) {
+    Paddle &paddle = world.paddle;
     
     Vec2 acceleration;
-    if (gameState.input.left) {
+    if (input.left) {
         if (paddle.velocity.x > 0){
             paddle.velocity.x = 0.0f;
         }
         acceleration.x = -1.0;
-    } else if (gameState.input.right) {
+    } else if (input.right) {
         if (paddle.velocity.x < 0){
             paddle.velocity.x = 0.0f;
         }
@@ -45,11 +44,11 @@ void updatePaddle(GameState& gameState) {
     acceleratePaddle(acceleration, paddle, delta);
     
     float offset = paddle.width * 0.5f;
-    if (paddle.newPos.x - offset < (gameState.obstacles.leftBottom.center.x + gameState.obstacles.leftBottom.width * 0.5f)) {
+    if (paddle.newPos.x - offset < (world.obstacles.leftBottom.center.x + world.obstacles.leftBottom.width * 0.5f)) {
         Vec2 wallNorm(1, 0);
         paddle.velocity = reflect(paddle.velocity, wallNorm);
         paddle.movementDelta.x += 1.0f;
-    } else if (paddle.newPos.x + offset > (gameState.obstacles.rightBottom.center.x - gameState.obstacles.leftBottom.width * 0.5f)) {
+    } else if (paddle.newPos.x + offset > (world.obstacles.rightBottom.center.x - world.obstacles.leftBottom.width * 0.5f)) {
         Vec2 wallNorm(-1, 0);
         paddle.velocity = reflect(paddle.velocity, wallNorm);
         paddle.movementDelta.x -= 1.0f;

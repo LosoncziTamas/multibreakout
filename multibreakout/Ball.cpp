@@ -46,10 +46,8 @@ void collideBalls(std::vector<Ball>& balls) {
     }
 }
 
-void updateBalls(GameState& gameState) {
-    GameInput& input = gameState.input;
-    
-    for (auto& ball : gameState.balls) {
+void updateBalls(World& world, GameInput& input, float delta) {
+    for (auto& ball : world.balls) {
         
         if (input.mouseRight) {
             Vec2 newVelocity(input.mouseX - ball.newPos.x, SCREEN_HEIGHT - input.mouseY - ball.newPos.y);
@@ -58,14 +56,14 @@ void updateBalls(GameState& gameState) {
         
         if (input.space && ball.assignedPaddle != nullptr && ball.assignedPaddle->orientation == lower) {
             ball.velocity = Vec2(0.0f, 1.0f);
-            ball.movementDelta = ball.velocity * ball.speed * gameState.delta;
+            ball.movementDelta = ball.velocity * ball.speed * delta;
             ball.assignedPaddle->ballIndex = INVALID_INDEX;
             ball.assignedPaddle = nullptr;
         } else if (ball.assignedPaddle != nullptr) {
             ball.movementDelta = ball.assignedPaddle->movementDelta;
             ball.velocity = Vec2(0.0f, 0.0f);
         } else {
-            ball.movementDelta = ball.velocity * ball.speed * gameState.delta;
+            ball.movementDelta = ball.velocity * ball.speed * delta;
         }
                 
         ball.oldPos = ball.newPos;
@@ -86,17 +84,17 @@ void updateBalls(GameState& gameState) {
         }
         
         float ballLeft = ball.newPos.x - ball.radius;
-        if (ballLeft <= gameState.leftBoundary) {
+        if (ballLeft <= world.leftBoundary) {
             Vec2 wallNorm(1.0f, 0.0f);
             ball.velocity = reflect(ball.velocity, wallNorm);
-            ball.movementDelta.x += gameState.leftBoundary - ballLeft;
+            ball.movementDelta.x += world.leftBoundary - ballLeft;
         }
         
         float ballRight = ball.newPos.x + ball.radius;
-        if (ballRight >= gameState.rightBoundary) {
+        if (ballRight >= world.rightBoundary) {
             Vec2 wallNorm(-1.0f, 0.0f);
             ball.velocity = reflect(ball.velocity, wallNorm);
-            ball.movementDelta.x += gameState.rightBoundary - ballRight;
+            ball.movementDelta.x += world.rightBoundary - ballRight;
         }
     }
 }

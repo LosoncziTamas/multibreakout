@@ -41,7 +41,7 @@ void drawPoint(const Renderer& renderer, const Vec2& vec, SDL_Color color = RED)
 void drawPoint(const Renderer& renderer, float x, float y, SDL_Color color = RED);
 void drawLowerPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawUpperPaddle(const Renderer& renderer, const Paddle& paddle);
-void drawDebugInfo(const Renderer& renderer, const GameState& gameState);
+void drawDebugInfo(Renderer& renderer, World& world, float delta);
 void drawRightPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawLeftPaddle(const Renderer& renderer, const Paddle& paddle);
 void drawObstacles(const Renderer& renderer, Obstacles& obstacles);

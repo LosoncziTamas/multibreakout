@@ -63,24 +63,10 @@ int getBrickTexture(PowerUp powerUp) {
     }
 }
 
-void initTextures(Renderer& renderer, GameState& gameState) {
+void initTextures(Renderer& renderer, World& world) {
     std::string json;
     readFile("assets/texture_atlas.json", json);
     initAtlas(json, renderer);
-    
-    gameState.paddle.textureIndex = PLAYER_PADDLE;
-    gameState.enemyLeft.paddle.textureIndex = PLAYER_PADDLE;
-    for (auto& ball : gameState.balls) {
-        ball.textureIndex = GREY_BALL;
-    };
-    for (auto& brick : gameState.bricks) {
-        brick.textureIndex = getBrickTexture(brick.powerUp);
-    };
-    gameState.enemyUpper.paddle.textureIndex = ENEMY_PADDLE;
-    gameState.enemyRight.paddle.textureIndex = ENEMY_PADDLE;
-    for (int i = 0; i < OBSTACLES_SIZE; ++i) {
-        gameState.obstacles.content[i].textureIndex = GREY_BRICK;
-    }
 }
 
 
