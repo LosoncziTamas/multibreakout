@@ -23,6 +23,11 @@ const int LEFT_BUTTON   = 12;
 const int ENEMY_PADDLE  = 13;
 const int RIGHT_BUTTON  = 14;
 
+struct Atlas {
+    std::vector<SDL_Rect> frames;
+    SDL_Texture *texture;
+};
+
 SDL_Texture *createTexture(const char *path, const Renderer& renderer);
 void initTextures(Renderer& renderer, World& world);
 int getBrickTexture(PowerUp powerUp);

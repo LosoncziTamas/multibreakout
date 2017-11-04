@@ -2,7 +2,6 @@
 
 #include "MultiBreakout.hpp"
 #include "Renderer.hpp"
-#include "Atlas.hpp"
 #include "Button.hpp"
 #include "TextureButton.hpp"
 #include "FontButton.hpp"
@@ -52,10 +51,6 @@ void onRightClick(GameInput& gameInput) {
 
 static TextureButton leftButton = {15, 30, 130, 130, LEFT_BUTTON, onLeftClick};
 static TextureButton rightButton = {SCREEN_WIDTH - 145, 30, 130, 130, RIGHT_BUTTON, onRightClick};
-
-static NinePatch ninePatchLeft = {0, 0, 160, SCREEN_HEIGHT, nullptr};
-static NinePatch ninePatchRight = {SCREEN_WIDTH - 160, 0, 160, SCREEN_HEIGHT, nullptr};
-
 
 void gamePlayUpdate(GameState& gameState, Renderer& renderer) {
     if (!gameState.world.init) {
@@ -108,8 +103,6 @@ void gamePlayUpdate(GameState& gameState, Renderer& renderer) {
     drawPoint(renderer, gameState.world.enemyRight.steeringPos);
     drawPoint(renderer, gameState.world.enemyLeft.steeringPos);
     
-    drawNinePatch(ninePatchLeft, renderer);
-    drawNinePatch(ninePatchRight, renderer);
     drawButton(leftButton, renderer);
     drawButton(rightButton, renderer);
     drawDebugInfo(renderer, gameState.world, gameState.delta);
@@ -121,16 +114,15 @@ void gamePlayUpdate(GameState& gameState, Renderer& renderer) {
 
 void menuUpdate(GameState& gameState, Renderer& renderer) {
     clear(renderer, SKY_BLUE);
+    drawNinePatch(menuPanel, renderer);
     update(renderer);
-    gameState.currScreen = game;
 }
 
 extern "C" void gameUpdate(GameState& gameState, Renderer& renderer) {
     if (!gameState.assetsLoaded) {
         srand(time(NULL));
         initTextures(renderer, gameState.world);
-        initNinePatch(ninePatchLeft, renderer);
-        initNinePatch(ninePatchRight, renderer);
+        generateNinePatches(renderer);
         gameState.assetsLoaded = true;
         gameState.currScreen = menu;
     }

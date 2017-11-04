@@ -27,7 +27,6 @@
 		E9D397C71FA1D4A6002EA223 /* FontButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D397C51FA1D4A6002EA223 /* FontButton.cpp */; };
 		E9DDF7161F973956000AE808 /* SDL_FontCache.c in Sources */ = {isa = PBXBuildFile; fileRef = E9DDF7141F973956000AE808 /* SDL_FontCache.c */; };
 		E9FD54151F9DDCE400B80EA3 /* jsmn.c in Sources */ = {isa = PBXBuildFile; fileRef = E9FD54131F9DDCE400B80EA3 /* jsmn.c */; };
-		E9FD54181F9DDD8800B80EA3 /* Atlas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9FD54161F9DDD8800B80EA3 /* Atlas.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -82,8 +81,6 @@
 		E9F606E51F7AE7AD005A405E /* GameState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GameState.hpp; sourceTree = "<group>"; };
 		E9FD54131F9DDCE400B80EA3 /* jsmn.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jsmn.c; path = multibreakout/jsmn.c; sourceTree = "<group>"; };
 		E9FD54141F9DDCE400B80EA3 /* jsmn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jsmn.h; path = multibreakout/jsmn.h; sourceTree = "<group>"; };
-		E9FD54161F9DDD8800B80EA3 /* Atlas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Atlas.cpp; sourceTree = "<group>"; };
-		E9FD54171F9DDD8800B80EA3 /* Atlas.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Atlas.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,8 +143,6 @@
 				E9BC8BEF1F99D74300B19AFC /* Obstacle.hpp */,
 				E9BC8BF11F99F95800B19AFC /* Physics.cpp */,
 				E9BC8BF21F99F95800B19AFC /* Physics.hpp */,
-				E9FD54161F9DDD8800B80EA3 /* Atlas.cpp */,
-				E9FD54171F9DDD8800B80EA3 /* Atlas.hpp */,
 				E9CD36DC1FA0D33400B380D3 /* Button.cpp */,
 				E9CD36DD1FA0D33400B380D3 /* Button.hpp */,
 				E9D397C21FA1CC5F002EA223 /* TextureButton.cpp */,
@@ -239,7 +234,6 @@
 				E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */,
 				E9A7DFAD1F94A2C700083AA4 /* Texture.cpp in Sources */,
 				E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */,
-				E9FD54181F9DDD8800B80EA3 /* Atlas.cpp in Sources */,
 				E9DDF7161F973956000AE808 /* SDL_FontCache.c in Sources */,
 				E93D15311F0BCF13007BF3ED /* Vec2.cpp in Sources */,
 				E9BC8BF01F99D74300B19AFC /* Obstacle.cpp in Sources */,

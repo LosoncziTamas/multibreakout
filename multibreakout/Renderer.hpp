@@ -10,7 +10,6 @@
 #include "Brick.hpp"
 #include "Texture.hpp"
 #include "Paddle.hpp"
-#include "Atlas.hpp"
 
 const SDL_Color RED = {255, 0, 0, 255};
 const SDL_Color GREEN = {0, 255, 0, 255};
