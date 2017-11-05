@@ -3,7 +3,7 @@
 #include "Brick.hpp"
 #include "MultiBreakout.hpp"
 #include "Physics.hpp"
-#include "Texture.hpp"
+#include "Renderer.hpp"
 
 void callback(Brick& brick, Ball& ball) {
     switch (brick.powerUp) {
@@ -60,5 +60,32 @@ void collideWithBrick(std::vector<Ball>& balls, std::vector<Brick>& bricks) {
                 brick.callback(brick, ball);
             }
         }
+    }
+}
+
+void drawBricksDebug(SDL_Renderer* renderer, const std::vector<Brick>& bricks) {
+    for (auto& brick : bricks) {
+        if (!brick.active) {
+            continue;
+        }
+        SDL_Color color = getDrawColor(brick.powerUp);
+        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+        int x = brick.center.x - brick.width * 0.5f;
+        int y = SCREEN_HEIGHT - (brick.center.y + brick.height * 0.5f);
+        SDL_Rect sdlRect = {x, y, brick.width, brick.height};
+        SDL_RenderDrawRect(renderer, &sdlRect);
+    }
+}
+
+void drawBricks(SDL_Renderer* renderer, Atlas& atlas, const std::vector<Brick>& bricks) {
+    for (auto& brick : bricks) {
+        if (!brick.active) {
+            continue;
+        }
+        int x = brick.center.x - brick.width * 0.5f;
+        int y = SCREEN_HEIGHT - (brick.center.y + brick.height * 0.5f);
+        SDL_Rect dstRec = {x, y, brick.width, brick.height};
+        SDL_Rect srcRect = atlas.frames[brick.textureIndex];
+        SDL_RenderCopy(renderer, atlas.texture, &srcRect, &dstRec);
     }
 }

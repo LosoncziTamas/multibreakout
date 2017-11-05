@@ -7,7 +7,6 @@ extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
 
 struct GameState;
-struct Renderer;
 
 struct GameInput
 {
@@ -31,6 +30,6 @@ struct GameInput
     };
 };
 
-extern "C" void gameUpdate(GameState& gameState, Renderer& renderer);
+extern "C" void gameUpdate(GameState& gameState);
 
 #endif

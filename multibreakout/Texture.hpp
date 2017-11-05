@@ -2,10 +2,13 @@
 #define Texture_hpp
 
 #include <SDL2_image/SDL_image.h>
+#include <SDL2/SDL_rect.h>
+#include <vector>
 
-#include "GameState.hpp"
+#include "Common.hpp"
 
 struct Renderer;
+struct World;
 
 const int GREY_BALL     = 0;
 const int BLUE_BALL     = 1;

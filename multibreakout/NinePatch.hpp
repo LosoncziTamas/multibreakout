@@ -39,7 +39,7 @@ extern NinePatch menuPanel;
 void initNinePatcheBase(NinePatchBase& ninePatchBase, Renderer& renderer);
 void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, Renderer& renderer);
 void generateNinePatches(Renderer& renderer);
-void drawNinePatch(NinePatch& ninePatch, Renderer& renderer);
+void drawNinePatch(NinePatch& ninePatch, SDL_Renderer* renderer);
 void deleteNinePatches();
 
 #endif

@@ -2,6 +2,8 @@
 
 #include "Physics.hpp"
 #include "Enemy.hpp"
+#include "Renderer.hpp"
+#include "GameState.hpp"
 
 static void initCommon(Enemy& enemy) {
     enemy.paddle.speed = DEFAULT_SPEED;
@@ -244,4 +246,19 @@ void updateEnemy(Enemy& enemy, Obstacles& obstacles, std::vector<Ball>& balls, f
         default:
             break;
     }
+}
+
+const char *aiStates[] =
+{
+    "none",
+    "steering",
+    "defending"
+};
+
+void drawDebugInfo(SDL_Renderer* renderer, FC_Font* font, World& world, float delta) {
+    FC_Draw(font, renderer, 0, 0, "delta: %f\nleft ai: %s\nright ai: %s\ntop ai: %s\n ",
+            delta,
+            aiStates[world.enemyLeft.state],
+            aiStates[world.enemyRight.state],
+            aiStates[world.enemyUpper.state]);
 }

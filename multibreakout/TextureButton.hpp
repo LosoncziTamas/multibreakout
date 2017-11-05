@@ -1,7 +1,9 @@
 #ifndef TextureButton_hpp
 #define TextureButton_hpp
 
-struct Renderer;
+#include <SDL2/SDL_render.h>
+
+struct Atlas;
 struct GameInput;
 
 struct TextureButton {
@@ -13,7 +15,7 @@ struct TextureButton {
     void (*onclick)(GameInput& input);
 };
 
-void drawButton(TextureButton& button, Renderer& renderer);
+void drawButton(SDL_Renderer* renderer, Atlas& atlas, TextureButton& button);
 void updateButton(TextureButton& button, GameInput& gameInput);
 
 #endif

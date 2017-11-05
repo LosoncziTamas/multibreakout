@@ -2,9 +2,12 @@
 #define Obstacle_hpp
 
 #include <vector>
+#include <SDL2/SDL_render.h>
 
 #include "Vec2.hpp"
 #include "Ball.hpp"
+
+struct Atlas;
 
 const int OBSTACLES_SIZE = 4;
 
@@ -29,5 +32,6 @@ struct Obstacles {
 
 void initObstacles(Obstacles& obstacles);
 void collideWithObstacle(std::vector<Ball>& balls, Obstacles& obstacles);
+void drawObstacles(SDL_Renderer* renderer, Atlas& atlas, Obstacles& obstacles);
 
 #endif

@@ -1,11 +1,15 @@
 #ifndef Paddle_hpp
 #define Paddle_hpp
 
+#include <SDL2/SDL_render.h>
+
 #include "Vec2.hpp"
 #include "Ball.hpp"
 #include "MultiBreakout.hpp"
 
+
 struct World;
+struct Atlas;
 
 const float DEFAULT_WIDTH = 90.0f;
 const float DEFAULT_HEIGHT = 25.0f;
@@ -36,5 +40,10 @@ void initPaddle(Paddle &paddle);
 void updatePaddle(World& world, GameInput& input, float delta);
 void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta);
 void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta);
+void drawPaddleDebug(SDL_Renderer* renderer, Paddle& paddle);
+void drawUpperPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+void drawLeftPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+void drawRightPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+void drawLowerPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
 
 #endif

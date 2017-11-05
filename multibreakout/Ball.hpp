@@ -2,10 +2,12 @@
 #define Ball_hpp
 
 #include <vector>
+#include <SDL2/SDL_render.h>
 
 #include "Vec2.hpp"
 #include "Common.hpp"
 
+struct Atlas;
 struct World;
 struct GameInput;
 struct Paddle;
@@ -25,5 +27,7 @@ struct Ball {
 void updateBalls(World& world, GameInput& input, float delta);
 void collideBalls(std::vector<Ball>& balls);
 void initBall(Ball& ball, std::vector<Ball>& balls, Paddle& paddle);
+void drawBalls(SDL_Renderer* renderer, Atlas& atlas, const std::vector<Ball>& balls);
+void drawBallsDebug(SDL_Renderer* renderer, const std::vector<Ball>& balls);
 
 #endif

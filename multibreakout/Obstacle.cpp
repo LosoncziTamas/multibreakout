@@ -3,6 +3,7 @@
 #include "Obstacle.hpp"
 #include "MultiBreakout.hpp"
 #include "Physics.hpp"
+#include "Texture.hpp"
 
 void initObstacles(Obstacles& obstacles) {
     const int width = 30;
@@ -44,5 +45,16 @@ void collideWithObstacle(std::vector<Ball>& balls, Obstacles& obstacles) {
                 ball.movementDelta += reflectionNorm;
             }
         }
+    }
+}
+
+void drawObstacles(SDL_Renderer* renderer, Atlas& atlas, Obstacles& obstacles) {
+    for (int i = 0; i < OBSTACLES_SIZE; ++i) {
+        Obstacle &obstacle = obstacles.content[i];
+        int x = obstacle.center.x - obstacle.width * 0.5f;
+        int y = SCREEN_HEIGHT - (obstacle.center.y + obstacle.height * 0.5f);
+        SDL_Rect dstRec = {x, y, obstacle.width, obstacle.height};
+        SDL_Rect srcRect = atlas.frames[obstacle.textureIndex];
+        SDL_RenderCopy(renderer, atlas.texture, &srcRect, &dstRec);
     }
 }

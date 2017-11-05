@@ -2,6 +2,7 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 #include "Physics.hpp"
+#include "Renderer.hpp"
 
 static const float BALL_RADIUS = 10.0f;
 static const float BALL_SPEED = 100.0f;
@@ -95,6 +96,54 @@ void updateBalls(World& world, GameInput& input, float delta) {
             Vec2 wallNorm(-1.0f, 0.0f);
             ball.velocity = reflect(ball.velocity, wallNorm);
             ball.movementDelta.x += world.rightBoundary - ballRight;
+        }
+    }
+}
+
+void drawBalls(SDL_Renderer* renderer, Atlas& atlas, const std::vector<Ball>& balls) {
+    for (auto& ball : balls) {
+        int x = ball.newPos.x - ball.radius;
+        int y = SCREEN_HEIGHT - (ball.newPos.y + ball.radius);
+        SDL_Rect dstRec = {x, y, static_cast<int>(ball.radius * 2), static_cast<int>(ball.radius * 2)};
+        SDL_Rect srcRect = atlas.frames[ball.textureIndex];
+        SDL_RenderCopy(renderer, atlas.texture, &srcRect, &dstRec);
+    }
+}
+
+void drawBallsDebug(SDL_Renderer* renderer, const std::vector<Ball>& balls) {
+    for (auto& ball : balls) {
+        SDL_Color color = getDrawColor(ball.powerUp);
+        int x0 = round(ball.newPos.x);
+        int y0 = round(SCREEN_HEIGHT - ball.newPos.y);
+        int radius = round(ball.radius);
+        
+        int x = radius-1;
+        int y = 0;
+        int dx = 1;
+        int dy = 1;
+        int err = dx - (radius << 1);
+        
+        while (x >= y) {
+            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+            SDL_RenderDrawPoint(renderer, x0 + x, y0 + y);
+            SDL_RenderDrawPoint(renderer, x0 + y, y0 + x);
+            SDL_RenderDrawPoint(renderer, x0 - y, y0 + x);
+            SDL_RenderDrawPoint(renderer, x0 - x, y0 + y);
+            SDL_RenderDrawPoint(renderer, x0 - x, y0 - y);
+            SDL_RenderDrawPoint(renderer, x0 - y, y0 - x);
+            SDL_RenderDrawPoint(renderer, x0 + y, y0 - x);
+            SDL_RenderDrawPoint(renderer, x0 + x, y0 - y);
+            
+            if (err <= 0) {
+                y++;
+                err += dy;
+                dy +=2;
+            }
+            if (err > 0) {
+                x--;
+                dx += 2;
+                err += (-radius << 1) + dx;
+            }
         }
     }
 }

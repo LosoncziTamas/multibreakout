@@ -154,9 +154,9 @@ void generateNinePatches(Renderer& renderer) {
     SDL_FreeSurface(base.surface);
 }
 
-void drawNinePatch(NinePatch& ninePatch, Renderer& renderer) {
+void drawNinePatch(NinePatch& ninePatch, SDL_Renderer* renderer) {
     SDL_Rect dst = {ninePatch.x, flipY(ninePatch.y, ninePatch.h), ninePatch.w, ninePatch.h};
-    SDL_RenderCopy(renderer.sdlRenderer, ninePatchTextures[ninePatch.textureId], NULL, &dst);
+    SDL_RenderCopy(renderer, ninePatchTextures[ninePatch.textureId], NULL, &dst);
 }
 
 void deleteNinePatches() {

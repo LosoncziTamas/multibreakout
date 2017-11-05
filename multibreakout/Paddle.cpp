@@ -131,3 +131,50 @@ void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta) {
         paddle.newPos = paddle.oldPos + paddle.movementDelta;
     }
 }
+
+void drawPaddleDebug(SDL_Renderer* renderer, Paddle& paddle) {
+    SDL_Rect rect;
+    rect.w = round(paddle.width);
+    rect.h = round(paddle.height);
+    rect.x = round(paddle.newPos.x - paddle.width * 0.5f);
+    rect.y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
+    
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderDrawRect(renderer, &rect);
+}
+
+void drawUpperPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.width * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
+    
+    SDL_Rect dstRec = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
+    SDL_Rect srcRect = atlas.frames[paddle.textureIndex];
+    SDL_RenderCopyEx(renderer, atlas.texture, &srcRect, &dstRec, 0, NULL, SDL_FLIP_HORIZONTAL);
+}
+
+void drawLeftPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.height * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.width * 0.5f));
+    
+    SDL_Rect dstRec = {x, y, static_cast<int>(paddle.height), static_cast<int>(paddle.width)};
+    SDL_Rect srcRect = atlas.frames[paddle.textureIndex];
+    SDL_RenderCopyEx(renderer, atlas.texture, &srcRect, &dstRec, 90, NULL, SDL_FLIP_NONE);
+}
+
+void drawRightPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.height * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.width * 0.5f));
+    
+    SDL_Rect dstRec = {x, y, static_cast<int>(paddle.height), static_cast<int>(paddle.width)};
+    SDL_Rect srcRect = atlas.frames[paddle.textureIndex];
+    SDL_RenderCopyEx(renderer, atlas.texture, &srcRect, &dstRec, 270, NULL, SDL_FLIP_VERTICAL);
+}
+
+void drawLowerPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle) {
+    int x = round(paddle.newPos.x - paddle.width * 0.5f);
+    int y = round(SCREEN_HEIGHT - (paddle.newPos.y + paddle.height * 0.5f));
+    
+    SDL_Rect dstRec = {x, y, static_cast<int>(paddle.width), static_cast<int>(paddle.height)};
+    SDL_Rect srcRect = atlas.frames[paddle.textureIndex];
+    SDL_RenderCopy(renderer, atlas.texture, &srcRect, &dstRec);
+}

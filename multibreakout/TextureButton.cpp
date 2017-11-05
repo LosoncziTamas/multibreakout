@@ -1,15 +1,15 @@
 #include "TextureButton.hpp"
 #include "Renderer.hpp"
 
-void drawButton(TextureButton& button, Renderer& renderer) {
+void drawButton(SDL_Renderer* renderer, Atlas& atlas, TextureButton& button) {
     SDL_Rect dstRec;
     dstRec.w = button.w;
     dstRec.h = button.h;
     dstRec.x = button.x;
     dstRec.y = flipY(button.y, button.h);
     
-    SDL_Rect srcRect = renderer.atlas.frames[button.textureIndex];
-    SDL_RenderCopy(renderer.sdlRenderer, renderer.atlas.texture, &srcRect, &dstRec);
+    SDL_Rect srcRect = atlas.frames[button.textureIndex];
+    SDL_RenderCopy(renderer, atlas.texture, &srcRect, &dstRec);
 }
 
 void updateButton(TextureButton& button, GameInput& gameInput) {

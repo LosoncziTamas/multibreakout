@@ -6,11 +6,12 @@
 #include "TextureButton.hpp"
 #include "FontButton.hpp"
 #include "NinePatch.hpp"
+#include "GameState.hpp"
 
 void initGameWorld(World& world) {
     world.leftBoundary = 160;
     world.rightBoundary = SCREEN_WIDTH - 160;
-    world.init = true;
+    world.initialized = true;
     initPaddle(world.paddle);
     initUpperEnemy(world.enemyUpper);
     initLeftEnemy(world.enemyLeft, world.leftBoundary);
@@ -52,8 +53,8 @@ void onRightClick(GameInput& gameInput) {
 static TextureButton leftButton = {15, 30, 130, 130, LEFT_BUTTON, onLeftClick};
 static TextureButton rightButton = {SCREEN_WIDTH - 145, 30, 130, 130, RIGHT_BUTTON, onRightClick};
 
-void gamePlayUpdate(GameState& gameState, Renderer& renderer) {
-    if (!gameState.world.init) {
+void gamePlayUpdate(GameState& gameState) {
+    if (!gameState.world.initialized) {
         initGameWorld(gameState.world);
     }
     if (gameState.input.pause) {
@@ -81,16 +82,18 @@ void gamePlayUpdate(GameState& gameState, Renderer& renderer) {
     collideWithObstacle(gameState.world.balls, gameState.world.obstacles);
     collideBalls(gameState.world.balls);
     
+    SDL_Renderer* renderer = gameState.renderer.sdlRenderer;
+    Atlas& atlas = gameState.renderer.atlas;
+    
     clear(renderer, SKY_BLUE);
     
-    drawLeftPaddle(renderer, gameState.world.enemyLeft.paddle);
-    drawRightPaddle(renderer, gameState.world.enemyRight.paddle);
-    drawLowerPaddle(renderer, gameState.world.paddle);
-    drawUpperPaddle(renderer, gameState.world.enemyUpper.paddle);
-    drawBalls(renderer, gameState.world.balls, gameState.delta);
-    drawBoundaries(renderer, gameState.world.leftBoundary, gameState.world.rightBoundary);
-    drawBricks(renderer, gameState.world.bricks);
-    drawObstacles(renderer, gameState.world.obstacles);
+    drawLeftPaddle(renderer, atlas, gameState.world.enemyLeft.paddle);
+    drawRightPaddle(renderer, atlas, gameState.world.enemyRight.paddle);
+    drawLowerPaddle(renderer, atlas, gameState.world.paddle);
+    drawUpperPaddle(renderer, atlas, gameState.world.enemyUpper.paddle);
+    drawBalls(renderer, atlas, gameState.world.balls);
+    drawBricks(renderer, atlas, gameState.world.bricks);
+    drawObstacles(renderer, atlas, gameState.world.obstacles);
     
     drawBricksDebug(renderer, gameState.world.bricks);
     drawPaddleDebug(renderer, gameState.world.paddle);
@@ -99,43 +102,45 @@ void gamePlayUpdate(GameState& gameState, Renderer& renderer) {
     drawPaddleDebug(renderer, gameState.world.enemyRight.paddle);
     drawBallsDebug(renderer, gameState.world.balls);
     
-    drawPoint(renderer, gameState.world.enemyUpper.steeringPos);
-    drawPoint(renderer, gameState.world.enemyRight.steeringPos);
-    drawPoint(renderer, gameState.world.enemyLeft.steeringPos);
+    drawPoint(renderer, gameState.world.enemyUpper.steeringPos, RED);
+    drawPoint(renderer, gameState.world.enemyRight.steeringPos, RED);
+    drawPoint(renderer, gameState.world.enemyLeft.steeringPos, RED);
     
-    drawButton(leftButton, renderer);
-    drawButton(rightButton, renderer);
-    drawDebugInfo(renderer, gameState.world, gameState.delta);
+    drawNinePatch(leftPanel, renderer);
+    drawNinePatch(rightPanel, renderer);
     
-    update(renderer);
+    drawButton(renderer, atlas, leftButton);
+    drawButton(renderer, atlas, rightButton);
     
+    drawDebugInfo(renderer, gameState.renderer.font, gameState.world, gameState.delta);
+    
+    SDL_RenderPresent(renderer);
     
 }
 
-void menuUpdate(GameState& gameState, Renderer& renderer) {
-    clear(renderer, SKY_BLUE);
-    drawNinePatch(menuPanel, renderer);
-    update(renderer);
+void menuUpdate(GameState& gameState) {
+    clear(gameState.renderer.sdlRenderer, SKY_BLUE);
+    drawNinePatch(menuPanel, gameState.renderer.sdlRenderer);
+    SDL_RenderPresent(gameState.renderer.sdlRenderer);
 }
 
-extern "C" void gameUpdate(GameState& gameState, Renderer& renderer) {
-    if (!gameState.assetsLoaded) {
+extern "C" void gameUpdate(GameState& gameState) {
+    if (!gameState.initialized) {
         srand(time(NULL));
-        initTextures(renderer, gameState.world);
-        generateNinePatches(renderer);
-        gameState.assetsLoaded = true;
-        gameState.currScreen = menu;
+        initTextures(gameState.renderer, gameState.world);
+        generateNinePatches(gameState.renderer);
+        gameState.initialized = true;
+        gameState.currScreen = game;
     }
     
     switch (gameState.currScreen) {
         case menu:
-            menuUpdate(gameState, renderer);
+            menuUpdate(gameState);
             break;
         case game:
-            gamePlayUpdate(gameState, renderer);
+            gamePlayUpdate(gameState);
             break;
         default:
             break;
     }
-    
 }

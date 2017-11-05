@@ -5,6 +5,8 @@
 #include "Paddle.hpp"
 #include "Obstacle.hpp"
 
+struct FC_Font;
+
 enum State {none, steering, defending};
 
 struct Enemy {
@@ -17,5 +19,6 @@ void initLeftEnemy(Enemy& enemy, float leftBoundary);
 void initRightEnemy(Enemy& enemy, float rightBoundary);
 void initUpperEnemy(Enemy& enemy);
 void updateEnemy(Enemy& enemy, Obstacles& obstacles, std::vector<Ball>& balls, float delta);
+void drawDebugInfo(SDL_Renderer* renderer, FC_Font* font, World& world, float delta);
 
 #endif 

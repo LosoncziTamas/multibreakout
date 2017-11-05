@@ -9,13 +9,14 @@
 #include "Brick.hpp"
 #include "Enemy.hpp"
 #include "Obstacle.hpp"
+#include "Renderer.hpp"
 
 enum Screen {
     menu, game
 };
 
 struct World {
-    bool init;
+    bool initialized;
     
     int leftBoundary;
     int rightBoundary;
@@ -32,8 +33,10 @@ struct World {
 
 struct GameState {
     float delta;
-    bool assetsLoaded;
     bool paused;
+    bool initialized;
+    
+    Renderer renderer;
     Screen currScreen;
     World world;
     GameInput input;

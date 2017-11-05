@@ -10,7 +10,7 @@ const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 480;
 const float TARGET_UPDATE_HZ = 30.0f;
 
-typedef void (*gameUpdateFn)(GameState& gameState, Renderer& renderer);
+typedef void (*gameUpdateFn)(GameState& gameState);
 
 struct GameCode {
     void *dll;
@@ -27,8 +27,7 @@ time_t getLastWriteTime(const char *fileName) {
     return fileAttrs.st_mtime;
 }
 
-bool loadDll(GameCode& appDll, const char *dllPath)
-{
+bool loadDll(GameCode& appDll, const char *dllPath){
     time_t time = getLastWriteTime(dllPath);
     
     if (appDll.lastLoadTime >= time) {
@@ -50,36 +49,22 @@ bool loadDll(GameCode& appDll, const char *dllPath)
     return true;
 }
 
-static SDL_bool handleEvent(SDL_Event& event)
-{
-    switch (event.type)
-    {
+static SDL_bool handleEvent(SDL_Event& event) {
+    switch (event.type) {
         case SDL_QUIT:
-        {
             return SDL_FALSE;
-        }
-        case SDL_WINDOWEVENT:
-        {
-            switch(event.window.event)
-            {
-                case SDL_WINDOWEVENT_EXPOSED:
-                {
-                    
-                } break;
-            }
-        } break;
+        default:
+            break;
     }
     
     return SDL_TRUE;
 }
 
-static float secondsElapsed(Uint64 old, Uint64 current)
-{
+static float secondsElapsed(Uint64 old, Uint64 current) {
     return static_cast<float>(current - old) / static_cast<float>(SDL_GetPerformanceFrequency());
 }
 
-int main(void)
-{
+int main(void) {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window *window = SDL_CreateWindow("Multibreakout",
                                           SDL_WINDOWPOS_CENTERED_MASK,
@@ -89,26 +74,22 @@ int main(void)
                                           SDL_WINDOW_RESIZABLE);
     SDL_assert(window);
     
-    Renderer renderer;
-    createRenderer(renderer, window);
-    
     bool running = true;
     float secondsPerFrame = 1.0f / TARGET_UPDATE_HZ;
     Uint64 startCounter = SDL_GetPerformanceCounter();
     Uint64 perfCountFreq = SDL_GetPerformanceFrequency();
     
     GameState gameState = {};
+    gameState.renderer.sdlRenderer = createRenderer(window);
     
     GameCode gameCode = {};
     time_t lastWrite = 0;
     bool loadingDll = true;
     const char *dllPath = "game.so";
     
-    while(running)
-    {
+    while(running) {
         SDL_Event event;
-        while(SDL_PollEvent(&event))
-        {
+        while(SDL_PollEvent(&event)) {
             running = handleEvent(event);
         }
         
@@ -135,29 +116,24 @@ int main(void)
         
         time_t time = getLastWriteTime(dllPath);
         
-        if (time > lastWrite)
-        {
+        if (time > lastWrite) {
             lastWrite = time;
             loadingDll = true;
         }
         
-        if (loadingDll)
-        {
-            if(loadDll(gameCode, dllPath))
-            {
+        if (loadingDll) {
+            if(loadDll(gameCode, dllPath)) {
                 loadingDll = false;
             }
         }
-        else if(gameCode.dll)
-        {
-            gameCode.update(gameState, renderer);
+        else if(gameCode.dll) {
+            gameCode.update(gameState);
         }
         
         startCounter = end_counter;
     }
     
-    deleteRenderer(renderer);
-    SDL_DestroyWindow(window);
-    
+    SDL_DestroyRenderer(gameState.renderer.sdlRenderer);
+    SDL_DestroyWindow(window);    
     SDL_Quit();
 }
