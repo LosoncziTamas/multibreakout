@@ -7,7 +7,6 @@
 
 #include "Common.hpp"
 
-struct Renderer;
 struct World;
 
 const int GREY_BALL     = 0;
@@ -31,7 +30,7 @@ struct Atlas {
     SDL_Texture *texture;
 };
 
-SDL_Texture *createTexture(const char *path, const Renderer& renderer);
+SDL_Texture *createTexture(const char *path, SDL_Renderer* renderer);
 void initTextures(SDL_Renderer* renderer, Atlas& atlas, World& world);
 int getBrickTexture(PowerUp powerUp);
 int getBallTexture(PowerUp powerUp);

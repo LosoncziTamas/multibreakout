@@ -4,13 +4,7 @@
 #include "Renderer.hpp"
 #include "NinePatch.hpp"
 
-static std::vector<SDL_Texture*> ninePatchTextures;
-
-NinePatch leftPanel = {0, 0, 160, SCREEN_HEIGHT, LEFT_PANEL};
-NinePatch rightPanel = {SCREEN_WIDTH - 160, 0, 160, SCREEN_HEIGHT, RIGHT_PANEL};
-NinePatch menuPanel = {50, 50, 50, 50, MENU_PANEL};
-
-void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer) {
+void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer, std::vector<SDL_Texture*>& ninePatchTextures) {
     ninePatchBase.surface = IMG_Load("assets/panelhdpi.9.png");
     SDL_assert(ninePatchBase.surface);
     SDL_Texture* texture = SDL_CreateTexture(renderer,
@@ -25,7 +19,7 @@ void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer) {
     int bufferHeight = ninePatchBase.surface->h;
     size_t bufferSize = bufferWidth * bufferHeight * ninePatchBase.surface->format->BytesPerPixel;
     void* bitmapBuffer = malloc(bufferSize);
-
+    
     SDL_LockTexture(texture, &ninePatchBase.surface->clip_rect, &bitmapBuffer, &ninePatchBase.surface->pitch);
     memcpy(bitmapBuffer, ninePatchBase.surface->pixels, bufferSize);
     SDL_UnlockTexture(texture);
@@ -64,7 +58,7 @@ void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer) {
     ninePatchBase.fillableCenter = {leftRectWidth, topRectHeight, rightRectStart - leftRectWidth, bottomRectStart - topRectHeight};
 }
 
-void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, SDL_Renderer* renderer) {
+void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, SDL_Renderer* renderer, std::vector<SDL_Texture*>& ninePatchTextures) {
     Uint32 rMask, gMask, bMask, aMask;
     
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -144,22 +138,12 @@ void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &n
     SDL_FreeSurface(tmpSurface);
 }
 
-void generateNinePatches(SDL_Renderer* renderer) {
-    NinePatchBase base;
-    initNinePatcheBase(base, renderer);
-    //TODO: fix fragile code
-    generateTextureFromNinePatchBase(base, leftPanel, renderer);
-    generateTextureFromNinePatchBase(base, rightPanel, renderer);
-    generateTextureFromNinePatchBase(base, menuPanel, renderer);
-    SDL_FreeSurface(base.surface);
-}
-
-void drawNinePatch(NinePatch& ninePatch, SDL_Renderer* renderer) {
+void drawNinePatch(std::vector<SDL_Texture*>& ninePatchTextures, NinePatch& ninePatch, SDL_Renderer* renderer) {
     SDL_Rect dst = {ninePatch.x, flipY(ninePatch.y, ninePatch.h), ninePatch.w, ninePatch.h};
     SDL_RenderCopy(renderer, ninePatchTextures[ninePatch.textureId], NULL, &dst);
 }
 
-void deleteNinePatches() {
+void deleteNinePatches(std::vector<SDL_Texture*>& ninePatchTextures) {
     for (auto p : ninePatchTextures) {
         SDL_DestroyTexture(p);
     }

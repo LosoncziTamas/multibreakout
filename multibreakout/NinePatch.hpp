@@ -3,8 +3,6 @@
 
 #include <SDL2/SDL_render.h>
 
-struct Renderer;
-
 const int LEFT_PANEL = 0;
 const int RIGHT_PANEL = 1;
 const int MENU_PANEL = 2;
@@ -32,14 +30,10 @@ struct NinePatch {
     int textureId;
 };
 
-extern NinePatch leftPanel;
-extern NinePatch rightPanel;
-extern NinePatch menuPanel;
-
-void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer);
-void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, SDL_Renderer* renderer);
-void generateNinePatches(SDL_Renderer* renderer);
-void drawNinePatch(NinePatch& ninePatch, SDL_Renderer* renderer);
-void deleteNinePatches();
+void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer, std::vector<SDL_Texture*>& ninePatchTextures);
+void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, SDL_Renderer* renderer, std::vector<SDL_Texture*>& ninePatchTextures);
+void generateNinePatches(SDL_Renderer* renderer, std::vector<SDL_Texture*>& ninePatchTextures);
+void drawNinePatch(std::vector<SDL_Texture*>& ninePatchTextures, NinePatch& ninePatch, SDL_Renderer* renderer);
+void deleteNinePatches(std::vector<SDL_Texture*>& ninePatchTextures);
 
 #endif

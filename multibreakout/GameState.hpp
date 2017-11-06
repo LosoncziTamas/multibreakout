@@ -10,6 +10,7 @@
 #include "Enemy.hpp"
 #include "Obstacle.hpp"
 #include "Renderer.hpp"
+#include "NinePatch.hpp"
 
 enum Screen {
     menu, game
@@ -43,6 +44,11 @@ struct GameState {
     Screen currScreen;
     World world;
     GameInput input;
+    
+    std::vector<SDL_Texture*> ninePatchTextures;
+    NinePatch leftPanel;
+    NinePatch rightPanel;
+    NinePatch menuPanel;
 };
 
 #endif

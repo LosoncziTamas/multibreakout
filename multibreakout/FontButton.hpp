@@ -14,11 +14,11 @@ struct FontButton {
     int y;
     int w;
     int h;
-    void (*onclick)(void);
+    void (*onclick)(GameInput& gameInput);
 };
 
 void initFontButton(FontButton& button, FC_Font* font, int x, int y, const char* text, void (*onclick)(void));
-void drawButton(FontButton& button, FC_Font* font, SDL_Renderer* renderer);
-void updateButton(FontButton& button, GameInput& gameInput);
+void drawFontButton(FontButton& button, FC_Font* font, SDL_Renderer* renderer);
+void updateFontButton(FontButton& button, GameInput& gameInput);
 
 #endif
