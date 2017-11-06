@@ -36,9 +36,9 @@ extern NinePatch leftPanel;
 extern NinePatch rightPanel;
 extern NinePatch menuPanel;
 
-void initNinePatcheBase(NinePatchBase& ninePatchBase, Renderer& renderer);
-void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, Renderer& renderer);
-void generateNinePatches(Renderer& renderer);
+void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer);
+void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, SDL_Renderer* renderer);
+void generateNinePatches(SDL_Renderer* renderer);
 void drawNinePatch(NinePatch& ninePatch, SDL_Renderer* renderer);
 void deleteNinePatches();
 

@@ -20,12 +20,6 @@ const SDL_Color WHITE = {255, 255, 255, 255};
 const SDL_Color BEIGE = {248, 232, 176, 255};
 const SDL_Color SKY_BLUE = {130, 189, 240, 0};
 
-struct Renderer {
-    SDL_Renderer *sdlRenderer;
-    FC_Font *font;
-    Atlas atlas;
-};
-
 SDL_Renderer* createRenderer(SDL_Window* window);
 FC_Font* createFont(SDL_Renderer* renderer);
 int flipY(int y, int height = 0);

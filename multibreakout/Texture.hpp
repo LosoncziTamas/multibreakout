@@ -32,7 +32,7 @@ struct Atlas {
 };
 
 SDL_Texture *createTexture(const char *path, const Renderer& renderer);
-void initTextures(Renderer& renderer, World& world);
+void initTextures(SDL_Renderer* renderer, Atlas& atlas, World& world);
 int getBrickTexture(PowerUp powerUp);
 int getBallTexture(PowerUp powerUp);
 

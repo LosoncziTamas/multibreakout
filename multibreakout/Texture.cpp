@@ -23,10 +23,10 @@ void readFile(const char* path, std::string& content) {
     }
 }
 
-SDL_Texture *createTexture(const char *path, const Renderer& renderer) {
+SDL_Texture *createTexture(const char *path, SDL_Renderer* renderer) {
     SDL_Surface *surface = IMG_Load(path);
     SDL_assert(surface);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer.sdlRenderer, surface);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_assert(texture);
     SDL_FreeSurface(surface);
     return texture;
@@ -90,7 +90,7 @@ int tokenToInt(jsmntok_t* token, const char* jsonStr) {
     return ret;
 }
 
-void initTextures(Renderer& renderer, World& world) {
+void initTextures(SDL_Renderer* renderer, Atlas& atlas, World& world) {
     std::string json;
     readFile("assets/texture_atlas.json", json);
     int bufferSize = 512;
@@ -131,7 +131,7 @@ void initTextures(Renderer& renderer, World& world) {
                 int h = tokenToInt(&tokens[i+11], json_c);
                 
                 SDL_Rect src_rect = {x, y, w, h};
-                renderer.atlas.frames.push_back(src_rect);
+                atlas.frames.push_back(src_rect);
                 i += 11;
             } else {
                 printf("Unexpected key.");
@@ -141,7 +141,7 @@ void initTextures(Renderer& renderer, World& world) {
         
         if (jsoneq(json_c, &tokens[i], "image") == 0) {
             char* texturePath = strndup(json_c + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
-            renderer.atlas.texture = createTexture(texturePath, renderer);
+            atlas.texture = createTexture(texturePath, renderer);
             free(texturePath);
         }
     }

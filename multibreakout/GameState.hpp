@@ -36,7 +36,10 @@ struct GameState {
     bool paused;
     bool initialized;
     
-    Renderer renderer;
+    SDL_Renderer *renderer;
+    FC_Font *font;
+    Atlas atlas;
+    
     Screen currScreen;
     World world;
     GameInput input;

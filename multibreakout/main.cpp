@@ -80,7 +80,7 @@ int main(void) {
     Uint64 perfCountFreq = SDL_GetPerformanceFrequency();
     
     GameState gameState = {};
-    gameState.renderer.sdlRenderer = createRenderer(window);
+    gameState.renderer = createRenderer(window);
     
     GameCode gameCode = {};
     time_t lastWrite = 0;
@@ -133,7 +133,7 @@ int main(void) {
         startCounter = end_counter;
     }
     
-    SDL_DestroyRenderer(gameState.renderer.sdlRenderer);
+    SDL_DestroyRenderer(gameState.renderer);
     SDL_DestroyWindow(window);    
     SDL_Quit();
 }

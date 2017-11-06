@@ -1,7 +1,7 @@
 #include "Button.hpp"
 #include "Renderer.hpp"
 
-void drawButton(Button& button, Renderer& renderer) {
+void drawButton(Button& button, SDL_Renderer* renderer) {
     SDL_Rect rect;
     rect.w = button.w;
     rect.h = button.h;
@@ -9,14 +9,14 @@ void drawButton(Button& button, Renderer& renderer) {
     rect.y = flipY(button.y, button.h);
     
     if (button.state == unpressed) {
-        SDL_SetRenderDrawColor(renderer.sdlRenderer, button.unpressedColor.r, button.unpressedColor.g, button.unpressedColor.b, button.unpressedColor.a);
+        SDL_SetRenderDrawColor(renderer, button.unpressedColor.r, button.unpressedColor.g, button.unpressedColor.b, button.unpressedColor.a);
     } else if (button.state == pressed) {
-        SDL_SetRenderDrawColor(renderer.sdlRenderer, button.pressedColor.r, button.pressedColor.g, button.pressedColor.b, button.pressedColor.a);
+        SDL_SetRenderDrawColor(renderer, button.pressedColor.r, button.pressedColor.g, button.pressedColor.b, button.pressedColor.a);
     } else if (button.state == hover) {
-        SDL_SetRenderDrawColor(renderer.sdlRenderer, button.hoverColor.r, button.hoverColor.g, button.hoverColor.b, button.hoverColor.a);
+        SDL_SetRenderDrawColor(renderer, button.hoverColor.r, button.hoverColor.g, button.hoverColor.b, button.hoverColor.a);
     }
     
-    SDL_RenderFillRect(renderer.sdlRenderer, &rect);
+    SDL_RenderFillRect(renderer, &rect);
 }
 
 void updateButton(Button& button, GameInput& gameInput) {

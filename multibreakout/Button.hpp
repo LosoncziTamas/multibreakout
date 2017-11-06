@@ -1,9 +1,8 @@
 #ifndef Button_hpp
 #define Button_hpp
 
-#include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_render.h>
 
-struct Renderer;
 struct GameInput;
 
 enum ButtonState {pressed, unpressed, hover};
@@ -19,7 +18,7 @@ struct Button {
     ButtonState state;
 };
 
-void drawButton(Button& button, Renderer& renderer);
+void drawButton(Button& button, SDL_Renderer* renderer);
 void updateButton(Button& button, GameInput& gameInput);
 
 #endif

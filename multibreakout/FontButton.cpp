@@ -1,17 +1,17 @@
 #include "FontButton.hpp"
 #include "Renderer.hpp"
 
-void initFontButton(FontButton& button, Renderer& renderer, int x, int y, const char* text, void (*onclick)(void)) {
+void initFontButton(FontButton& button, FC_Font* font, int x, int y, const char* text, void (*onclick)(void)) {
     button.x = x;
     button.y = y;
-    button.w = FC_GetWidth(renderer.font, text);
-    button.h = FC_GetHeight(renderer.font, text);
+    button.w = FC_GetWidth(font, text);
+    button.h = FC_GetHeight(font, text);
     button.text = text;
     button.onclick = onclick;
 }
 
-void drawButton(FontButton& button, Renderer& renderer) {
-    FC_Draw(renderer.font, renderer.sdlRenderer, button.x, flipY(button.y, button.h), button.text);
+void drawButton(FontButton& button, FC_Font* font, SDL_Renderer* renderer) {
+    FC_Draw(font, renderer, button.x, flipY(button.y, button.h), button.text);
 }
 
 void updateButton(FontButton& button, GameInput& gameInput) {

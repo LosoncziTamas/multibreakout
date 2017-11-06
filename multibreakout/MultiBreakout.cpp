@@ -82,8 +82,8 @@ void gamePlayUpdate(GameState& gameState) {
     collideWithObstacle(gameState.world.balls, gameState.world.obstacles);
     collideBalls(gameState.world.balls);
     
-    SDL_Renderer* renderer = gameState.renderer.sdlRenderer;
-    Atlas& atlas = gameState.renderer.atlas;
+    SDL_Renderer* renderer = gameState.renderer;
+    Atlas& atlas = gameState.atlas;
     
     clear(renderer, SKY_BLUE);
     
@@ -112,22 +112,23 @@ void gamePlayUpdate(GameState& gameState) {
     drawButton(renderer, atlas, leftButton);
     drawButton(renderer, atlas, rightButton);
     
-    drawDebugInfo(renderer, gameState.renderer.font, gameState.world, gameState.delta);
+    drawDebugInfo(renderer, gameState.font, gameState.world, gameState.delta);
     
     SDL_RenderPresent(renderer);
     
 }
 
 void menuUpdate(GameState& gameState) {
-    clear(gameState.renderer.sdlRenderer, SKY_BLUE);
-    drawNinePatch(menuPanel, gameState.renderer.sdlRenderer);
-    SDL_RenderPresent(gameState.renderer.sdlRenderer);
+    clear(gameState.renderer, SKY_BLUE);
+    drawNinePatch(menuPanel, gameState.renderer);
+    SDL_RenderPresent(gameState.renderer);
 }
 
 extern "C" void gameUpdate(GameState& gameState) {
     if (!gameState.initialized) {
         srand(time(NULL));
-        initTextures(gameState.renderer, gameState.world);
+        gameState.font = createFont(gameState.renderer);
+        initTextures(gameState.renderer, gameState.atlas, gameState.world);
         generateNinePatches(gameState.renderer);
         gameState.initialized = true;
         gameState.currScreen = game;

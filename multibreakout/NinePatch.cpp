@@ -10,10 +10,10 @@ NinePatch leftPanel = {0, 0, 160, SCREEN_HEIGHT, LEFT_PANEL};
 NinePatch rightPanel = {SCREEN_WIDTH - 160, 0, 160, SCREEN_HEIGHT, RIGHT_PANEL};
 NinePatch menuPanel = {50, 50, 50, 50, MENU_PANEL};
 
-void initNinePatcheBase(NinePatchBase& ninePatchBase, Renderer& renderer) {
+void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer) {
     ninePatchBase.surface = IMG_Load("assets/panelhdpi.9.png");
     SDL_assert(ninePatchBase.surface);
-    SDL_Texture* texture = SDL_CreateTexture(renderer.sdlRenderer,
+    SDL_Texture* texture = SDL_CreateTexture(renderer,
                                              ninePatchBase.surface->format->format,
                                              SDL_TEXTUREACCESS_STREAMING,
                                              ninePatchBase.surface->w,
@@ -64,7 +64,7 @@ void initNinePatcheBase(NinePatchBase& ninePatchBase, Renderer& renderer) {
     ninePatchBase.fillableCenter = {leftRectWidth, topRectHeight, rightRectStart - leftRectWidth, bottomRectStart - topRectHeight};
 }
 
-void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, Renderer& renderer) {
+void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, SDL_Renderer* renderer) {
     Uint32 rMask, gMask, bMask, aMask;
     
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -138,13 +138,13 @@ void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &n
         }
     }
     
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer.sdlRenderer, tmpSurface);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, tmpSurface);
     SDL_assert(texture);
     ninePatchTextures.push_back(texture);
     SDL_FreeSurface(tmpSurface);
 }
 
-void generateNinePatches(Renderer& renderer) {
+void generateNinePatches(SDL_Renderer* renderer) {
     NinePatchBase base;
     initNinePatcheBase(base, renderer);
     //TODO: fix fragile code
