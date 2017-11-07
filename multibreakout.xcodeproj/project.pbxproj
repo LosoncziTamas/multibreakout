@@ -26,6 +26,7 @@
 		E9D397C41FA1CC5F002EA223 /* TextureButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D397C21FA1CC5F002EA223 /* TextureButton.cpp */; };
 		E9D397C71FA1D4A6002EA223 /* FontButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9D397C51FA1D4A6002EA223 /* FontButton.cpp */; };
 		E9DDF7161F973956000AE808 /* SDL_FontCache.c in Sources */ = {isa = PBXBuildFile; fileRef = E9DDF7141F973956000AE808 /* SDL_FontCache.c */; };
+		E9E601721FB1A9C90002AE28 /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9E601701FB1A9C90002AE28 /* Menu.cpp */; };
 		E9FD54151F9DDCE400B80EA3 /* jsmn.c in Sources */ = {isa = PBXBuildFile; fileRef = E9FD54131F9DDCE400B80EA3 /* jsmn.c */; };
 /* End PBXBuildFile section */
 
@@ -78,6 +79,9 @@
 		E9D397C61FA1D4A6002EA223 /* FontButton.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FontButton.hpp; sourceTree = "<group>"; };
 		E9DDF7141F973956000AE808 /* SDL_FontCache.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_FontCache.c; path = multibreakout/SDL_FontCache.c; sourceTree = "<group>"; };
 		E9DDF7151F973956000AE808 /* SDL_FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_FontCache.h; path = multibreakout/SDL_FontCache.h; sourceTree = "<group>"; };
+		E9E601701FB1A9C90002AE28 /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Menu.cpp; sourceTree = "<group>"; };
+		E9E601711FB1A9C90002AE28 /* Menu.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Menu.hpp; sourceTree = "<group>"; };
+		E9E601731FB1B6680002AE28 /* build.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
 		E9F606E51F7AE7AD005A405E /* GameState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GameState.hpp; sourceTree = "<group>"; };
 		E9FD54131F9DDCE400B80EA3 /* jsmn.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jsmn.c; path = multibreakout/jsmn.c; sourceTree = "<group>"; };
 		E9FD54141F9DDCE400B80EA3 /* jsmn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jsmn.h; path = multibreakout/jsmn.h; sourceTree = "<group>"; };
@@ -151,6 +155,9 @@
 				E9D397C61FA1D4A6002EA223 /* FontButton.hpp */,
 				E9A2F6C31FAB7B750050DA5A /* NinePatch.cpp */,
 				E9A2F6C41FAB7B750050DA5A /* NinePatch.hpp */,
+				E9E601701FB1A9C90002AE28 /* Menu.cpp */,
+				E9E601731FB1B6680002AE28 /* build.sh */,
+				E9E601711FB1A9C90002AE28 /* Menu.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -222,6 +229,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9E601721FB1A9C90002AE28 /* Menu.cpp in Sources */,
 				E9FD54151F9DDCE400B80EA3 /* jsmn.c in Sources */,
 				E93D152B1F0B9F84007BF3ED /* Renderer.cpp in Sources */,
 				E9A2F6C51FAB7B750050DA5A /* NinePatch.cpp in Sources */,

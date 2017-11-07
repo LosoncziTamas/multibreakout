@@ -24,6 +24,8 @@ const int PLAYER_PADDLE = 11;
 const int LEFT_BUTTON   = 12;
 const int ENEMY_PADDLE  = 13;
 const int RIGHT_BUTTON  = 14;
+const int GAME_TITLE    = 15;
+
 
 struct Atlas {
     std::vector<SDL_Rect> frames;

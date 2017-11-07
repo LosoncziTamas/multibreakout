@@ -7,6 +7,7 @@
 #include "FontButton.hpp"
 #include "NinePatch.hpp"
 #include "GameState.hpp"
+#include "Menu.hpp"
 
 void initGameWorld(World& world) {
     world.leftBoundary = 160;
@@ -116,49 +117,6 @@ void gamePlayUpdate(GameState& gameState) {
     
     SDL_RenderPresent(renderer);
     
-}
-
-static bool redraw = true;
-
-void generatePatches(GameState& gameState) {
-    NinePatchBase base;
-    gameState.ninePatchTextures.clear();
-    initNinePatcheBase(base, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.leftPanel, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.rightPanel, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.menuPanel, gameState.renderer, gameState.ninePatchTextures);
-    SDL_FreeSurface(base.surface);
-}
-
-static FontButton startGame;
-
-void onStartClick(GameInput& input) {
-    
-}
-
-void menuUpdate(GameState& gameState) {
-    clear(gameState.renderer, SKY_BLUE);
-    if (redraw) {
-        int w = 400;
-        int x = SCREEN_WIDTH * 0.5f - w * 0.5f;
-        int h = 300;
-        int y = SCREEN_HEIGHT * 0.5f - h * 0.5f;
-        gameState.menuPanel = {x, y, w, h, MENU_PANEL};
-        generatePatches(gameState);
-        redraw = false;
-        
-        const char* text = "Start game";
-        startGame.x = x;
-        startGame.y = y;
-        startGame.w = FC_GetWidth(gameState.font, text);
-        startGame.h = FC_GetHeight(gameState.font, text);
-        startGame.text = text;
-        startGame.onclick = onStartClick;
-    }
-    updateFontButton(startGame, gameState.input);
-    drawNinePatch(gameState.ninePatchTextures, gameState.menuPanel, gameState.renderer);
-    drawFontButton(startGame, gameState.font, gameState.renderer);
-    SDL_RenderPresent(gameState.renderer);
 }
 
 extern "C" void gameUpdate(GameState& gameState) {

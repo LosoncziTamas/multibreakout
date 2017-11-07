@@ -6,6 +6,8 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
+#define HOTLOAD 1
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 480;
 const float TARGET_UPDATE_HZ = 30.0f;
@@ -64,6 +66,7 @@ static float secondsElapsed(Uint64 old, Uint64 current) {
     return static_cast<float>(current - old) / static_cast<float>(SDL_GetPerformanceFrequency());
 }
 
+
 int main(void) {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window *window = SDL_CreateWindow("Multibreakout",
@@ -114,6 +117,7 @@ int main(void) {
         Uint64 end_counter = SDL_GetPerformanceCounter();
         gameState.delta = static_cast<float>(end_counter - startCounter) / static_cast<float>(perfCountFreq);
         
+#if HOTLOAD
         time_t time = getLastWriteTime(dllPath);
         
         if (time > lastWrite) {
@@ -129,11 +133,14 @@ int main(void) {
         else if(gameCode.dll) {
             gameCode.update(gameState);
         }
+#else
+        gameUpdate(gameState);
+#endif
         
         startCounter = end_counter;
     }
     
     SDL_DestroyRenderer(gameState.renderer);
-    SDL_DestroyWindow(window);    
+    SDL_DestroyWindow(window);
     SDL_Quit();
 }

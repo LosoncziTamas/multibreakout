@@ -92,7 +92,7 @@
 },
 {
 	"filename": "brick_yellow.png",
-	"frame": {"x":0,"y":30,"w":30,"h":30},
+	"frame": {"x":250,"y":0,"w":30,"h":30},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":30},
@@ -101,7 +101,7 @@
 },
 {
 	"filename": "green_lower_paddle.png",
-	"frame": {"x":30,"y":30,"w":90,"h":25},
+	"frame": {"x":0,"y":89,"w":90,"h":25},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":90,"h":25},
@@ -110,7 +110,7 @@
 },
 {
 	"filename": "left_button.png",
-	"frame": {"x":120,"y":30,"w":129,"h":130},
+	"frame": {"x":90,"y":89,"w":129,"h":130},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":130},
@@ -119,7 +119,7 @@
 },
 {
 	"filename": "purple_upper_paddle.png",
-	"frame": {"x":0,"y":160,"w":90,"h":25},
+	"frame": {"x":219,"y":89,"w":90,"h":25},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":90,"h":25},
@@ -128,20 +128,30 @@
 },
 {
 	"filename": "right_button.png",
-	"frame": {"x":90,"y":160,"w":129,"h":130},
+	"frame": {"x":309,"y":89,"w":129,"h":130},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":130},
 	"sourceSize": {"w":129,"h":130},
 	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "game_title.png",
+	"frame": {"x":0,"y":30,"w":448,"h":59},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":448,"h":59},
+	"sourceSize": {"w":448,"h":59},
+	"pivot": {"x":0.5,"y":0.5}
 }],
+
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "assets/texture_atlas.png",
 	"format": "RGBA8888",
-	"size": {"w":250,"h":290},
+	"size": {"w":448,"h":219},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:2f8894c061a10f49682e291a32379b57:cc8b399baf00e2c3dc23371a7bd2e36b:67087b54f7aa7c7f6411022b7ef8a190$"
+	"smartupdate": "$TexturePacker:SmartUpdate:8999dd8c6f4ecf4c6eff756fcbcafc6c:87aa65b04998e0681129f43038a2fa7c:67087b54f7aa7c7f6411022b7ef8a190$"
 }
 }
