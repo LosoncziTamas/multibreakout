@@ -2,6 +2,7 @@
 #define NinePatch_hpp
 
 #include <SDL2/SDL_render.h>
+#include <vector>
 
 const int LEFT_PANEL = 0;
 const int RIGHT_PANEL = 1;

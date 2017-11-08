@@ -2,26 +2,6 @@
 #include "GameState.hpp"
 #include "FontButton.hpp"
 
-static SDL_Rect titleRect;
-static SDL_Rect srcRect;
-
-static FontButton startGame;
-static FontButton signIn;
-static FontButton leaderBoards;
-
-static bool redraw = true;
-
-void generatePatches(GameState& gameState) {
-    NinePatchBase base;
-    gameState.ninePatchTextures.clear();
-    initNinePatcheBase(base, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.leftPanel, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.rightPanel, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.menuPanel, gameState.renderer, gameState.ninePatchTextures);
-    SDL_FreeSurface(base.surface);
-}
-
-
 void onStartClick(GameInput& input) {
     printf("Start\n");
 }
@@ -34,63 +14,63 @@ void onLeaderBoardsClick(GameInput& input) {
     printf("Leaderboards\n");
 }
 
-void menuUpdate(GameState& gameState) {
-    clear(gameState.renderer, SKY_BLUE);
-    if (redraw) {
-        int w = 400;
-        int x = SCREEN_WIDTH * 0.5f - w * 0.5f;
-        int h = 250;
-        int y = SCREEN_HEIGHT * 0.5f - h * 0.5f;
-        gameState.menuPanel = {x, y, w, h, MENU_PANEL};
-        
-        const char* startGameText = "Start game";
-        startGame.w = FC_GetWidth(gameState.font, startGameText);
-        startGame.h = FC_GetHeight(gameState.font, startGameText);
-        int topPadding = 75;
-        startGame.x = x + w * 0.5f - startGame.w * 0.5f;
-        startGame.y = y + h - startGame.h - topPadding;
-        startGame.text = startGameText;
-        startGame.onclick = onStartClick;
-        
-        const char* signInText = "Sign in";
-        signIn.w = FC_GetWidth(gameState.font, signInText);
-        signIn.h = FC_GetHeight(gameState.font, signInText);
-        int padding = 50;
-        signIn.x = x + w * 0.5f - signIn.w * 0.5f;
-        signIn.y = startGame.y - padding;
-        signIn.text = signInText;
-        signIn.onclick = onSignInClick;
-        
-        const char* leaderBoardsText = "Leaderboards";
-        leaderBoards.text = leaderBoardsText;
-        leaderBoards.w = FC_GetWidth(gameState.font, leaderBoardsText);
-        leaderBoards.h = FC_GetHeight(gameState.font, leaderBoardsText);
-        
-        leaderBoards.x = x + w * 0.5f - leaderBoards.w * 0.5f;
-        leaderBoards.y = signIn.y - padding;
-        leaderBoards.onclick = onLeaderBoardsClick;
-        
-        srcRect = gameState.atlas.frames[GAME_TITLE];
-        
-        titleRect.w = srcRect.w;
-        titleRect.h = srcRect.h;
-        titleRect.x = x + w * 0.5f - srcRect.w * 0.5f;
-        titleRect.y = y + h - (titleRect.h * 0.5f);
-        titleRect.y = flipY(titleRect.y, titleRect.h);
-        
-        generatePatches(gameState);
-        redraw = false;
-    }
-    updateFontButton(startGame, gameState.input);
-    updateFontButton(signIn, gameState.input);
-    updateFontButton(leaderBoards, gameState.input);
-
-    drawNinePatch(gameState.ninePatchTextures, gameState.menuPanel, gameState.renderer);
-    drawFontButton(startGame, gameState.font, gameState.renderer);
-    drawFontButton(signIn, gameState.font, gameState.renderer);
-    drawFontButton(leaderBoards, gameState.font, gameState.renderer);
-
-    SDL_RenderCopy(gameState.renderer, gameState.atlas.texture, &srcRect, &titleRect);
+void initializeMenu(Menu& menu, FC_Font* font, Atlas& atlas) {
+    int w = 500;
+    int x = SCREEN_WIDTH * 0.5f - w * 0.5f;
+    int h = 250;
+    int y = SCREEN_HEIGHT * 0.5f - h * 0.5f;
+    menu.menuPanel = {x, y, w, h, MENU_PANEL};
     
-    SDL_RenderPresent(gameState.renderer);
+    const char* startGameText = "Start game";
+    menu.startGame.w = FC_GetWidth(font, startGameText);
+    menu.startGame.h = FC_GetHeight(font, startGameText);
+    int topPadding = 75;
+    menu.startGame.x = x + w * 0.5f - menu.startGame.w * 0.5f;
+    menu.startGame.y = y + h - menu.startGame.h - topPadding;
+    menu.startGame.text = startGameText;
+    menu.startGame.onclick = onStartClick;
+    
+    const char* signInText = "Sign in";
+    menu.signIn.w = FC_GetWidth(font, signInText);
+    menu.signIn.h = FC_GetHeight(font, signInText);
+    int padding = 50;
+    menu.signIn.x = x + w * 0.5f - menu.signIn.w * 0.5f;
+    menu.signIn.y = menu.startGame.y - padding;
+    menu.signIn.text = signInText;
+    menu.signIn.onclick = onSignInClick;
+    
+    const char* leaderBoardsText = "Leaderboards";
+    menu.leaderBoards.text = leaderBoardsText;
+    menu.leaderBoards.w = FC_GetWidth(font, leaderBoardsText);
+    menu.leaderBoards.h = FC_GetHeight(font, leaderBoardsText);
+    
+    menu.leaderBoards.x = x + w * 0.5f - menu.leaderBoards.w * 0.5f;
+    menu.leaderBoards.y = menu.signIn.y - padding;
+    menu.leaderBoards.onclick = onLeaderBoardsClick;
+    
+    SDL_Rect &srcRect = atlas.frames[GAME_TITLE];
+    
+    menu.gameTitleRect.w = srcRect.w;
+    menu.gameTitleRect.h = srcRect.h;
+    menu.gameTitleRect.x = x + w * 0.5f - srcRect.w * 0.5f;
+    menu.gameTitleRect.y = y + h - (menu.gameTitleRect.h * 0.5f);
+    menu.gameTitleRect.y = flipY(menu.gameTitleRect.y, menu.gameTitleRect.h);
+}
+
+void updateMenu(Menu& menu, GameInput& input) {
+    updateFontButton(menu.startGame, input);
+    updateFontButton(menu.signIn, input);
+    updateFontButton(menu.leaderBoards, input);
+}
+
+void drawMenu(Menu& menu, SDL_Renderer* renderer, FC_Font* font, Atlas& atlas, std::vector<SDL_Texture*>& ninePatchTextures) {
+    clear(renderer, SKY_BLUE);
+    drawNinePatch(ninePatchTextures, menu.menuPanel, renderer);
+    
+    drawFontButton(menu.startGame, font, renderer);
+    drawFontButton(menu.signIn, font, renderer);
+    drawFontButton(menu.leaderBoards, font, renderer);
+    SDL_Rect& frame = atlas.frames[GAME_TITLE];
+    SDL_RenderCopy(renderer, atlas.texture, &frame, &menu.gameTitleRect);
+    SDL_RenderPresent(renderer);
 }

@@ -11,6 +11,7 @@
 #include "Obstacle.hpp"
 #include "Renderer.hpp"
 #include "NinePatch.hpp"
+#include "Menu.hpp"
 
 enum Screen {
     menu, game
@@ -48,7 +49,7 @@ struct GameState {
     std::vector<SDL_Texture*> ninePatchTextures;
     NinePatch leftPanel;
     NinePatch rightPanel;
-    NinePatch menuPanel;
+    Menu menu;
 };
 
 #endif
