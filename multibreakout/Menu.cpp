@@ -2,15 +2,15 @@
 #include "GameState.hpp"
 #include "FontButton.hpp"
 
-void onStartClick(GameInput& input) {
-    printf("Start\n");
+void onStartClick(GameState& gameState) {
+    gameState.currScreen = game;
 }
 
-void onSignInClick(GameInput& input) {
+void onSignInClick(GameState& gameState) {
     printf("Sign in\n");
 }
 
-void onLeaderBoardsClick(GameInput& input) {
+void onLeaderBoardsClick(GameState& gameState) {
     printf("Leaderboards\n");
 }
 
@@ -57,19 +57,19 @@ void initializeMenu(Menu& menu, FC_Font* font, Atlas& atlas) {
     menu.gameTitleRect.y = flipY(menu.gameTitleRect.y, menu.gameTitleRect.h);
 }
 
-void updateMenu(Menu& menu, GameInput& input) {
-    updateFontButton(menu.startGame, input);
-    updateFontButton(menu.signIn, input);
-    updateFontButton(menu.leaderBoards, input);
+void updateMenu(Menu& menu, GameState& gameState) {
+    updateFontButton(menu.startGame, gameState);
+    updateFontButton(menu.signIn, gameState);
+    updateFontButton(menu.leaderBoards, gameState);
 }
 
 void drawMenu(Menu& menu, SDL_Renderer* renderer, FC_Font* font, Atlas& atlas, std::vector<SDL_Texture*>& ninePatchTextures) {
     clear(renderer, SKY_BLUE);
     drawNinePatch(ninePatchTextures, menu.menuPanel, renderer);
-    
     drawFontButton(menu.startGame, font, renderer);
     drawFontButton(menu.signIn, font, renderer);
     drawFontButton(menu.leaderBoards, font, renderer);
+    
     SDL_Rect& frame = atlas.frames[GAME_TITLE];
     SDL_RenderCopy(renderer, atlas.texture, &frame, &menu.gameTitleRect);
     SDL_RenderPresent(renderer);

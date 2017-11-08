@@ -6,7 +6,7 @@
 
 #include "SDL_FontCache.h"
 
-struct GameInput;
+struct GameState;
 
 struct FontButton {
     const char* text;
@@ -14,11 +14,11 @@ struct FontButton {
     int y;
     int w;
     int h;
-    void (*onclick)(GameInput& gameInput);
+    void (*onclick)(GameState& gameState);
 };
 
 void initFontButton(FontButton& button, FC_Font* font, int x, int y, const char* text, void (*onclick)(void));
 void drawFontButton(FontButton& button, FC_Font* font, SDL_Renderer* renderer);
-void updateFontButton(FontButton& button, GameInput& gameInput);
+void updateFontButton(FontButton& button, GameState& gameState);
 
 #endif

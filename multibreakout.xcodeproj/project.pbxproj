@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E931C41A1FB30E5F005B8D3B /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E931C4181FB30E5F005B8D3B /* Game.cpp */; };
 		E93D151A1F0B9158007BF3ED /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E93D15191F0B9158007BF3ED /* main.cpp */; };
 		E93D15231F0B917C007BF3ED /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E93D15201F0B917C007BF3ED /* SDL2_ttf.framework */; };
 		E93D15241F0B917C007BF3ED /* SDL2_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E93D15211F0B917C007BF3ED /* SDL2_image.framework */; };
@@ -43,6 +44,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E931C4181FB30E5F005B8D3B /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
+		E931C4191FB30E5F005B8D3B /* Game.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Game.hpp; sourceTree = "<group>"; };
 		E93D15161F0B9158007BF3ED /* multibreakout */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = multibreakout; sourceTree = BUILT_PRODUCTS_DIR; };
 		E93D15191F0B9158007BF3ED /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E93D15201F0B917C007BF3ED /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_ttf.framework; path = ../../../Library/Frameworks/SDL2_ttf.framework; sourceTree = "<group>"; };
@@ -158,6 +161,8 @@
 				E9E601701FB1A9C90002AE28 /* Menu.cpp */,
 				E9E601731FB1B6680002AE28 /* build.sh */,
 				E9E601711FB1A9C90002AE28 /* Menu.hpp */,
+				E931C4181FB30E5F005B8D3B /* Game.cpp */,
+				E931C4191FB30E5F005B8D3B /* Game.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -240,6 +245,7 @@
 				E9CD36DE1FA0D33400B380D3 /* Button.cpp in Sources */,
 				E9D146581F922D1C0074C598 /* Enemy.cpp in Sources */,
 				E93D152E1F0BA6AA007BF3ED /* MultiBreakout.cpp in Sources */,
+				E931C41A1FB30E5F005B8D3B /* Game.cpp in Sources */,
 				E9A7DFAD1F94A2C700083AA4 /* Texture.cpp in Sources */,
 				E9D20FAC1F85730E0064A1B3 /* Brick.cpp in Sources */,
 				E9DDF7161F973956000AE808 /* SDL_FontCache.c in Sources */,
