@@ -2,10 +2,9 @@
 #include "Texture.hpp"
 #include "GameState.hpp"
 
-void initGameWorld(World& world) {
+void initalizeGameWorld(World& world) {
     world.leftBoundary = 160;
     world.rightBoundary = SCREEN_WIDTH - 160;
-    world.initialized = true;
     initPaddle(world.paddle);
     initUpperEnemy(world.enemyUpper);
     initLeftEnemy(world.enemyLeft, world.leftBoundary);
@@ -44,69 +43,73 @@ void onRightClick(GameInput& gameInput) {
     gameInput.right = true;
 }
 
+void initializeUi(GameUi& gameUi) {
+    gameUi.leftButton = {15, 30, 130, 130, LEFT_BUTTON, onLeftClick};
+    gameUi.rightButton = {SCREEN_WIDTH - 145, 30, 130, 130, RIGHT_BUTTON, onRightClick};
+}
+
+void updateUi(GameUi& gameUi, GameInput& input) {
+    updateButton(gameUi.leftButton, input);
+    updateButton(gameUi.rightButton, input);
+}
+
+void updateGame(World& world, GameInput& input, float delta) {
+    updateBalls(world, input, delta);
+    updatePaddle(world, input, delta);
+    updateEnemy(world.enemyUpper, world.obstacles, world.balls, delta);
+    updateEnemy(world.enemyLeft, world.obstacles, world.balls, delta);
+    updateEnemy(world.enemyRight, world.obstacles, world.balls, delta);
+    
+    collideWithBrick(world.balls, world.bricks);
+    resolveCollision(world.balls, world.enemyUpper.paddle, delta);
+    resolveCollision(world.balls, world.paddle, delta);
+    resolveCollision(world.balls, world.enemyLeft.paddle, delta);
+    resolveCollision(world.balls, world.enemyRight.paddle, delta);
+    collideWithObstacle(world.balls, world.obstacles);
+    collideBalls(world.balls);
+}
+
+void drawGame(SDL_Renderer* renderer, Atlas& atlas, World& world, float delta) {
+    drawLeftPaddle(renderer, atlas, world.enemyLeft.paddle);
+    drawRightPaddle(renderer, atlas, world.enemyRight.paddle);
+    drawLowerPaddle(renderer, atlas, world.paddle);
+    drawUpperPaddle(renderer, atlas, world.enemyUpper.paddle);
+    drawBalls(renderer, atlas, world.balls);
+    drawBricks(renderer, atlas, world.bricks);
+    drawObstacles(renderer, atlas, world.obstacles);
+    
+    drawBricksDebug(renderer, world.bricks);
+    drawPaddleDebug(renderer, world.paddle);
+    drawPaddleDebug(renderer, world.enemyUpper.paddle);
+    drawPaddleDebug(renderer, world.enemyLeft.paddle);
+    drawPaddleDebug(renderer, world.enemyRight.paddle);
+    drawBallsDebug(renderer, world.balls);
+    
+    drawPoint(renderer, world.enemyUpper.steeringPos, RED);
+    drawPoint(renderer, world.enemyRight.steeringPos, RED);
+    drawPoint(renderer, world.enemyLeft.steeringPos, RED);
+}
+
+void drawUi(std::vector<SDL_Texture*>& ninePatchTextures, GameUi& gameUi, SDL_Renderer* renderer, Atlas& atlas) {
+    drawNinePatch(ninePatchTextures, gameUi.leftPanel, renderer);
+    drawNinePatch(ninePatchTextures, gameUi.rightPanel, renderer);
+    drawButton(renderer, atlas, gameUi.leftButton);
+    drawButton(renderer, atlas, gameUi.rightButton);
+}
+
 void gamePlayUpdate(GameState& gameState) {
-    if (!gameState.world.initialized) {
-        initGameWorld(gameState.world);
-        gameState.gameScreen.leftButton = {15, 30, 130, 130, LEFT_BUTTON, onLeftClick};
-        gameState.gameScreen.rightButton = {SCREEN_WIDTH - 145, 30, 130, 130, RIGHT_BUTTON, onRightClick};
-    }
     if (gameState.input.pause) {
         gameState.paused = gameState.paused == true ? false : true;
     }
-    
     if (gameState.paused) {
         return;
     }
     
-    updateButton(gameState.gameScreen.leftButton, gameState.input);
-    updateButton(gameState.gameScreen.rightButton, gameState.input);
-    
-    updateBalls(gameState.world, gameState.input, gameState.delta);
-    updatePaddle(gameState.world, gameState.input, gameState.delta);
-    updateEnemy(gameState.world.enemyUpper, gameState.world.obstacles, gameState.world.balls, gameState.delta);
-    updateEnemy(gameState.world.enemyLeft, gameState.world.obstacles, gameState.world.balls, gameState.delta);
-    updateEnemy(gameState.world.enemyRight, gameState.world.obstacles, gameState.world.balls, gameState.delta);
-    
-    collideWithBrick(gameState.world.balls, gameState.world.bricks);
-    resolveCollision(gameState.world.balls, gameState.world.enemyUpper.paddle, gameState.delta);
-    resolveCollision(gameState.world.balls, gameState.world.paddle, gameState.delta);
-    resolveCollision(gameState.world.balls, gameState.world.enemyLeft.paddle, gameState.delta);
-    resolveCollision(gameState.world.balls, gameState.world.enemyRight.paddle, gameState.delta);
-    collideWithObstacle(gameState.world.balls, gameState.world.obstacles);
-    collideBalls(gameState.world.balls);
-    
-    SDL_Renderer* renderer = gameState.renderer;
-    Atlas& atlas = gameState.atlas;
-    
-    clear(renderer, SKY_BLUE);
-    
-    drawLeftPaddle(renderer, atlas, gameState.world.enemyLeft.paddle);
-    drawRightPaddle(renderer, atlas, gameState.world.enemyRight.paddle);
-    drawLowerPaddle(renderer, atlas, gameState.world.paddle);
-    drawUpperPaddle(renderer, atlas, gameState.world.enemyUpper.paddle);
-    drawBalls(renderer, atlas, gameState.world.balls);
-    drawBricks(renderer, atlas, gameState.world.bricks);
-    drawObstacles(renderer, atlas, gameState.world.obstacles);
-    
-    drawBricksDebug(renderer, gameState.world.bricks);
-    drawPaddleDebug(renderer, gameState.world.paddle);
-    drawPaddleDebug(renderer, gameState.world.enemyUpper.paddle);
-    drawPaddleDebug(renderer, gameState.world.enemyLeft.paddle);
-    drawPaddleDebug(renderer, gameState.world.enemyRight.paddle);
-    drawBallsDebug(renderer, gameState.world.balls);
-    
-    drawPoint(renderer, gameState.world.enemyUpper.steeringPos, RED);
-    drawPoint(renderer, gameState.world.enemyRight.steeringPos, RED);
-    drawPoint(renderer, gameState.world.enemyLeft.steeringPos, RED);
-    
-    drawNinePatch(gameState.ninePatchTextures, gameState.gameScreen.leftPanel, renderer);
-    drawNinePatch(gameState.ninePatchTextures, gameState.gameScreen.rightPanel, renderer);
-    
-    drawButton(renderer, atlas, gameState.gameScreen.leftButton);
-    drawButton(renderer, atlas, gameState.gameScreen.rightButton);
-    
-    drawDebugInfo(renderer, gameState.font, gameState.world, gameState.delta);
-    
-    SDL_RenderPresent(renderer);
-    
+    clear(gameState.renderer, SKY_BLUE);
+    updateUi(gameState.gameUi, gameState.input);
+    updateGame(gameState.world, gameState.input, gameState.delta);
+    drawGame(gameState.renderer, gameState.atlas, gameState.world, gameState.delta);
+    drawUi(gameState.ninePatchTextures, gameState.gameUi, gameState.renderer, gameState.atlas);
+    drawDebugInfo(gameState.renderer, gameState.font, gameState.world, gameState.delta);
+    SDL_RenderPresent(gameState.renderer);
 }

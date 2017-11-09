@@ -25,7 +25,7 @@ struct GameState {
     FC_Font *font;
     Atlas atlas;
     
-    GameScreen gameScreen;
+    GameUi gameUi;
     World world;
     Menu menu;
 };

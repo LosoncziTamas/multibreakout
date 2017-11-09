@@ -9,19 +9,19 @@ void generatePatches(GameState& gameState) {
     NinePatchBase base;
     gameState.ninePatchTextures.clear();
     initNinePatcheBase(base, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.gameScreen.leftPanel, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.gameScreen.rightPanel, gameState.renderer, gameState.ninePatchTextures);
+    generateTextureFromNinePatchBase(base, gameState.gameUi.leftPanel, gameState.renderer, gameState.ninePatchTextures);
+    generateTextureFromNinePatchBase(base, gameState.gameUi.rightPanel, gameState.renderer, gameState.ninePatchTextures);
     generateTextureFromNinePatchBase(base, gameState.menu.menuPanel, gameState.renderer, gameState.ninePatchTextures);
     SDL_FreeSurface(base.surface);
 }
 
 extern "C" void gameUpdate(GameState& gameState) {
     if (!gameState.initialized) {
-        srand(time(NULL));
+        srand(static_cast<unsigned int>(time(NULL)));
         gameState.font = createFont(gameState.renderer);
         initTextures(gameState.renderer, gameState.atlas, gameState.world);
-        gameState.gameScreen.leftPanel = {0, 0, 160, SCREEN_HEIGHT, LEFT_PANEL};
-        gameState.gameScreen.rightPanel = {SCREEN_WIDTH - 160, 0, 160, SCREEN_HEIGHT, RIGHT_PANEL};
+        gameState.gameUi.leftPanel = {0, 0, 160, SCREEN_HEIGHT, LEFT_PANEL};
+        gameState.gameUi.rightPanel = {SCREEN_WIDTH - 160, 0, 160, SCREEN_HEIGHT, RIGHT_PANEL};
         gameState.initialized = true;
         gameState.currScreen = menu;
     }
@@ -37,6 +37,14 @@ extern "C" void gameUpdate(GameState& gameState) {
             drawMenu(gameState.menu, gameState.renderer, gameState.font, gameState.atlas, gameState.ninePatchTextures);
             break;
         case game:
+            if (!gameState.world.initialized) {
+                initalizeGameWorld(gameState.world);
+                gameState.world.initialized = true;
+            }
+            if (!gameState.gameUi.initialized) {
+                initializeUi(gameState.gameUi);
+                gameState.gameUi.initialized = true;
+            }
             gamePlayUpdate(gameState);
             break;
         default:

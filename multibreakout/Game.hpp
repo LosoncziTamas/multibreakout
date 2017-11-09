@@ -27,7 +27,8 @@ struct World {
     Enemy enemyRight;
 };
 
-struct GameScreen {
+struct GameUi {
+    bool initialized;
     NinePatch leftPanel;
     NinePatch rightPanel;
     TextureButton leftButton;
@@ -35,5 +36,7 @@ struct GameScreen {
 };
 
 void gamePlayUpdate(GameState& gameState);
+void initalizeGameWorld(World& world);
+void initializeUi(GameUi& gameUi);
 
 #endif
