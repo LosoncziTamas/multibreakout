@@ -208,11 +208,15 @@ void launchBall(std::vector<Ball>& balls, Enemy& enemy) {
 }
 
 void updateEnemy(Enemy& enemy, Obstacles& obstacles, std::vector<Ball>& balls, float delta) {
-    float topBoundary = obstacles.leftTop.center.y - obstacles.leftTop.height * 0.5;
-    float bottomBoundary = obstacles.leftBottom.center.y + obstacles.leftBottom.height * 0.5;
+    Obstacle* leftBottom = obstacles.content + obstacles.leftBottomIndex;
+    Obstacle* leftTop = obstacles.content + obstacles.leftTopIndex;
+    Obstacle* rightTop = obstacles.content + obstacles.rightTopIndex;
     
-    float leftBoundary = obstacles.leftTop.center.x + obstacles.leftTop.width * 0.5;
-    float rightBoundary = obstacles.rightTop.center.x - obstacles.rightTop.width * 0.5;
+    float topBoundary = leftTop->center.y - leftTop->height * 0.5;
+    float bottomBoundary = leftBottom->center.y + leftBottom->height * 0.5;
+    
+    float leftBoundary = leftTop->center.x + leftTop->width * 0.5;
+    float rightBoundary = rightTop->center.x - rightTop->width * 0.5;
     
     bool isDanger = danger(balls, enemy.paddle.orientation);
     switch (enemy.state) {

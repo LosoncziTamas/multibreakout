@@ -44,11 +44,14 @@ void updatePaddle(World& world, GameInput& input, float delta) {
     acceleratePaddle(acceleration, paddle, delta);
     
     float offset = paddle.width * 0.5f;
-    if (paddle.newPos.x - offset < (world.obstacles.leftBottom.center.x + world.obstacles.leftBottom.width * 0.5f)) {
+    Obstacle* leftBottom = world.obstacles.content + world.obstacles.leftBottomIndex;
+    Obstacle* rightBottom = world.obstacles.content + world.obstacles.rightBottomIndex;
+    
+    if (paddle.newPos.x - offset < (leftBottom->center.x + leftBottom->width * 0.5f)) {
         Vec2 wallNorm(1, 0);
         paddle.velocity = reflect(paddle.velocity, wallNorm);
         paddle.movementDelta.x += 1.0f;
-    } else if (paddle.newPos.x + offset > (world.obstacles.rightBottom.center.x - world.obstacles.leftBottom.width * 0.5f)) {
+    } else if (paddle.newPos.x + offset > (rightBottom->center.x - leftBottom->width * 0.5f)) {
         Vec2 wallNorm(-1, 0);
         paddle.velocity = reflect(paddle.velocity, wallNorm);
         paddle.movementDelta.x -= 1.0f;

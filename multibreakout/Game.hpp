@@ -11,7 +11,12 @@
 #include "TextureButton.hpp"
 #include "NinePatch.hpp"
 
+enum GameType {
+    oneVsOne, twoVsTwo
+};
+
 struct World {
+    GameType type;
     bool initialized;
     
     int leftBoundary;
@@ -20,9 +25,10 @@ struct World {
     std::vector<Brick> bricks;
     std::vector<Ball> balls;
     
-    Obstacles obstacles;
     Paddle paddle;
     Enemy enemyUpper;
+    
+    Obstacles obstacles;
     Enemy enemyLeft;
     Enemy enemyRight;
 };

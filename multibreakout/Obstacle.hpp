@@ -9,25 +9,23 @@
 
 struct Atlas;
 
-const int OBSTACLES_SIZE = 4;
+const int OBSTACLES_SIZE_MAX = 32;
 
 struct Obstacle {
     Vec2 center;
-    int width;
-    int height;
-    int textureIndex;
+    Sint32 width;
+    Sint32 height;
+    Uint32 textureIndex;
 };
 
 struct Obstacles {
-    union {
-        Obstacle content[OBSTACLES_SIZE];
-        struct {
-            Obstacle leftBottom;
-            Obstacle leftTop;
-            Obstacle rightBottom;
-            Obstacle rightTop;
-        };
-    };
+    Obstacle content[OBSTACLES_SIZE_MAX];
+    Uint32 obstacleCount;
+    
+    Uint32 leftBottomIndex;
+    Uint32 leftTopIndex;
+    Uint32 rightBottomIndex;
+    Uint32 rightTopIndex;
 };
 
 void initObstacles(Obstacles& obstacles);
