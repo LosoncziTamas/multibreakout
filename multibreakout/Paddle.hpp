@@ -38,7 +38,7 @@ struct Paddle {
 
 void initPaddle(Paddle &paddle);
 void updatePaddle(World& world, GameInput& input, float delta);
-void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta);
+void resolveCollision(World& world, Paddle& paddle, float delta);
 void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta);
 void drawPaddleDebug(SDL_Renderer* renderer, Paddle& paddle);
 void drawUpperPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);

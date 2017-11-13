@@ -15,6 +15,9 @@ enum GameType {
     oneVsOne, twoVsTwo
 };
 
+const Uint32 MAX_BALLS = 4;
+const Uint32 MAX_BRICKS = 256;
+
 struct World {
     GameType type;
     bool initialized;
@@ -22,8 +25,11 @@ struct World {
     int leftBoundary;
     int rightBoundary;
     
-    std::vector<Brick> bricks;
-    std::vector<Ball> balls;
+    Uint32 brickCount;
+    Brick bricks[MAX_BRICKS];
+    
+    Uint32 ballCount;
+    Ball balls[MAX_BALLS];
     
     Paddle paddle;
     Enemy enemyUpper;

@@ -58,8 +58,8 @@ void updatePaddle(World& world, GameInput& input, float delta) {
     }
 }
 
-void activatePowerUp(Ball& ball, Paddle& paddle) {
-    switch (ball.powerUp) {
+void activatePowerUp(Ball* ball, Paddle& paddle) {
+    switch (ball->powerUp) {
         case speedUp:
             if (paddle.speed == DEFAULT_SPEED) {
                 paddle.speed = HIGH_SPEED;
@@ -102,17 +102,18 @@ void activatePowerUp(Ball& ball, Paddle& paddle) {
             SDL_assert(false);
             break;
     }
-    ball.textureIndex = GREY_BALL;
-    ball.powerUp = neutral;
+    ball->textureIndex = GREY_BALL;
+    ball->powerUp = neutral;
 }
 
-void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta) {
-    for (auto& ball : balls) {
-        if (circleRectIntersect(ball.newPos, ball.radius, paddle.newPos, paddle.width, paddle.height)) {
+void resolveCollision(World& world, Paddle& paddle, float delta) {
+    for (Uint32 ballIndex = 0; ballIndex < world.ballCount; ++ballIndex) {
+        Ball* ball = world.balls + ballIndex;
+        if (circleRectIntersect(ball->newPos, ball->radius, paddle.newPos, paddle.width, paddle.height)) {
             for (int i = 1; i <= 4; ++i) {
-                Vec2 ballCollisionLocation = (1.0f / i) * ball.oldPos + (1.0f - 1.0f / i) * ball.newPos;
+                Vec2 ballCollisionLocation = (1.0f / i) * ball->oldPos + (1.0f - 1.0f / i) * ball->newPos;
                 Vec2 paddleCollisionLocation = (1.0f / i) * paddle.oldPos + (1.0f - 1.0f / i) * paddle.newPos;
-                if (circleRectIntersect(ballCollisionLocation, ball.radius, paddleCollisionLocation, paddle.width, paddle.height)) {
+                if (circleRectIntersect(ballCollisionLocation, ball->radius, paddleCollisionLocation, paddle.width, paddle.height)) {
                     Vec2 reflection = ballCollisionLocation - paddleCollisionLocation;
                     Vec2 reflectionInverse = paddleCollisionLocation - ballCollisionLocation;
                     reflection.normalize();
@@ -122,15 +123,15 @@ void resolveCollision(std::vector<Ball>& balls, Paddle& paddle, float delta) {
                         reflectionInverse.y = 0.0f;
                     }
                     reflectionInverse.normalize();
-                    ball.velocity = reflection;
-                    ball.movementDelta += reflection * paddle.movementDelta.length();
+                    ball->velocity = reflection;
+                    ball->movementDelta += reflection * paddle.movementDelta.length();
                     paddle.movementDelta += reflectionInverse * paddle.movementDelta.length();
                     activatePowerUp(ball, paddle);
                     break;
                 }
             }
         }
-        ball.newPos = ball.oldPos + ball.movementDelta;
+        ball->newPos = ball->oldPos + ball->movementDelta;
         paddle.newPos = paddle.oldPos + paddle.movementDelta;
     }
 }

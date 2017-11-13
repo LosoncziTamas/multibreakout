@@ -10,17 +10,17 @@
 
 struct Brick {
     Vec2 center;
-    int width;
-    int height;
+    Sint32 width;
+    Sint32 height;
+    Uint32 textureIndex;
     bool active;
-    void (*callback)(Brick& brick, Ball& ball);
+    void (*callback)(Brick* brick, Ball* ball);
     PowerUp powerUp;
-    int textureIndex;
 };
 
-void initBricks(std::vector<Brick>& bricks);
-void collideWithBrick(std::vector<Ball>& balls, std::vector<Brick>& bricks);
-void drawBricksDebug(SDL_Renderer* renderer, const std::vector<Brick>& bricks);
-void drawBricks(SDL_Renderer* renderer, Atlas& atlas, const std::vector<Brick>& bricks);
+void initBricks(World& world);
+void collideWithBrick(World& world);
+void drawBricksDebug(SDL_Renderer* renderer, World& world);
+void drawBricks(SDL_Renderer* renderer, Atlas& atlas, World& world);
 
 #endif

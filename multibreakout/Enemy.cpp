@@ -112,13 +112,13 @@ void moveToward(Paddle& enemy, const Vec2& target, float delta, float leftBounda
     }
 }
 
-bool betterTarget(Orientation orientation, Ball& ball, Ball *currentTarget) {
+bool betterTarget(Orientation orientation, Ball* ball, Ball *currentTarget) {
     if (orientation == upper) {
-        return (currentTarget == nullptr || (currentTarget->newPos.y < ball.newPos.y && ball.velocity.y > 0)) && ball.newPos.y > SCREEN_HEIGHT * 0.5f;
+        return (!currentTarget || (currentTarget->newPos.y < ball->newPos.y && ball->velocity.y > 0)) && ball->newPos.y > SCREEN_HEIGHT * 0.5f;
     } else if (orientation == left) {
-        return (currentTarget == nullptr || (currentTarget->newPos.x > ball.newPos.x && ball.velocity.x < 0)) && ball.newPos.x < SCREEN_WIDTH * 0.5f;
+        return (!currentTarget || (currentTarget->newPos.x > ball->newPos.x && ball->velocity.x < 0)) && ball->newPos.x < SCREEN_WIDTH * 0.5f;
     } else if (orientation == right) {
-        return (currentTarget == nullptr || (currentTarget->newPos.x < ball.newPos.x && ball.velocity.x > 0)) && ball.newPos.x > SCREEN_WIDTH * 0.5f;
+        return (!currentTarget || (currentTarget->newPos.x < ball->newPos.x && ball->velocity.x > 0)) && ball->newPos.x > SCREEN_WIDTH * 0.5f;
     }
     return false;
 }
@@ -140,33 +140,35 @@ void setTarget(Ball *target, Orientation orientation, float leftBoundary, float 
     
 }
 
-Vec2 getTarget(Paddle& enemy, std::vector<Ball>& balls, float leftBoundary, float rightBoundary) {
+Vec2 getTarget(Paddle& enemy, World& world, float leftBoundary, float rightBoundary) {
     Vec2 targetPos(enemy.newPos);
     Ball *target = nullptr;
     
-    for (auto& ball : balls) {
-        if (betterTarget(enemy.orientation, ball, target) && ball.assignedPaddle == nullptr) {
-            targetPos = ball.newPos;
-            target = &ball;
+    for (Uint32 ballIndex = 0; ballIndex < world.ballCount; ++ballIndex) {
+        Ball* ball = world.balls + ballIndex;
+        if (betterTarget(enemy.orientation, ball, target) && !ball->assignedPaddle) {
+            targetPos = ball->newPos;
+            target = ball;
             setTarget(target, enemy.orientation, leftBoundary, rightBoundary, enemy);
-            SDL_assert(ball.assignedPaddle != &enemy);
+            SDL_assert(ball->assignedPaddle != &enemy);
         }
     }
     return targetPos;
 }
 
-bool danger(std::vector<Ball>& balls, Orientation orientation) {
-    for (auto& ball : balls) {
+bool danger(World& world, Orientation orientation) {
+    for (Uint32 ballIndex = 0; ballIndex < world.ballCount; ++ballIndex) {
+        Ball* ball = world.balls + ballIndex;
         if (orientation == upper) {
-            if (ball.newPos.y > SCREEN_HEIGHT * 0.5f && ball.assignedPaddle == nullptr) {
+            if (ball->newPos.y > SCREEN_HEIGHT * 0.5f && ball->assignedPaddle == nullptr) {
                 return true;
             }
         } else if (orientation == left) {
-            if (ball.newPos.x < SCREEN_WIDTH * 0.5f && ball.assignedPaddle == nullptr) {
+            if (ball->newPos.x < SCREEN_WIDTH * 0.5f && ball->assignedPaddle == nullptr) {
                 return true;
             }
         } else if (orientation == right) {
-            if (ball.newPos.x > SCREEN_WIDTH * 0.5f && ball.assignedPaddle == nullptr) {
+            if (ball->newPos.x > SCREEN_WIDTH * 0.5f && ball->assignedPaddle == nullptr) {
                 return true;
             }
         }
@@ -192,25 +194,26 @@ bool reachedTarget(Enemy& enemy) {
     }
 }
 
-void launchBall(std::vector<Ball>& balls, Enemy& enemy) {
-    Ball& assignedBall = balls.at(enemy.paddle.ballIndex);
+void launchBall(World& world, Enemy& enemy) {
+    SDL_assert(enemy.paddle.ballIndex < world.ballCount);
+    Ball* assignedBall = world.balls + enemy.paddle.ballIndex;
     if (enemy.paddle.orientation == left) {
-        assignedBall.velocity = Vec2(1.0f, 0.0f);
+        assignedBall->velocity = Vec2(1.0f, 0.0f);
     } else if (enemy.paddle.orientation == right) {
-        assignedBall.velocity = Vec2(-1.0f, 0.0f);
+        assignedBall->velocity = Vec2(-1.0f, 0.0f);
     } else if (enemy.paddle.orientation == upper) {
-        assignedBall.velocity = Vec2(0.0f, -1.0f);
+        assignedBall->velocity = Vec2(0.0f, -1.0f);
     } else {
         SDL_assert(false);
     }
-    assignedBall.assignedPaddle = nullptr;
+    assignedBall->assignedPaddle = nullptr;
     enemy.paddle.ballIndex = INVALID_INDEX;
 }
 
-void updateEnemy(Enemy& enemy, Obstacles& obstacles, std::vector<Ball>& balls, float delta) {
-    Obstacle* leftBottom = obstacles.content + obstacles.leftBottomIndex;
-    Obstacle* leftTop = obstacles.content + obstacles.leftTopIndex;
-    Obstacle* rightTop = obstacles.content + obstacles.rightTopIndex;
+void updateEnemy(World& world, Enemy& enemy, float delta) {
+    Obstacle* leftBottom = world.obstacles.content + world.obstacles.leftBottomIndex;
+    Obstacle* leftTop = world.obstacles.content + world.obstacles.leftTopIndex;
+    Obstacle* rightTop = world.obstacles.content + world.obstacles.rightTopIndex;
     
     float topBoundary = leftTop->center.y - leftTop->height * 0.5;
     float bottomBoundary = leftBottom->center.y + leftBottom->height * 0.5;
@@ -218,7 +221,7 @@ void updateEnemy(Enemy& enemy, Obstacles& obstacles, std::vector<Ball>& balls, f
     float leftBoundary = leftTop->center.x + leftTop->width * 0.5;
     float rightBoundary = rightTop->center.x - rightTop->width * 0.5;
     
-    bool isDanger = danger(balls, enemy.paddle.orientation);
+    bool isDanger = danger(world, enemy.paddle.orientation);
     switch (enemy.state) {
         case none: {
             if (enemy.paddle.ballIndex != INVALID_INDEX && !isDanger) {
@@ -234,7 +237,7 @@ void updateEnemy(Enemy& enemy, Obstacles& obstacles, std::vector<Ball>& balls, f
                 moveToward(enemy.paddle, enemy.steeringPos, delta, topBoundary, bottomBoundary, leftBoundary, rightBoundary);
             } else {
                 if (reached) {
-                    launchBall(balls, enemy);
+                    launchBall(world, enemy);
                 }
                 enemy.state = isDanger ? defending : none;
             }
@@ -243,7 +246,7 @@ void updateEnemy(Enemy& enemy, Obstacles& obstacles, std::vector<Ball>& balls, f
             if (!isDanger) {
                 enemy.state = none;
             } else {
-                Vec2 target = getTarget(enemy.paddle, balls, leftBoundary, rightBoundary);
+                Vec2 target = getTarget(enemy.paddle, world, leftBoundary, rightBoundary);
                 moveToward(enemy.paddle, target, delta, leftBoundary, rightBoundary, topBoundary, bottomBoundary);
             }
         } break;

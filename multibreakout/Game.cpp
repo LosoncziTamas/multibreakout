@@ -5,37 +5,24 @@
 void initalizeGameWorld(World& world) {
     world.leftBoundary = 160;
     world.rightBoundary = SCREEN_WIDTH - 160;
+    
     initPaddle(world.paddle);
     initUpperEnemy(world.enemyUpper);
-    initBricks(world.bricks);
-    Ball ball;
-    initBall(ball, world.balls, world.paddle);
+    initBricks(world);
+    initObstacles(world.obstacles);
+    addBall(world, world.paddle);
+    
     world.paddle.textureIndex = PLAYER_PADDLE;
     world.enemyUpper.paddle.textureIndex = ENEMY_PADDLE;
-    
-    initObstacles(world.obstacles);
-    for (Uint32 obstacleIndex = 0; obstacleIndex < world.obstacles.obstacleCount; ++obstacleIndex) {
-        Obstacle* obstacle = world.obstacles.content + obstacleIndex;
-        SDL_assert(obstacle);
-        obstacle->textureIndex = GREY_BRICK;
-    }
     
     if (world.type == twoVsTwo) {
         initLeftEnemy(world.enemyLeft, world.leftBoundary);
         initRightEnemy(world.enemyRight, world.rightBoundary);
-        Ball ball2;
-        initBall(ball2, world.balls, world.enemyRight.paddle);
+        addBall(world, world.enemyRight.paddle);
+        
         world.enemyRight.paddle.textureIndex = ENEMY_PADDLE;
         world.enemyLeft.paddle.textureIndex = PLAYER_PADDLE;
     }
-    
-    for (auto& ball : world.balls) {
-        ball.textureIndex = GREY_BALL;
-    };
-    for (auto& brick : world.bricks) {
-        brick.textureIndex = getBrickTexture(brick.powerUp);
-    };
-    
 }
 
 void onLeftClick(GameInput& gameInput) {
@@ -59,31 +46,31 @@ void updateUi(GameUi& gameUi, GameInput& input) {
 void updateGame(World& world, GameInput& input, float delta) {
     updateBalls(world, input, delta);
     updatePaddle(world, input, delta);
-    updateEnemy(world.enemyUpper, world.obstacles, world.balls, delta);
+    updateEnemy(world, world.enemyUpper, delta);
     
     if (world.type == twoVsTwo) {
-        updateEnemy(world.enemyLeft, world.obstacles, world.balls, delta);
-        updateEnemy(world.enemyRight, world.obstacles, world.balls, delta);
+        updateEnemy(world, world.enemyLeft, delta);
+        updateEnemy(world, world.enemyRight, delta);
     }
     
-    collideWithBrick(world.balls, world.bricks);
-    resolveCollision(world.balls, world.enemyUpper.paddle, delta);
-    resolveCollision(world.balls, world.paddle, delta);
+    collideWithBrick(world);
+    resolveCollision(world, world.enemyUpper.paddle, delta);
+    resolveCollision(world, world.paddle, delta);
     
     if (world.type == twoVsTwo) {
-        resolveCollision(world.balls, world.enemyLeft.paddle, delta);
-        resolveCollision(world.balls, world.enemyRight.paddle, delta);
+        resolveCollision(world, world.enemyLeft.paddle, delta);
+        resolveCollision(world, world.enemyRight.paddle, delta);
     }
-    collideWithObstacle(world.balls, world.obstacles);
-    collideBalls(world.balls);
+    collideWithObstacle(world, world.obstacles);
+    collideBalls(world);
 }
 
 void drawGame(SDL_Renderer* renderer, Atlas& atlas, World& world, float delta) {
     
     drawLowerPaddle(renderer, atlas, world.paddle);
     drawUpperPaddle(renderer, atlas, world.enemyUpper.paddle);
-    drawBalls(renderer, atlas, world.balls);
-    drawBricks(renderer, atlas, world.bricks);
+    drawBalls(renderer, atlas, world);
+    drawBricks(renderer, atlas, world);
     
     if (world.type == twoVsTwo) {
         drawLeftPaddle(renderer, atlas, world.enemyLeft.paddle);
@@ -93,10 +80,10 @@ void drawGame(SDL_Renderer* renderer, Atlas& atlas, World& world, float delta) {
     }
     drawObstacles(renderer, atlas, world.obstacles);
 
-    drawBricksDebug(renderer, world.bricks);
+    drawBricksDebug(renderer, world);
     drawPaddleDebug(renderer, world.paddle);
     drawPaddleDebug(renderer, world.enemyUpper.paddle);
-    drawBallsDebug(renderer, world.balls);
+    drawBallsDebug(renderer, world);
     drawPoint(renderer, world.enemyUpper.steeringPos, RED);
     
     if (world.type == twoVsTwo) {

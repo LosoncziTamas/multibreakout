@@ -6,7 +6,7 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
-#define HOTLOAD 1
+#define HOTLOAD 0
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 480;

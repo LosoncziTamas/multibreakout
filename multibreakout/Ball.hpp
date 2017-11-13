@@ -24,10 +24,10 @@ struct Ball {
     int textureIndex;
 };
 
+Ball *addBall(World& world, Paddle& paddle);
 void updateBalls(World& world, GameInput& input, float delta);
-void collideBalls(std::vector<Ball>& balls);
-void initBall(Ball& ball, std::vector<Ball>& balls, Paddle& paddle);
-void drawBalls(SDL_Renderer* renderer, Atlas& atlas, const std::vector<Ball>& balls);
-void drawBallsDebug(SDL_Renderer* renderer, const std::vector<Ball>& balls);
+void collideBalls(World& world);
+void drawBalls(SDL_Renderer* renderer, Atlas& atlas, World& world);
+void drawBallsDebug(SDL_Renderer* renderer, World& world);
 
 #endif

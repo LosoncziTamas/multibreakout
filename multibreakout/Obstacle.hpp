@@ -29,7 +29,7 @@ struct Obstacles {
 };
 
 void initObstacles(Obstacles& obstacles);
-void collideWithObstacle(std::vector<Ball>& balls, Obstacles& obstacles);
+void collideWithObstacle(World& world, Obstacles& obstacles);
 void drawObstacles(SDL_Renderer* renderer, Atlas& atlas, Obstacles& obstacles);
 
 #endif
