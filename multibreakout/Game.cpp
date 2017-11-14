@@ -92,7 +92,7 @@ void drawGame(SDL_Renderer* renderer, Atlas& atlas, World& world, float delta) {
     }
 }
 
-void drawUi(std::vector<SDL_Texture*>& ninePatchTextures, GameUi& gameUi, SDL_Renderer* renderer, Atlas& atlas) {
+void drawUi(SDL_Texture** ninePatchTextures, GameUi& gameUi, SDL_Renderer* renderer, Atlas& atlas) {
     drawNinePatch(ninePatchTextures, gameUi.leftPanel, renderer);
     drawNinePatch(ninePatchTextures, gameUi.rightPanel, renderer);
     drawButton(renderer, atlas, gameUi.leftButton);

@@ -3,8 +3,9 @@
 
 #include "Renderer.hpp"
 #include "NinePatch.hpp"
+#include "GameState.hpp"
 
-void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer, std::vector<SDL_Texture*>& ninePatchTextures) {
+void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer) {
     ninePatchBase.surface = IMG_Load("assets/panelhdpi.9.png");
     SDL_assert(ninePatchBase.surface);
     SDL_Texture* texture = SDL_CreateTexture(renderer,
@@ -58,7 +59,7 @@ void initNinePatcheBase(NinePatchBase& ninePatchBase, SDL_Renderer* renderer, st
     ninePatchBase.fillableCenter = {leftRectWidth, topRectHeight, rightRectStart - leftRectWidth, bottomRectStart - topRectHeight};
 }
 
-void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, SDL_Renderer* renderer, std::vector<SDL_Texture*>& ninePatchTextures) {
+void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &ninePatch, GameState &gameState) {
     Uint32 rMask, gMask, bMask, aMask;
     
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -131,20 +132,20 @@ void generateTextureFromNinePatchBase(NinePatchBase& ninePatchBase, NinePatch &n
             SDL_BlitSurface(ninePatchBase.surface, &fillableCenter, tmpSurface, &dstRectFillableCenter);
         }
     }
-    
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+    SDL_assert(gameState.textureCount < SDL_arraysize(gameState.ninePatchTextures));
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(gameState.renderer, tmpSurface);
     SDL_assert(texture);
-    ninePatchTextures.push_back(texture);
+    gameState.ninePatchTextures[gameState.textureCount++] = texture;
     SDL_FreeSurface(tmpSurface);
 }
 
-void drawNinePatch(std::vector<SDL_Texture*>& ninePatchTextures, NinePatch& ninePatch, SDL_Renderer* renderer) {
+void drawNinePatch(SDL_Texture** ninePatchTextures, NinePatch& ninePatch, SDL_Renderer* renderer) {
     SDL_Rect dst = {ninePatch.x, flipY(ninePatch.y, ninePatch.h), ninePatch.w, ninePatch.h};
     SDL_RenderCopy(renderer, ninePatchTextures[ninePatch.textureId], NULL, &dst);
 }
 
-void deleteNinePatches(std::vector<SDL_Texture*>& ninePatchTextures) {
-    for (auto p : ninePatchTextures) {
-        SDL_DestroyTexture(p);
+void deleteNinePatches(SDL_Texture** ninePatchTextures, Uint32 textureCount) {
+    for (Uint32 textureIndex = 0; textureIndex < textureCount; ++textureCount) {
+        SDL_DestroyTexture(ninePatchTextures[textureIndex]);
     }
 }

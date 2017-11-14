@@ -20,7 +20,9 @@ struct GameState {
     Screen currScreen;
     GameInput input;
     
-    std::vector<SDL_Texture*> ninePatchTextures;
+    Uint32 textureCount;
+    SDL_Texture *ninePatchTextures[3];
+    
     SDL_Renderer *renderer;
     FC_Font *font;
     Atlas atlas;

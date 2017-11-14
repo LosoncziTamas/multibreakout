@@ -20,7 +20,7 @@ struct Menu {
 
 void initializeMenu(Menu& menu, FC_Font* font, Atlas& atlas);
 void updateMenu(Menu& menu, GameState& gameState);
-void drawMenu(Menu& menu, SDL_Renderer* renderer, FC_Font* font, Atlas& atlas, std::vector<SDL_Texture*>& ninePatchTextures);
+void drawMenu(Menu& menu, SDL_Renderer* renderer, FC_Font* font, Atlas& atlas,SDL_Texture** ninePatchTextures);
 
 
 #endif

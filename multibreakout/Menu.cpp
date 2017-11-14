@@ -63,7 +63,7 @@ void updateMenu(Menu& menu, GameState& gameState) {
     updateFontButton(menu.leaderBoards, gameState);
 }
 
-void drawMenu(Menu& menu, SDL_Renderer* renderer, FC_Font* font, Atlas& atlas, std::vector<SDL_Texture*>& ninePatchTextures) {
+void drawMenu(Menu& menu, SDL_Renderer* renderer, FC_Font* font, Atlas& atlas, SDL_Texture** ninePatchTextures) {
     clear(renderer, SKY_BLUE);
     drawNinePatch(ninePatchTextures, menu.menuPanel, renderer);
     drawFontButton(menu.startGame, font, renderer);

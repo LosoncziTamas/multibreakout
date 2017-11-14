@@ -7,11 +7,14 @@
 
 void generatePatches(GameState& gameState) {
     NinePatchBase base;
-    gameState.ninePatchTextures.clear();
-    initNinePatcheBase(base, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.gameUi.leftPanel, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.gameUi.rightPanel, gameState.renderer, gameState.ninePatchTextures);
-    generateTextureFromNinePatchBase(base, gameState.menu.menuPanel, gameState.renderer, gameState.ninePatchTextures);
+    for (Uint32 textureIndex = 0; textureIndex < gameState.textureCount; ++textureIndex) {
+        SDL_DestroyTexture(gameState.ninePatchTextures[textureIndex]);
+    }
+    gameState.textureCount = 0;
+    initNinePatcheBase(base, gameState.renderer);
+    generateTextureFromNinePatchBase(base, gameState.gameUi.leftPanel, gameState);
+    generateTextureFromNinePatchBase(base, gameState.gameUi.rightPanel, gameState);
+    generateTextureFromNinePatchBase(base, gameState.menu.menuPanel, gameState);
     SDL_FreeSurface(base.surface);
 }
 
