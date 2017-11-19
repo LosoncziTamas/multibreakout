@@ -12,7 +12,7 @@ const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 480;
 const float TARGET_UPDATE_HZ = 30.0f;
 
-typedef void (*gameUpdateFn)(GameState& gameState);
+typedef void (*gameUpdateFn)(GameState &gameState);
 
 struct GameCode {
     void *dll;
@@ -82,8 +82,19 @@ int main(void) {
     Uint64 startCounter = SDL_GetPerformanceCounter();
     Uint64 perfCountFreq = SDL_GetPerformanceFrequency();
     
-    GameState gameState = {};
-    gameState.renderer = createRenderer(window);
+    size_t totalSize = 1024 * 1024 * 16;
+    void *memory = SDL_malloc(totalSize);
+    SDL_assert(memory && totalSize > sizeof(GameState));
+    
+    GameState *gameState = (GameState*)memory;
+    
+    Memory gameMemory = {};
+    gameMemory.size = totalSize - sizeof(GameState);
+    gameMemory.used = 0;
+    gameMemory.base = (Uint8*) memory + sizeof(GameState);
+    
+    gameState->gameMemory = gameMemory;
+    gameState->renderer = createRenderer(window);
     
     GameCode gameCode = {};
     time_t lastWrite = 0;
@@ -110,12 +121,12 @@ int main(void) {
         input.mouseLeft = mouseVal & SDL_BUTTON(SDL_BUTTON_LEFT);
         input.mouseRight = mouseVal & SDL_BUTTON(SDL_BUTTON_RIGHT);
         
-        gameState.input = input;
+        gameState->input = input;
         
         while (secondsElapsed(startCounter, SDL_GetPerformanceCounter()) < secondsPerFrame);
         
         Uint64 end_counter = SDL_GetPerformanceCounter();
-        gameState.delta = static_cast<float>(end_counter - startCounter) / static_cast<float>(perfCountFreq);
+        gameState->delta = SDL_static_cast(float, (end_counter - startCounter)) / SDL_static_cast(float, perfCountFreq);
         
 #if HOTLOAD
         time_t time = getLastWriteTime(dllPath);
@@ -134,13 +145,13 @@ int main(void) {
             gameCode.update(gameState);
         }
 #else
-        gameUpdate(gameState);
+        gameUpdate(*gameState);
 #endif
         
         startCounter = end_counter;
     }
     
-    SDL_DestroyRenderer(gameState.renderer);
+    SDL_DestroyRenderer(gameState->renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }

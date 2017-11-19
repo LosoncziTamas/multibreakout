@@ -13,16 +13,23 @@ enum Screen {
     menu, game
 };
 
+struct Memory {
+    Uint8 *base;
+    size_t size;
+    size_t used;
+};
+
 struct GameState {
+    
     float delta;
     bool paused;
     bool initialized;
     Screen currScreen;
     GameInput input;
+    Memory gameMemory;
     
     Uint32 textureCount;
     SDL_Texture *ninePatchTextures[3];
-    
     SDL_Renderer *renderer;
     FC_Font *font;
     Atlas atlas;

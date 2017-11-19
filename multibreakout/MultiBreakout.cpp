@@ -18,9 +18,9 @@ void generatePatches(GameState& gameState) {
     SDL_FreeSurface(base.surface);
 }
 
-extern "C" void gameUpdate(GameState& gameState) {
+extern "C" void gameUpdate(GameState &gameState) {
     if (!gameState.initialized) {
-        srand(static_cast<unsigned int>(time(NULL)));
+        srand(SDL_static_cast(unsigned int, time(NULL)));
         gameState.font = createFont(gameState.renderer);
         initTextures(gameState.renderer, gameState.atlas, gameState.world);
         gameState.gameUi.leftPanel = {0, 0, 160, SCREEN_HEIGHT, LEFT_PANEL};

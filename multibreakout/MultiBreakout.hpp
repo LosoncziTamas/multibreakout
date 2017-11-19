@@ -30,6 +30,6 @@ struct GameInput
     };
 };
 
-extern "C" void gameUpdate(GameState& gameState);
+extern "C" void gameUpdate(GameState &gameState);
 
 #endif
