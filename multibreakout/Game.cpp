@@ -113,5 +113,6 @@ void gamePlayUpdate(GameState& gameState) {
     drawGame(gameState.renderer, gameState.atlas, gameState.world, gameState.delta);
     drawUi(gameState.ninePatchTextures, gameState.gameUi, gameState.renderer, gameState.atlas);
     drawDebugInfo(gameState.renderer, gameState.font, gameState.world, gameState.delta);
+    updateProjectile(&gameState.projectile, gameState.renderer, gameState.delta);
     SDL_RenderPresent(gameState.renderer);
 }

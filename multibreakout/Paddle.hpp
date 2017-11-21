@@ -46,4 +46,18 @@ void drawLeftPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
 void drawRightPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
 void drawLowerPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
 
+struct Projectile {
+    Vec2 velocity;
+    Vec2 oldPos;
+    Vec2 newPos;
+    Vec2 delta;
+    float width;
+    float height;
+    float speed;
+    Uint32 textureIndex;
+};
+
+void updateProjectile(Projectile* projectile, SDL_Renderer* renderer, float delta);
+void setProjectile(Projectile* projectile);
+
 #endif

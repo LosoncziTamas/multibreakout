@@ -19,6 +19,7 @@ struct GameState {
     float delta;
     bool paused;
     bool initialized;
+    Projectile projectile;
     Screen currScreen;
     GameInput input;
     Memory gameMemory;

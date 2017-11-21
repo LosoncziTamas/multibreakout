@@ -6,6 +6,48 @@
 #include "Physics.hpp"
 #include "Texture.hpp"
 
+struct Rect {
+    Vec2 bottomLeft;
+    Vec2 topRight;
+};
+
+Vec2 getRectCenter(Rect* rect) {
+    Vec2 center;
+    float width = rect->topRight.x - rect->bottomLeft.x;
+    float height = rect->topRight.y - rect->bottomLeft.y;
+    center.x = rect->bottomLeft.x + 0.5f * width;
+    center.y = rect->bottomLeft.y + 0.5f * height;
+    
+    return center;
+}
+
+void setProjectile(Projectile* projectile) {
+    projectile->velocity = Vec2(0.0f, 1.0f);
+    projectile->newPos = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f + 10.0f);
+    projectile->speed = 200.0f;
+    projectile->width = 30.0f;
+    projectile->height = 30.0f;
+    projectile->textureIndex = PURPLE_BRICK;
+}
+
+void updateProjectile(Projectile* projectile, SDL_Renderer* renderer, float delta) {
+    Vec2 acceleration = Vec2(0.0f, 1.0f);
+    acceleration *= projectile->speed;
+    projectile->oldPos = projectile->newPos;
+    projectile->delta = (0.5f * acceleration * pow(delta, 2) + projectile->velocity * delta);
+    projectile->velocity += acceleration * delta;
+    projectile->newPos = projectile->oldPos + projectile->delta;
+    
+    SDL_Rect rect;
+    rect.w = round(projectile->width);
+    rect.h = round(projectile->height);
+    rect.x = round(projectile->newPos.x - projectile->width * 0.5f);
+    rect.y = round(SCREEN_HEIGHT - (projectile->newPos.y + projectile->height * 0.5f));
+    
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderDrawRect(renderer, &rect);
+}
+
 void initPaddle(Paddle &paddle) {
     paddle.width = DEFAULT_WIDTH;
     paddle.height = DEFAULT_HEIGHT;

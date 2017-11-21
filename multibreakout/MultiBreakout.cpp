@@ -43,6 +43,7 @@ extern "C" void gameUpdate(GameState &gameState) {
             if (!gameState.world.initialized) {
                 initalizeGameWorld(gameState.world);
                 gameState.world.initialized = true;
+                setProjectile(&gameState.projectile);
             }
             if (!gameState.gameUi.initialized) {
                 initializeUi(gameState.gameUi);
