@@ -18,6 +18,7 @@
 		E96AD1DB1F1A3CF600B66D3A /* Ball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E96AD1DA1F1A3CF600B66D3A /* Ball.cpp */; };
 		E9A2F6C51FAB7B750050DA5A /* NinePatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9A2F6C31FAB7B750050DA5A /* NinePatch.cpp */; };
 		E9A7DFAD1F94A2C700083AA4 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9A7DFAB1F94A2C700083AA4 /* Texture.cpp */; };
+		E9B7A67F1FC4C38F00191845 /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9B7A67D1FC4C38F00191845 /* Memory.cpp */; };
 		E9BC8BF01F99D74300B19AFC /* Obstacle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9BC8BEE1F99D74300B19AFC /* Obstacle.cpp */; };
 		E9BC8BF31F99F95800B19AFC /* Physics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9BC8BF11F99F95800B19AFC /* Physics.cpp */; };
 		E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9C5A0B11F0CDBC10017FCE6 /* Paddle.cpp */; };
@@ -64,6 +65,8 @@
 		E9A2F6C41FAB7B750050DA5A /* NinePatch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = NinePatch.hpp; sourceTree = "<group>"; };
 		E9A7DFAB1F94A2C700083AA4 /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = "<group>"; };
 		E9A7DFAC1F94A2C700083AA4 /* Texture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Texture.hpp; sourceTree = "<group>"; };
+		E9B7A67D1FC4C38F00191845 /* Memory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Memory.cpp; sourceTree = "<group>"; };
+		E9B7A67E1FC4C38F00191845 /* Memory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Memory.hpp; sourceTree = "<group>"; };
 		E9BC8BEE1F99D74300B19AFC /* Obstacle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obstacle.cpp; sourceTree = "<group>"; };
 		E9BC8BEF1F99D74300B19AFC /* Obstacle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Obstacle.hpp; sourceTree = "<group>"; };
 		E9BC8BF11F99F95800B19AFC /* Physics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Physics.cpp; sourceTree = "<group>"; };
@@ -163,6 +166,8 @@
 				E9E601711FB1A9C90002AE28 /* Menu.hpp */,
 				E931C4181FB30E5F005B8D3B /* Game.cpp */,
 				E931C4191FB30E5F005B8D3B /* Game.hpp */,
+				E9B7A67D1FC4C38F00191845 /* Memory.cpp */,
+				E9B7A67E1FC4C38F00191845 /* Memory.hpp */,
 			);
 			path = multibreakout;
 			sourceTree = "<group>";
@@ -238,6 +243,7 @@
 				E9FD54151F9DDCE400B80EA3 /* jsmn.c in Sources */,
 				E93D152B1F0B9F84007BF3ED /* Renderer.cpp in Sources */,
 				E9A2F6C51FAB7B750050DA5A /* NinePatch.cpp in Sources */,
+				E9B7A67F1FC4C38F00191845 /* Memory.cpp in Sources */,
 				E9C5A0B31F0CDBC10017FCE6 /* Paddle.cpp in Sources */,
 				E93D151A1F0B9158007BF3ED /* main.cpp in Sources */,
 				E9BC8BF31F99F95800B19AFC /* Physics.cpp in Sources */,

@@ -8,15 +8,10 @@
 #include "Renderer.hpp"
 #include "NinePatch.hpp"
 #include "Menu.hpp"
+#include "Memory.hpp"
 
 enum Screen {
     menu, game
-};
-
-struct Memory {
-    Uint8 *base;
-    size_t size;
-    size_t used;
 };
 
 struct GameState {

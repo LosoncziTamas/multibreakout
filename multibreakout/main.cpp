@@ -63,7 +63,7 @@ static SDL_bool handleEvent(SDL_Event& event) {
 }
 
 static float secondsElapsed(Uint64 old, Uint64 current) {
-    return static_cast<float>(current - old) / static_cast<float>(SDL_GetPerformanceFrequency());
+    return SDL_static_cast(float, current - old) / SDL_static_cast(float, SDL_GetPerformanceFrequency());
 }
 
 
@@ -151,6 +151,7 @@ int main(void) {
         startCounter = end_counter;
     }
     
+    SDL_free(memory);
     SDL_DestroyRenderer(gameState->renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
