@@ -4,8 +4,8 @@
 #include "Paddle.hpp"
 
 void initalizeGameWorld(World& world) {
-    world.leftBoundary = 160;
-    world.rightBoundary = SCREEN_WIDTH - 160;
+    world.bounds.bottomLeft = Vec2(160, 0);
+    world.bounds.topRight = Vec2(SCREEN_WIDTH - 160, SCREEN_HEIGHT);
     
     initPaddle(world.paddle);
     initUpperEnemy(world.enemyUpper);
@@ -17,8 +17,8 @@ void initalizeGameWorld(World& world) {
     world.enemyUpper.paddle.textureIndex = ENEMY_PADDLE;
     
     if (world.type == twoVsTwo) {
-        initLeftEnemy(world.enemyLeft, world.leftBoundary);
-        initRightEnemy(world.enemyRight, world.rightBoundary);
+        initLeftEnemy(world.enemyLeft, world.bounds.bottomLeft.x);
+        initRightEnemy(world.enemyRight, world.bounds.topRight.x);
         addBall(world, world.enemyRight.paddle);
         
         world.enemyRight.paddle.textureIndex = ENEMY_PADDLE;

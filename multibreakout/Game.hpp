@@ -20,11 +20,9 @@ const Uint32 MAX_PROJECTILE = 16;
 const Uint32 MAX_BRICKS = 256;
 
 struct World {
+    Rectangle bounds;
     GameType type;
     bool initialized;
-    
-    int leftBoundary;
-    int rightBoundary;
     
     Uint32 brickCount;
     Brick bricks[MAX_BRICKS];

@@ -76,10 +76,10 @@ void updateBalls(World& world, GameInput& input, float delta) {
         ball->newPos = ball->oldPos + ball->movementDelta;
         
         float ballTop = ball->newPos.y + ball->radius;
-        if (ballTop >= SCREEN_HEIGHT) {
+        if (ballTop >= world.bounds.topRight.y) {
             Vec2 wallNorm(0.0f, -1.0f);
             ball->velocity = reflect(ball->velocity, wallNorm);
-            ball->movementDelta.y += SCREEN_HEIGHT - ballTop;
+            ball->movementDelta.y += world.bounds.topRight.y - ballTop;
         }
         
         float ballBottom = ball->newPos.y - ball->radius;
@@ -90,17 +90,17 @@ void updateBalls(World& world, GameInput& input, float delta) {
         }
         
         float ballLeft = ball->newPos.x - ball->radius;
-        if (ballLeft <= world.leftBoundary) {
+        if (ballLeft <= world.bounds.bottomLeft.x) {
             Vec2 wallNorm(1.0f, 0.0f);
             ball->velocity = reflect(ball->velocity, wallNorm);
-            ball->movementDelta.x += world.leftBoundary - ballLeft;
+            ball->movementDelta.x += world.bounds.bottomLeft.x - ballLeft;
         }
         
         float ballRight = ball->newPos.x + ball->radius;
-        if (ballRight >= world.rightBoundary) {
+        if (ballRight >= world.bounds.topRight.x) {
             Vec2 wallNorm(-1.0f, 0.0f);
             ball->velocity = reflect(ball->velocity, wallNorm);
-            ball->movementDelta.x += world.rightBoundary - ballRight;
+            ball->movementDelta.x += world.bounds.topRight.x - ballRight;
         }
     }
 }

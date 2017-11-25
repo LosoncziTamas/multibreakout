@@ -6,11 +6,6 @@
 #include "Physics.hpp"
 #include "Texture.hpp"
 
-struct Rectangle {
-    Vec2 bottomLeft;
-    Vec2 topRight;
-};
-
 Vec2 getCenter(Rectangle* rect) {
     Vec2 center = 0.5f * (rect->bottomLeft + rect->topRight);
     return center;
@@ -30,7 +25,6 @@ bool isInRectangle(Rectangle rectangle, Vec2 test) {
                    (test.y >= rectangle.bottomLeft.y) &&
                    (test.x < rectangle.topRight.x) &&
                    (test.y < rectangle.topRight.y));
-    
     return result;
 }
 
@@ -40,7 +34,6 @@ bool aabb(Rectangle rectA, Rectangle rectB) {
                    (rectA.bottomLeft.x <= rectB.topRight.x) &&
                    (rectA.bottomLeft.y <= rectB.topRight.y) &&
                    (rectA.topRight.y >= rectB.bottomLeft.y));
-    
     return result;
 }
 
@@ -50,19 +43,11 @@ Projectile* addProjectile(Vec2 location, World* world) {
     Projectile* projectile = world->projectiles + world->projectileCount++;
     projectile->velocity = Vec2(0.0f, 1.0f);
     projectile->newPos = location;
-    projectile->speed = 100.0f;
+    projectile->speed = 50.0;
     projectile->width = 15.0f;
     projectile->height = 30.0f;
     
     return projectile;
-}
-
-void setProjectile(Projectile* projectile) {
-    projectile->velocity = Vec2(0.0f, 1.0f);
-    projectile->newPos = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f + 10.0f);
-    projectile->speed = 100.0f;
-    projectile->width = 15.0f;
-    projectile->height = 30.0f;
 }
 
 void removeBrickAt(Uint32 index, World* world) {
@@ -75,10 +60,9 @@ void updateProjectiles(World* world, SDL_Renderer* renderer, float delta) {
     for (Uint32 projectileIndex = 0; projectileIndex < world->projectileCount; ++projectileIndex) {
         Projectile* projectile = world->projectiles + projectileIndex;
         
-        //TODO: check if within bounds
-        
         Vec2 acceleration = Vec2(0.0f, 1.0f);
         acceleration *= projectile->speed;
+        
         projectile->oldPos = projectile->newPos;
         projectile->delta = (0.5f * acceleration * pow(delta, 2) + projectile->velocity * delta);
         projectile->velocity += acceleration * delta;
@@ -88,6 +72,16 @@ void updateProjectiles(World* world, SDL_Renderer* renderer, float delta) {
                                                     projectile->width,
                                                     projectile->height);
         
+        Rectangle enemyRect = fromDimAndCenter(world->enemyUpper.paddle.newPos,
+                                               world->enemyUpper.paddle.width,
+                                               world->enemyUpper.paddle.height);
+        
+        bool remove = !isInRectangle(world->bounds, projectile->newPos) || aabb(enemyRect, projectileRect);
+        if (remove) {
+            world->projectiles[projectileIndex] = world->projectiles[--world->projectileCount];
+            return;
+        }
+        
         for (Uint32 brickIndex = 0; brickIndex < world->brickCount; ++brickIndex) {
             Brick* brick = world->bricks + brickIndex;
             Rectangle brickRect = fromDimAndCenter(brick->center, brick->width, brick->height);
@@ -95,10 +89,6 @@ void updateProjectiles(World* world, SDL_Renderer* renderer, float delta) {
                 removeBrickAt(brickIndex, world);
             }
         }
-        
-        Rectangle enemyRect = fromDimAndCenter(world->enemyUpper.paddle.newPos,
-                                               world->enemyUpper.paddle.width,
-                                               world->enemyUpper.paddle.height);
         
         SDL_Rect rect;
         rect.w = round(projectile->width);
@@ -110,8 +100,6 @@ void updateProjectiles(World* world, SDL_Renderer* renderer, float delta) {
         SDL_RenderDrawRect(renderer, &rect);
     }
 }
-
-
 
 void initPaddle(Paddle &paddle) {
     paddle.width = DEFAULT_WIDTH;

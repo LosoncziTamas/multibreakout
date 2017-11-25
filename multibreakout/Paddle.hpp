@@ -58,6 +58,10 @@ struct Projectile {
 
 void updateProjectiles(World* world, SDL_Renderer* renderer, float delta);
 Projectile* addProjectile(Vec2 location, World* world);
-void setProjectile(Projectile* projectile);
+
+struct Rectangle {
+    Vec2 bottomLeft;
+    Vec2 topRight;
+};
 
 #endif
