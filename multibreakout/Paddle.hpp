@@ -54,10 +54,10 @@ struct Projectile {
     float width;
     float height;
     float speed;
-    Uint32 textureIndex;
 };
 
-void updateProjectile(Projectile* projectile, SDL_Renderer* renderer, float delta);
+void updateProjectiles(World* world, SDL_Renderer* renderer, float delta);
+Projectile* addProjectile(Vec2 location, World* world);
 void setProjectile(Projectile* projectile);
 
 #endif

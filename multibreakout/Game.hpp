@@ -16,6 +16,7 @@ enum GameType {
 };
 
 const Uint32 MAX_BALLS = 4;
+const Uint32 MAX_PROJECTILE = 16;
 const Uint32 MAX_BRICKS = 256;
 
 struct World {
@@ -30,6 +31,9 @@ struct World {
     
     Uint32 ballCount;
     Ball balls[MAX_BALLS];
+    
+    Uint32 projectileCount;
+    Projectile projectiles[MAX_PROJECTILE];
     
     Paddle paddle;
     Enemy enemyUpper;

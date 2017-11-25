@@ -1,6 +1,7 @@
 #include "Game.hpp"
 #include "Texture.hpp"
 #include "GameState.hpp"
+#include "Paddle.hpp"
 
 void initalizeGameWorld(World& world) {
     world.leftBoundary = 160;
@@ -23,6 +24,7 @@ void initalizeGameWorld(World& world) {
         world.enemyRight.paddle.textureIndex = ENEMY_PADDLE;
         world.enemyLeft.paddle.textureIndex = PLAYER_PADDLE;
     }
+    
 }
 
 void onLeftClick(GameInput& gameInput) {
@@ -63,6 +65,10 @@ void updateGame(World& world, GameInput& input, float delta) {
     }
     collideWithObstacle(world, world.obstacles);
     collideBalls(world);
+    
+    if (input.mouseLeft) {
+        addProjectile(Vec2(input.mouseX, SCREEN_HEIGHT - input.mouseY), &world);
+    }
 }
 
 void drawGame(SDL_Renderer* renderer, Atlas& atlas, World& world, float delta) {
@@ -113,6 +119,6 @@ void gamePlayUpdate(GameState& gameState) {
     drawGame(gameState.renderer, gameState.atlas, gameState.world, gameState.delta);
     drawUi(gameState.ninePatchTextures, gameState.gameUi, gameState.renderer, gameState.atlas);
     drawDebugInfo(gameState.renderer, gameState.font, gameState.world, gameState.delta);
-    updateProjectile(&gameState.projectile, gameState.renderer, gameState.delta);
+    updateProjectiles(&gameState.world, gameState.renderer, gameState.delta);
     SDL_RenderPresent(gameState.renderer);
 }

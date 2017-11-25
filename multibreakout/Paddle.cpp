@@ -6,47 +6,112 @@
 #include "Physics.hpp"
 #include "Texture.hpp"
 
-struct Rect {
+struct Rectangle {
     Vec2 bottomLeft;
     Vec2 topRight;
 };
 
-Vec2 getRectCenter(Rect* rect) {
-    Vec2 center;
-    float width = rect->topRight.x - rect->bottomLeft.x;
-    float height = rect->topRight.y - rect->bottomLeft.y;
-    center.x = rect->bottomLeft.x + 0.5f * width;
-    center.y = rect->bottomLeft.y + 0.5f * height;
-    
+Vec2 getCenter(Rectangle* rect) {
+    Vec2 center = 0.5f * (rect->bottomLeft + rect->topRight);
     return center;
+}
+
+Rectangle fromDimAndCenter(Vec2 center, float width, float height) {
+    Rectangle result;
+    result.bottomLeft.x = center.x - width * 0.5f;
+    result.bottomLeft.y = center.y - height * 0.5f;
+    result.topRight.x = center.x + width * 0.5f;
+    result.topRight.y = center.y + height * 0.5f;
+    return result;
+}
+
+bool isInRectangle(Rectangle rectangle, Vec2 test) {
+    bool result = ((test.x >= rectangle.bottomLeft.x) &&
+                   (test.y >= rectangle.bottomLeft.y) &&
+                   (test.x < rectangle.topRight.x) &&
+                   (test.y < rectangle.topRight.y));
+    
+    return result;
+}
+
+
+bool aabb(Rectangle rectA, Rectangle rectB) {
+    bool result = ((rectA.topRight.x >= rectB.bottomLeft.x) &&
+                   (rectA.bottomLeft.x <= rectB.topRight.x) &&
+                   (rectA.bottomLeft.y <= rectB.topRight.y) &&
+                   (rectA.topRight.y >= rectB.bottomLeft.y));
+    
+    return result;
+}
+
+Projectile* addProjectile(Vec2 location, World* world) {
+    SDL_assert(world->projectileCount < SDL_arraysize(world->projectiles));
+    
+    Projectile* projectile = world->projectiles + world->projectileCount++;
+    projectile->velocity = Vec2(0.0f, 1.0f);
+    projectile->newPos = location;
+    projectile->speed = 100.0f;
+    projectile->width = 15.0f;
+    projectile->height = 30.0f;
+    
+    return projectile;
 }
 
 void setProjectile(Projectile* projectile) {
     projectile->velocity = Vec2(0.0f, 1.0f);
     projectile->newPos = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f + 10.0f);
-    projectile->speed = 200.0f;
-    projectile->width = 30.0f;
+    projectile->speed = 100.0f;
+    projectile->width = 15.0f;
     projectile->height = 30.0f;
-    projectile->textureIndex = PURPLE_BRICK;
 }
 
-void updateProjectile(Projectile* projectile, SDL_Renderer* renderer, float delta) {
-    Vec2 acceleration = Vec2(0.0f, 1.0f);
-    acceleration *= projectile->speed;
-    projectile->oldPos = projectile->newPos;
-    projectile->delta = (0.5f * acceleration * pow(delta, 2) + projectile->velocity * delta);
-    projectile->velocity += acceleration * delta;
-    projectile->newPos = projectile->oldPos + projectile->delta;
-    
-    SDL_Rect rect;
-    rect.w = round(projectile->width);
-    rect.h = round(projectile->height);
-    rect.x = round(projectile->newPos.x - projectile->width * 0.5f);
-    rect.y = round(SCREEN_HEIGHT - (projectile->newPos.y + projectile->height * 0.5f));
-    
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &rect);
+void removeBrickAt(Uint32 index, World* world) {
+    SDL_assert(index < world->brickCount);
+    world->bricks[index] = world->bricks[--world->brickCount];
+    //TODO: null the old one?
 }
+
+void updateProjectiles(World* world, SDL_Renderer* renderer, float delta) {
+    for (Uint32 projectileIndex = 0; projectileIndex < world->projectileCount; ++projectileIndex) {
+        Projectile* projectile = world->projectiles + projectileIndex;
+        
+        //TODO: check if within bounds
+        
+        Vec2 acceleration = Vec2(0.0f, 1.0f);
+        acceleration *= projectile->speed;
+        projectile->oldPos = projectile->newPos;
+        projectile->delta = (0.5f * acceleration * pow(delta, 2) + projectile->velocity * delta);
+        projectile->velocity += acceleration * delta;
+        projectile->newPos = projectile->oldPos + projectile->delta;
+        
+        Rectangle projectileRect = fromDimAndCenter(projectile->newPos,
+                                                    projectile->width,
+                                                    projectile->height);
+        
+        for (Uint32 brickIndex = 0; brickIndex < world->brickCount; ++brickIndex) {
+            Brick* brick = world->bricks + brickIndex;
+            Rectangle brickRect = fromDimAndCenter(brick->center, brick->width, brick->height);
+            if (aabb(brickRect, projectileRect)) {
+                removeBrickAt(brickIndex, world);
+            }
+        }
+        
+        Rectangle enemyRect = fromDimAndCenter(world->enemyUpper.paddle.newPos,
+                                               world->enemyUpper.paddle.width,
+                                               world->enemyUpper.paddle.height);
+        
+        SDL_Rect rect;
+        rect.w = round(projectile->width);
+        rect.h = round(projectile->height);
+        rect.x = round(projectile->newPos.x - projectile->width * 0.5f);
+        rect.y = round(SCREEN_HEIGHT - (projectile->newPos.y + projectile->height * 0.5f));
+        
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderDrawRect(renderer, &rect);
+    }
+}
+
+
 
 void initPaddle(Paddle &paddle) {
     paddle.width = DEFAULT_WIDTH;
