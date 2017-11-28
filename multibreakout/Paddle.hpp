@@ -54,23 +54,4 @@ void drawRightPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
 
 void drawLowerPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
 
-struct Projectile {
-    Vec2 velocity;
-    Vec2 oldPos;
-    Vec2 newPos;
-    Vec2 delta;
-    float width;
-    float height;
-    float speed;
-};
-
-void updateProjectiles(World* world, SDL_Renderer* renderer, float delta);
-
-Projectile* addProjectile(Vec2 location, World* world);
-
-struct Rectangle {
-    Vec2 bottomLeft;
-    Vec2 topRight;
-};
-
 #endif

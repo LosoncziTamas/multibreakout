@@ -10,6 +10,8 @@
 #include "Brick.hpp"
 #include "TextureButton.hpp"
 #include "NinePatch.hpp"
+#include "Projectile.hpp"
+#include "Physics.hpp"
 
 enum GameType {
     oneVsOne, twoVsTwo
