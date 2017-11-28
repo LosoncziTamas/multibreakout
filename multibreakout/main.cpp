@@ -107,21 +107,20 @@ int main(void) {
             running = handleEvent(event);
         }
         
-        GameInput input = {};
+        gameState->oldInput = gameState->input;
+        gameState->input = {};
         
         const Uint8 *state = SDL_GetKeyboardState(NULL);
-        input.left = state[SDL_SCANCODE_LEFT];
-        input.down = state[SDL_SCANCODE_DOWN];
-        input.up = state[SDL_SCANCODE_UP];
-        input.right = state[SDL_SCANCODE_RIGHT];
-        input.space = state[SDL_SCANCODE_SPACE];
-        input.pause = state[SDL_SCANCODE_P];
+        gameState->input.left = state[SDL_SCANCODE_LEFT];
+        gameState->input.down = state[SDL_SCANCODE_DOWN];
+        gameState->input.up = state[SDL_SCANCODE_UP];
+        gameState->input.right = state[SDL_SCANCODE_RIGHT];
+        gameState->input.space = state[SDL_SCANCODE_SPACE];
+        gameState->input.pause = state[SDL_SCANCODE_P];
         
-        Uint32 mouseVal = SDL_GetMouseState(&input.mouseX, &input.mouseY);
-        input.mouseLeft = mouseVal & SDL_BUTTON(SDL_BUTTON_LEFT);
-        input.mouseRight = mouseVal & SDL_BUTTON(SDL_BUTTON_RIGHT);
-        
-        gameState->input = input;
+        Uint32 mouseVal = SDL_GetMouseState(&gameState->input.mouseX, &gameState->input.mouseY);
+        gameState->input.mouseLeft = mouseVal & SDL_BUTTON(SDL_BUTTON_LEFT);
+        gameState->input.mouseRight = mouseVal & SDL_BUTTON(SDL_BUTTON_RIGHT);
         
         while (secondsElapsed(startCounter, SDL_GetPerformanceCounter()) < secondsPerFrame);
         

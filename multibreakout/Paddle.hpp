@@ -36,14 +36,22 @@ struct Paddle {
     Orientation orientation;
 };
 
-void initPaddle(Paddle &paddle);
-void updatePaddle(World& world, GameInput& input, float delta);
+void initPaddle(Paddle* paddle);
+
+void updatePaddle(World* world, GameInput* input, GameInput* oldInput, float delta);
+
 void resolveCollision(World& world, Paddle& paddle, float delta);
-void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta);
+
+Vec2 acceleratePaddle(Vec2 acceleration, Paddle* paddle, float delta);
+
 void drawPaddleDebug(SDL_Renderer* renderer, Paddle& paddle);
+
 void drawUpperPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+
 void drawLeftPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+
 void drawRightPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+
 void drawLowerPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
 
 struct Projectile {
@@ -57,6 +65,7 @@ struct Projectile {
 };
 
 void updateProjectiles(World* world, SDL_Renderer* renderer, float delta);
+
 Projectile* addProjectile(Vec2 location, World* world);
 
 struct Rectangle {

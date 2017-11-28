@@ -20,6 +20,7 @@ struct GameState {
     bool paused;
     bool initialized;
     Screen currScreen;
+    GameInput oldInput;
     GameInput input;
     Memory gameMemory;
     

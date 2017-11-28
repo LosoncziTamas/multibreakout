@@ -7,7 +7,7 @@ void initalizeGameWorld(World& world) {
     world.bounds.bottomLeft = Vec2(160, 0);
     world.bounds.topRight = Vec2(SCREEN_WIDTH - 160, SCREEN_HEIGHT);
     
-    initPaddle(world.paddle);
+    initPaddle(&world.paddle);
     initUpperEnemy(world.enemyUpper);
     initBricks(world);
     initObstacles(world.obstacles);
@@ -24,7 +24,6 @@ void initalizeGameWorld(World& world) {
         world.enemyRight.paddle.textureIndex = ENEMY_PADDLE;
         world.enemyLeft.paddle.textureIndex = PLAYER_PADDLE;
     }
-    
 }
 
 void onLeftClick(GameInput& gameInput) {
@@ -45,29 +44,29 @@ void updateUi(GameUi& gameUi, GameInput& input) {
     updateButton(gameUi.rightButton, input);
 }
 
-void updateGame(World& world, GameInput& input, float delta) {
-    updateBalls(world, input, delta);
-    updatePaddle(world, input, delta);
-    updateEnemy(world, world.enemyUpper, delta);
+void updateGame(World* world, GameInput* input, GameInput* oldInput, float delta) {
+    updateBalls(*world, *input, delta);
+    updatePaddle(world, input, oldInput, delta);
+    updateEnemy(*world, world->enemyUpper, delta);
     
-    if (world.type == twoVsTwo) {
-        updateEnemy(world, world.enemyLeft, delta);
-        updateEnemy(world, world.enemyRight, delta);
+    if (world->type == twoVsTwo) {
+        updateEnemy(*world, world->enemyLeft, delta);
+        updateEnemy(*world, world->enemyRight, delta);
     }
     
-    collideWithBrick(world);
-    resolveCollision(world, world.enemyUpper.paddle, delta);
-    resolveCollision(world, world.paddle, delta);
+    collideWithBrick(*world);
+    resolveCollision(*world, world->enemyUpper.paddle, delta);
+    resolveCollision(*world, world->paddle, delta);
     
-    if (world.type == twoVsTwo) {
-        resolveCollision(world, world.enemyLeft.paddle, delta);
-        resolveCollision(world, world.enemyRight.paddle, delta);
+    if (world->type == twoVsTwo) {
+        resolveCollision(*world, world->enemyLeft.paddle, delta);
+        resolveCollision(*world, world->enemyRight.paddle, delta);
     }
-    collideWithObstacle(world, world.obstacles);
-    collideBalls(world);
+    collideWithObstacle(*world, world->obstacles);
+    collideBalls(*world);
     
-    if (input.mouseLeft) {
-        addProjectile(Vec2(input.mouseX, SCREEN_HEIGHT - input.mouseY), &world);
+    if (input->mouseLeft && !oldInput->mouseLeft) {
+        addProjectile(Vec2(input->mouseX, SCREEN_HEIGHT - input->mouseY), world);
     }
 }
 
@@ -115,7 +114,7 @@ void gamePlayUpdate(GameState& gameState) {
     
     clear(gameState.renderer, SKY_BLUE);
     updateUi(gameState.gameUi, gameState.input);
-    updateGame(gameState.world, gameState.input, gameState.delta);
+    updateGame(&gameState.world, &gameState.input, &gameState.oldInput, gameState.delta);
     drawGame(gameState.renderer, gameState.atlas, gameState.world, gameState.delta);
     drawUi(gameState.ninePatchTextures, gameState.gameUi, gameState.renderer, gameState.atlas);
     drawDebugInfo(gameState.renderer, gameState.font, gameState.world, gameState.delta);

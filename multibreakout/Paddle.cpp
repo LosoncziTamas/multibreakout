@@ -53,7 +53,6 @@ Projectile* addProjectile(Vec2 location, World* world) {
 void removeBrickAt(Uint32 index, World* world) {
     SDL_assert(index < world->brickCount);
     world->bricks[index] = world->bricks[--world->brickCount];
-    //TODO: null the old one?
 }
 
 void updateProjectiles(World* world, SDL_Renderer* renderer, float delta) {
@@ -101,55 +100,60 @@ void updateProjectiles(World* world, SDL_Renderer* renderer, float delta) {
     }
 }
 
-void initPaddle(Paddle &paddle) {
-    paddle.width = DEFAULT_WIDTH;
-    paddle.height = DEFAULT_HEIGHT;
-    paddle.newPos = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f);
-    paddle.speed = DEFAULT_SPEED;
-    paddle.orientation = lower;
-    paddle.textureIndex = INVALID_INDEX;
+void initPaddle(Paddle* paddle) {
+    paddle->width = DEFAULT_WIDTH;
+    paddle->height = DEFAULT_HEIGHT;
+    paddle->newPos = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f);
+    paddle->speed = DEFAULT_SPEED;
+    paddle->orientation = lower;
+    paddle->textureIndex = INVALID_INDEX;
 }
 
-void acceleratePaddle(Vec2& acceleration, Paddle& paddle, float delta) {
-    acceleration *= paddle.speed;
-    paddle.oldPos = paddle.newPos;
-    paddle.movementDelta = (0.5f * acceleration * pow(delta, 2) + paddle.velocity * delta);
-    paddle.velocity += acceleration * delta;
-    paddle.newPos = paddle.oldPos + paddle.movementDelta;
+Vec2 acceleratePaddle(Vec2 acceleration, Paddle* paddle, float delta) {
+    acceleration *= paddle->speed;
+    paddle->oldPos = paddle->newPos;
+    paddle->movementDelta = (0.5f * acceleration * pow(delta, 2) + paddle->velocity * delta);
+    paddle->velocity += acceleration * delta;
+    paddle->newPos = paddle->oldPos + paddle->movementDelta;
+    return acceleration;
 }
 
-void updatePaddle(World& world, GameInput& input, float delta) {
-    Paddle &paddle = world.paddle;
+void updatePaddle(World* world, GameInput* input, GameInput* oldInput, float delta) {
+    Paddle *paddle = &world->paddle;
     
     Vec2 acceleration;
-    if (input.left) {
-        if (paddle.velocity.x > 0){
-            paddle.velocity.x = 0.0f;
+    if (input->left) {
+        if (paddle->velocity.x > 0){
+            paddle->velocity.x = 0.0f;
         }
         acceleration.x = -1.0;
-    } else if (input.right) {
-        if (paddle.velocity.x < 0){
-            paddle.velocity.x = 0.0f;
+    } else if (input->right) {
+        if (paddle->velocity.x < 0){
+            paddle->velocity.x = 0.0f;
         }
         acceleration.x = 1.0;
     } else {
-        paddle.velocity += - 0.02 * paddle.velocity;
+        paddle->velocity += - 0.02 * paddle->velocity;
     }
     
-    acceleratePaddle(acceleration, paddle, delta);
+    if (input->space && !oldInput->space) {
+        addProjectile(paddle->newPos, world);
+    }
     
-    float offset = paddle.width * 0.5f;
-    Obstacle* leftBottom = world.obstacles.content + world.obstacles.leftBottomIndex;
-    Obstacle* rightBottom = world.obstacles.content + world.obstacles.rightBottomIndex;
+    acceleration = acceleratePaddle(acceleration, paddle, delta);
     
-    if (paddle.newPos.x - offset < (leftBottom->center.x + leftBottom->width * 0.5f)) {
+    float offset = paddle->width * 0.5f;
+    Obstacle* leftBottom = world->obstacles.content + world->obstacles.leftBottomIndex;
+    Obstacle* rightBottom = world->obstacles.content + world->obstacles.rightBottomIndex;
+    
+    if (paddle->newPos.x - offset < (leftBottom->center.x + leftBottom->width * 0.5f)) {
         Vec2 wallNorm(1, 0);
-        paddle.velocity = reflect(paddle.velocity, wallNorm);
-        paddle.movementDelta.x += 1.0f;
-    } else if (paddle.newPos.x + offset > (rightBottom->center.x - leftBottom->width * 0.5f)) {
+        paddle->velocity = reflect(paddle->velocity, wallNorm);
+        paddle->movementDelta.x += 1.0f;
+    } else if (paddle->newPos.x + offset > (rightBottom->center.x - leftBottom->width * 0.5f)) {
         Vec2 wallNorm(-1, 0);
-        paddle.velocity = reflect(paddle.velocity, wallNorm);
-        paddle.movementDelta.x -= 1.0f;
+        paddle->velocity = reflect(paddle->velocity, wallNorm);
+        paddle->movementDelta.x -= 1.0f;
     }
 }
 

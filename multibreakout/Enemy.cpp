@@ -59,7 +59,7 @@ void moveTowardHorizontal(Paddle& enemy, const Vec2& target, float delta, float 
         enemy.velocity += -0.02 * enemy.velocity;
     }
     
-    acceleratePaddle(acceleration, enemy, delta);
+    acceleration = acceleratePaddle(acceleration, &enemy, delta);
     
     float offset = enemy.width * 0.5f;
     if (enemy.newPos.x - offset < leftBoundary) {
@@ -90,7 +90,7 @@ void moveTowardVertical(Paddle& enemy, const Vec2& target, float delta, float to
         enemy.velocity += -0.02 * enemy.velocity;
     }
     
-    acceleratePaddle(acceleration, enemy, delta);
+    acceleration = acceleratePaddle(acceleration, &enemy, delta);
     
     float offset = enemy.height * 0.5f;
     if (enemy.newPos.y - offset < bottomBoundary) {
