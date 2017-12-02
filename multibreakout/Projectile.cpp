@@ -49,6 +49,15 @@ void updateProjectiles(World* world, SDL_Renderer* renderer, float delta) {
             }
         }
         
+        for (Uint32 ballIndex = 0; ballIndex < world->ballCount; ++ballIndex) {
+            Ball* ball = world->balls + ballIndex;
+            if (circleRectIntersect(ball->newPos, ball->radius, projectile->newPos, projectile->width, projectile->height)) {
+                Vec2 reflection = ball->newPos - projectile->newPos;
+                ball->velocity = reflection.normalize();
+                ball->movementDelta += reflection * ball->movementDelta.length();
+            }
+        }
+        
         SDL_Rect rect;
         rect.w = round(projectile->width);
         rect.h = round(projectile->height);

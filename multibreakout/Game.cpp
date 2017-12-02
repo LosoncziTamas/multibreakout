@@ -11,7 +11,7 @@ void initalizeGameWorld(World& world) {
     initUpperEnemy(world.enemyUpper);
     initBricks(world);
     initObstacles(world.obstacles);
-    addBall(world, world.paddle);
+    addBall(&world, &world.paddle);
     
     world.paddle.textureIndex = PLAYER_PADDLE;
     world.enemyUpper.paddle.textureIndex = ENEMY_PADDLE;
@@ -19,7 +19,7 @@ void initalizeGameWorld(World& world) {
     if (world.type == twoVsTwo) {
         initLeftEnemy(world.enemyLeft, world.bounds.bottomLeft.x);
         initRightEnemy(world.enemyRight, world.bounds.topRight.x);
-        addBall(world, world.enemyRight.paddle);
+        addBall(&world, &world.enemyRight.paddle);
         
         world.enemyRight.paddle.textureIndex = ENEMY_PADDLE;
         world.enemyLeft.paddle.textureIndex = PLAYER_PADDLE;
@@ -45,7 +45,7 @@ void updateUi(GameUi& gameUi, GameInput& input) {
 }
 
 void updateGame(World* world, GameInput* input, GameInput* oldInput, float delta) {
-    updateBalls(*world, *input, delta);
+    updateBalls(world, input, delta);
     updatePaddle(world, input, oldInput, delta);
     updateEnemy(*world, world->enemyUpper, delta);
     
@@ -63,7 +63,7 @@ void updateGame(World* world, GameInput* input, GameInput* oldInput, float delta
         resolveCollision(*world, world->enemyRight.paddle, delta);
     }
     collideWithObstacle(*world, world->obstacles);
-    collideBalls(*world);
+    collideBalls(world);
     
     if (input->mouseLeft && !oldInput->mouseLeft) {
         addProjectile(Vec2(input->mouseX, SCREEN_HEIGHT - input->mouseY), world);
@@ -74,7 +74,7 @@ void drawGame(SDL_Renderer* renderer, Atlas& atlas, World& world, float delta) {
     
     drawLowerPaddle(renderer, atlas, world.paddle);
     drawUpperPaddle(renderer, atlas, world.enemyUpper.paddle);
-    drawBalls(renderer, atlas, world);
+    drawBalls(renderer, &atlas, &world);
     drawBricks(renderer, atlas, world);
     
     if (world.type == twoVsTwo) {
@@ -88,7 +88,7 @@ void drawGame(SDL_Renderer* renderer, Atlas& atlas, World& world, float delta) {
     drawBricksDebug(renderer, world);
     drawPaddleDebug(renderer, world.paddle);
     drawPaddleDebug(renderer, world.enemyUpper.paddle);
-    drawBallsDebug(renderer, world);
+    drawBallsDebug(renderer, &world);
     drawPoint(renderer, world.enemyUpper.steeringPos, RED);
     
     if (world.type == twoVsTwo) {
