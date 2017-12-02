@@ -27,25 +27,28 @@ Ball *addBall(World& world, Paddle& paddle) {
         ball->newPos.x -= ball->radius + paddle.width * 0.5f + 1;
     }
     
+    ball->boundingBox = fromDimAndCenter(ball->newPos, ball->radius * 2, ball->radius * 2);
+    
     return ball;
 }
 
-//TODO: use quadtree or bounding boxes
 void collideBalls(World& world) {
     for (Uint32 ballIndex = 0; ballIndex < world.ballCount; ++ballIndex) {
         Ball* ball = world.balls + ballIndex;
         for (Uint32 otherBallIndex = ballIndex + 1; otherBallIndex < world.ballCount; ++otherBallIndex) {
             Ball* otherBall = world.balls + otherBallIndex;
-            float distance = ball->newPos.distance(otherBall->newPos);
-            bool collide = distance <= ball->radius + otherBall->radius;
-            if (collide) {
-                Vec2 ballRef = ball->newPos - otherBall->newPos;
-                ball->velocity = ballRef.normalize();
-                ball->movementDelta += ballRef * ball->movementDelta.length();
-                
-                Vec2 otherBallref = otherBall->newPos - ball->newPos;
-                otherBall->velocity = otherBallref.normalize();
-                otherBall->movementDelta += otherBallref * otherBall->movementDelta.length();
+            if (aabb(ball->boundingBox, otherBall->boundingBox)) {
+                float distance = ball->newPos.distance(otherBall->newPos);
+                bool collide = distance <= ball->radius + otherBall->radius;
+                if (collide) {
+                    Vec2 ballRef = ball->newPos - otherBall->newPos;
+                    ball->velocity = ballRef.normalize();
+                    ball->movementDelta += ballRef * ball->movementDelta.length();
+                    
+                    Vec2 otherBallref = otherBall->newPos - ball->newPos;
+                    otherBall->velocity = otherBallref.normalize();
+                    otherBall->movementDelta += otherBallref * otherBall->movementDelta.length();
+                }
             }
         }
     }
@@ -74,6 +77,7 @@ void updateBalls(World& world, GameInput& input, float delta) {
         
         ball->oldPos = ball->newPos;
         ball->newPos = ball->oldPos + ball->movementDelta;
+        ball->boundingBox = fromDimAndCenter(ball->newPos, ball->radius * 2, ball->radius * 2);
         
         float ballTop = ball->newPos.y + ball->radius;
         if (ballTop >= world.bounds.topRight.y) {

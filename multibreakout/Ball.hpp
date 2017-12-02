@@ -1,11 +1,10 @@
 #ifndef Ball_hpp
 #define Ball_hpp
 
-#include <vector>
 #include <SDL2/SDL_render.h>
 
-#include "Vec2.hpp"
 #include "Common.hpp"
+#include "Physics.hpp"
 
 struct Atlas;
 struct World;
@@ -13,6 +12,7 @@ struct GameInput;
 struct Paddle;
 
 struct Ball {
+    Rectangle boundingBox;
     Vec2 velocity;
     Vec2 oldPos;
     Vec2 newPos;

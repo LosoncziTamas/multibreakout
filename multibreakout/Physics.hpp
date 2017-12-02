@@ -2,7 +2,6 @@
 #define Physics_hpp
 
 #include "Vec2.hpp"
-#include "Paddle.hpp"
 
 struct Rectangle {
     Vec2 bottomLeft;
