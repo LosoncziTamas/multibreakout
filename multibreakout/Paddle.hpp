@@ -44,14 +44,14 @@ void resolveCollision(World& world, Paddle& paddle, float delta);
 
 Vec2 acceleratePaddle(Vec2 acceleration, Paddle* paddle, float delta);
 
-void drawPaddleDebug(SDL_Renderer* renderer, Paddle& paddle);
+void drawPaddleDebug(SDL_Renderer* renderer, Paddle* paddle);
 
-void drawUpperPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+void drawUpperPaddle(SDL_Renderer* renderer, Atlas* atlas, Paddle* paddle);
 
-void drawLeftPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+void drawLeftPaddle(SDL_Renderer* renderer, Atlas* atlas, Paddle* paddle);
 
-void drawRightPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+void drawRightPaddle(SDL_Renderer* renderer, Atlas* atlas, Paddle* paddle);
 
-void drawLowerPaddle(SDL_Renderer* renderer, Atlas& atlas, Paddle& paddle);
+void drawLowerPaddle(SDL_Renderer* renderer, Atlas* atlas, Paddle* paddle);
 
 #endif

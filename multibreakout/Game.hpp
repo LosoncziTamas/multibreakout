@@ -51,8 +51,10 @@ struct GameUi {
     TextureButton rightButton;
 };
 
-void gamePlayUpdate(GameState& gameState);
-void initalizeGameWorld(World& world);
-void initializeUi(GameUi& gameUi);
+void gamePlayUpdate(GameState* gameState);
+
+void initalizeGameWorld(World* world);
+
+void initializeUi(GameUi* gameUi);
 
 #endif

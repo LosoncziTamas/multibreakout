@@ -15,10 +15,14 @@ struct Enemy {
     Vec2 steeringPos;
 };
 
-void initLeftEnemy(Enemy& enemy, float leftBoundary);
-void initRightEnemy(Enemy& enemy, float rightBoundary);
-void initUpperEnemy(Enemy& enemy);
-void updateEnemy(World& world, Enemy& enemy, float delta);
-void drawDebugInfo(SDL_Renderer* renderer, FC_Font* font, World& world, float delta);
+void initLeftEnemy(Enemy* enemy, float leftBoundary);
+
+void initRightEnemy(Enemy* enemy, float rightBoundary);
+
+void initUpperEnemy(Enemy* enemy);
+
+void updateEnemy(World* world, Enemy* enemy, float delta);
+
+void drawDebugInfo(SDL_Renderer* renderer, FC_Font* font, World* world, float delta);
 
 #endif 

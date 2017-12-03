@@ -24,8 +24,8 @@ void callback(Brick* brick, Ball* ball) {
     brick->active = false;
 }
 
-void initBricks(World& world) {
-    int brickWidth = 30;
+void initBricks(World* world) {
+    int brickWidth =30;
     int brickHeight = 30;
     int columns = 4;
     int rows = 5;
@@ -38,9 +38,9 @@ void initBricks(World& world) {
     
     for (int i = 0; i < columns; ++i) {
         for (int j = 0; j < rows; ++j) {
-            SDL_assert(world.brickCount < SDL_arraysize(world.bricks));
+            SDL_assert(world->brickCount < SDL_arraysize(world->bricks));
             
-            brick = world.bricks + world.brickCount++;
+            brick = world->bricks + world->brickCount++;
             brick->center = Vec2(pivotX + (i * brickWidth) + halfWidth, pivotY - (j * brickHeight) + halfHeight);
             brick->width = brickWidth;
             brick->height = brickHeight;
@@ -85,16 +85,16 @@ void drawBricksDebug(SDL_Renderer* renderer, World& world) {
     }
 }
 
-void drawBricks(SDL_Renderer* renderer, Atlas& atlas, World& world) {
-    for (Uint32 brickIndex = 0; brickIndex < world.brickCount; ++brickIndex) {
-        Brick *brick = world.bricks + brickIndex;
+void drawBricks(SDL_Renderer* renderer, Atlas* atlas, World* world) {
+    for (Uint32 brickIndex = 0; brickIndex < world->brickCount; ++brickIndex) {
+        Brick *brick = world->bricks + brickIndex;
         if (!brick->active) {
             continue;
         }
         int x = brick->center.x - brick->width * 0.5f;
         int y = SCREEN_HEIGHT - (brick->center.y + brick->height * 0.5f);
         SDL_Rect dstRec = {x, y, brick->width, brick->height};
-        SDL_Rect srcRect = atlas.frames[brick->textureIndex];
-        SDL_RenderCopy(renderer, atlas.texture, &srcRect, &dstRec);
+        SDL_Rect srcRect = atlas->frames[brick->textureIndex];
+        SDL_RenderCopy(renderer, atlas->texture, &srcRect, &dstRec);
     }
 }

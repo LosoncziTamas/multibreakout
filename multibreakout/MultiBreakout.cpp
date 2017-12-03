@@ -41,14 +41,12 @@ extern "C" void gameUpdate(GameState &gameState) {
             break;
         case game:
             if (!gameState.world.initialized) {
-                initalizeGameWorld(gameState.world);
-                gameState.world.initialized = true;
+                initalizeGameWorld(&gameState.world);
             }
             if (!gameState.gameUi.initialized) {
-                initializeUi(gameState.gameUi);
-                gameState.gameUi.initialized = true;
+                initializeUi(&gameState.gameUi);
             }
-            gamePlayUpdate(gameState);
+            gamePlayUpdate(&gameState);
             break;
         default:
             break;

@@ -51,13 +51,13 @@ void collideWithObstacle(World& world, Obstacles& obstacles) {
     }
 }
 
-void drawObstacles(SDL_Renderer* renderer, Atlas& atlas, Obstacles& obstacles) {
-    for (Uint32 obstacleIndex = 0; obstacleIndex < obstacles.obstacleCount; ++obstacleIndex) {
-        Obstacle &obstacle = obstacles.content[obstacleIndex];
-        int x = obstacle.center.x - obstacle.width * 0.5f;
-        int y = SCREEN_HEIGHT - (obstacle.center.y + obstacle.height * 0.5f);
-        SDL_Rect dstRec = {x, y, obstacle.width, obstacle.height};
-        SDL_Rect srcRect = atlas.frames[obstacle.textureIndex];
-        SDL_RenderCopy(renderer, atlas.texture, &srcRect, &dstRec);
+void drawObstacles(SDL_Renderer* renderer, Atlas* atlas, Obstacles* obstacles) {
+    for (Uint32 obstacleIndex = 0; obstacleIndex < obstacles->obstacleCount; ++obstacleIndex) {
+        Obstacle *obstacle = obstacles->content + obstacleIndex;
+        int x = obstacle->center.x - obstacle->width * 0.5f;
+        int y = SCREEN_HEIGHT - (obstacle->center.y + obstacle->height * 0.5f);
+        SDL_Rect dstRec = {x, y, obstacle->width, obstacle->height};
+        SDL_Rect srcRect = atlas->frames[obstacle->textureIndex];
+        SDL_RenderCopy(renderer, atlas->texture, &srcRect, &dstRec);
     }
 }

@@ -18,9 +18,9 @@ struct Brick {
     PowerUp powerUp;
 };
 
-void initBricks(World& world);
+void initBricks(World* world);
 void collideWithBrick(World& world);
 void drawBricksDebug(SDL_Renderer* renderer, World& world);
-void drawBricks(SDL_Renderer* renderer, Atlas& atlas, World& world);
+void drawBricks(SDL_Renderer* renderer, Atlas* atlas, World* world);
 
 #endif
