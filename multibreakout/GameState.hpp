@@ -9,6 +9,7 @@
 #include "NinePatch.hpp"
 #include "Menu.hpp"
 #include "Memory.hpp"
+#include "Entity.hpp"
 
 enum Screen {
     menu, game
@@ -33,6 +34,9 @@ struct GameState {
     GameUi gameUi;
     World world;
     Menu menu;
+    
+    Entity entities[128];
+    Uint32 entityCount;
 };
 
 #endif
