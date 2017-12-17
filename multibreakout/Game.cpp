@@ -43,7 +43,7 @@ void initializeUi(GameUi* gameUi) {
     gameUi->initialized = true;
 }
 
-void gamePlayUpdate(GameState* gameState) {
+void gamePlayUpdateOld(GameState* gameState) {
     if (gameState->input.pause) {
         gameState->paused = gameState->paused == true ? false : true;
     }
@@ -105,10 +105,10 @@ void gamePlayUpdate(GameState* gameState) {
         drawPoint(gameState->renderer, world.enemyLeft.steeringPos, RED);
     }
     
-    drawNinePatch(gameState->ninePatchTextures, gameUi.leftPanel, gameState->renderer);
-    drawNinePatch(gameState->ninePatchTextures, gameUi.rightPanel, gameState->renderer);
-    drawButton(gameState->renderer, gameState->atlas, gameUi.leftButton);
-    drawButton(gameState->renderer, gameState->atlas, gameUi.rightButton);
+    drawNinePatch(gameState->ninePatchTextures, gameState->gameUi.leftPanel, gameState->renderer);
+    drawNinePatch(gameState->ninePatchTextures, gameState->gameUi.rightPanel, gameState->renderer);
+    drawButton(gameState->renderer, gameState->atlas, gameState->gameUi.leftButton);
+    drawButton(gameState->renderer, gameState->atlas, gameState->gameUi.rightButton);
     
     drawDebugInfo(gameState->renderer, gameState->font, &gameState->world, gameState->delta);
     updateProjectiles(&gameState->world, gameState->renderer, gameState->delta);

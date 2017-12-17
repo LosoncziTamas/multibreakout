@@ -18,6 +18,11 @@ void generatePatches(GameState& gameState) {
     SDL_FreeSurface(base.surface);
 }
 
+void gamePlayUpdate()
+{
+    
+}
+
 extern "C" void gameUpdate(GameState &gameState) {
     if (!gameState.initialized) {
         srand(SDL_static_cast(unsigned int, time(NULL)));
@@ -40,13 +45,7 @@ extern "C" void gameUpdate(GameState &gameState) {
             drawMenu(gameState.menu, gameState.renderer, gameState.font, gameState.atlas, gameState.ninePatchTextures);
             break;
         case game:
-            if (!gameState.world.initialized) {
-                initalizeGameWorld(&gameState.world);
-            }
-            if (!gameState.gameUi.initialized) {
-                initializeUi(&gameState.gameUi);
-            }
-            gamePlayUpdate(&gameState);
+            gamePlayUpdate();
             break;
         default:
             break;
