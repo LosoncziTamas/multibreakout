@@ -4,6 +4,8 @@
 #include <SDL2/SDL_stdinc.h>
 #include "Vec2.hpp"
 
+struct GameState;
+
 enum EntityType
 {
     ENTITY_TYPE_BALL,
@@ -15,7 +17,9 @@ enum EntityType
 
 enum EntityFlags
 {
-    ENTITY_FLAG_COLLIDES = (1 << 0)
+    ENTITY_FLAG_COLLIDES = (1 << 0),
+    ENTITY_FLAG_STATIC = (1 << 1)
+
 };
 
 struct Entity
@@ -28,5 +32,13 @@ struct Entity
     EntityType type;
     Uint32 flags;
 };
+
+struct MovementSpecs
+{
+    float speed;
+    float drag;
+};
+
+void updateEntities(GameState *gameState);
 
 #endif

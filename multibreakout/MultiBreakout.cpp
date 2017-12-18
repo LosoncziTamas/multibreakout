@@ -4,6 +4,7 @@
 #include "NinePatch.hpp"
 #include "GameState.hpp"
 #include "Menu.hpp"
+#include "Entity.hpp"
 
 void generatePatches(GameState& gameState) {
     NinePatchBase base;
@@ -18,9 +19,9 @@ void generatePatches(GameState& gameState) {
     SDL_FreeSurface(base.surface);
 }
 
-void gamePlayUpdate()
+void gamePlayUpdate(GameState *gameState)
 {
-    
+    updateEntities(gameState);
 }
 
 extern "C" void gameUpdate(GameState &gameState) {
@@ -45,7 +46,7 @@ extern "C" void gameUpdate(GameState &gameState) {
             drawMenu(gameState.menu, gameState.renderer, gameState.font, gameState.atlas, gameState.ninePatchTextures);
             break;
         case game:
-            gamePlayUpdate();
+            gamePlayUpdate(&gameState);
             break;
         default:
             break;
