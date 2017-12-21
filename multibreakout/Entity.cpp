@@ -1,5 +1,6 @@
 #include "Entity.hpp"
 #include "GameState.hpp"
+#include "Physics.hpp"
 
 static bool initialized;
 
@@ -30,6 +31,46 @@ void addEntities(GameState *gameState)
     paddle->type = ENTITY_TYPE_PADDLE;
     
     setFlag(paddle, ENTITY_FLAG_COLLIDES);
+    
+    Entity* wall = gameState->entities + gameState->entityCount++;
+    
+    wall->storageIndex = gameState->entityCount - 1;
+    wall->w = 20.0f;
+    wall->h = SCREEN_HEIGHT;
+    wall->p = Vec2(150.f, SCREEN_HEIGHT * 0.5f);
+    wall->dp = Vec2();
+    wall->type = ENTITY_TYPE_OBSTACLE;
+    
+    setFlag(wall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
+    Entity* ball = gameState->entities + gameState->entityCount++;
+    
+    ball->storageIndex = gameState->entityCount - 1;
+    float radius = 10.0f;
+    ball->w = radius * 2.0f;
+    ball->h = radius * 2.0f;
+    ball->p = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f);
+    ball->dp = Vec2();
+    ball->type = ENTITY_TYPE_BALL;
+    
+    setFlag(ball, ENTITY_FLAG_COLLIDES);
+}
+
+void resolveCollision(Entity* a, Entity* b)
+{
+    //NOTE: less dominant should be first
+    if (a->type > b->type)
+    {
+        Entity* tmp = a;
+        a = b;
+        b = tmp;
+    }
+    
+    if (a->type == ENTITY_TYPE_PADDLE && b->type == ENTITY_TYPE_OBSTACLE)
+    {
+        Vec2 wallNorm(1, 0);
+        a->dp = reflect(a->dp, wallNorm);
+    }
 }
 
 void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs specs)
@@ -45,8 +86,22 @@ void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs sp
     Vec2 newP = oldP + movementDelta;
     entity->p = newP;
     
-    //collision detection
+    for (Uint32 entityIndex = entity->storageIndex + 1; entityIndex < gameState->entityCount; ++entityIndex)
+    {
+        Entity *test = gameState->entities + entityIndex;
+        SDL_assert(test->storageIndex > entity->storageIndex);
+        Rectangle entityRect = fromDimAndCenter(entity->p, entity->w, entity->h);
+        Rectangle testRect = fromDimAndCenter(test->p, test->w, test->h);
+        
+        bool collides = isSet(entity, ENTITY_FLAG_COLLIDES) && isSet(test, ENTITY_FLAG_COLLIDES);
+        if (collides && aabb(entityRect, testRect))
+        {
+            resolveCollision(entity, test);
+        }
+    }
 }
+
+
 
 void drawEntityBounds(SDL_Renderer* renderer, Entity* entity) {
     SDL_Rect rect;
@@ -93,6 +148,15 @@ void updateEntities(GameState *gameState)
                 {
                     ddp.x = 1.0;
                 }
+            } break;
+            case ENTITY_TYPE_BALL:
+            {
+                //ddp.x = 1.0f;
+                //specs.speed = 200.0f;
+            } break;
+            case ENTITY_TYPE_OBSTACLE:
+            {
+                //do nothing
             } break;
             default:
             {
