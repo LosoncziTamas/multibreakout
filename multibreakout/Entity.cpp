@@ -56,21 +56,19 @@ void addEntities(GameState *gameState)
     setFlag(ball, ENTITY_FLAG_COLLIDES);
 }
 
-void resolveCollision(Entity* a, Entity* b)
+void resolveCollision(Entity* entity, Entity* test, float len)
 {
-    //NOTE: less dominant should be first
-    if (a->type > b->type)
-    {
-        Entity* tmp = a;
-        a = b;
-        b = tmp;
-    }
-    
-    if (a->type == ENTITY_TYPE_PADDLE && b->type == ENTITY_TYPE_OBSTACLE)
+    if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
     {
         Vec2 wallNorm(1, 0);
-        a->dp = reflect(a->dp, wallNorm);
+        entity->dp = reflect(entity->dp, wallNorm) * len;
     }
+}
+
+void printEntity(Entity *entity)
+{
+    printf("dp.x: %f dp.y: %f \n", entity->dp.x, entity->dp.y);
+
 }
 
 void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs specs)
@@ -83,22 +81,53 @@ void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs sp
     Vec2 oldP = entity->p;
     Vec2 movementDelta = (0.5f * ddp * pow(delta, 2) + entity->dp * delta);
     entity->dp = ddp * delta + entity->dp;
-    Vec2 newP = oldP + movementDelta;
-    entity->p = newP;
+    Vec2 desiredP = oldP + movementDelta;
     
-    for (Uint32 entityIndex = entity->storageIndex + 1; entityIndex < gameState->entityCount; ++entityIndex)
+    for (Uint32 entityIndex = 0; entityIndex < gameState->entityCount; ++entityIndex)
     {
         Entity *test = gameState->entities + entityIndex;
-        SDL_assert(test->storageIndex > entity->storageIndex);
-        Rectangle entityRect = fromDimAndCenter(entity->p, entity->w, entity->h);
+        if (test == entity)
+        {
+            continue;
+        }
+        
         Rectangle testRect = fromDimAndCenter(test->p, test->w, test->h);
         
-        bool collides = isSet(entity, ENTITY_FLAG_COLLIDES) && isSet(test, ENTITY_FLAG_COLLIDES);
-        if (collides && aabb(entityRect, testRect))
+        Uint32 iterationCount = 4;
+        for (Uint32 iteration = 0; iteration <= iterationCount; ++iteration)
         {
-            resolveCollision(entity, test);
+            float t = iteration * (1.0 / iterationCount);
+            Vec2 testP = ((1.0 - t) * oldP) + (t * desiredP);
+            Rectangle entityRect = fromDimAndCenter(testP, entity->w, entity->h);
+            if (aabb(entityRect, testRect))
+            {
+                float leftover = (1.0f - t) * movementDelta.length();
+                printf("leftover %f \n", leftover);
+                
+                if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
+                {
+                    Vec2 wallNorm(1, 0);
+                    Vec2 reflection = reflect(entity->dp, wallNorm);
+                    entity->dp += reflection;
+                    desiredP = testP + leftover * wallNorm;
+                    
+                    Rectangle verificationRect = fromDimAndCenter(desiredP, entity->w, entity->h);
+                    if (aabb(verificationRect, testRect))
+                    {
+                        SDL_TriggerBreakpoint();
+                    }
+                    
+                    break;
+                }
+            }
         }
+        
+
+
+//        bool collides = isSet(entity, ENTITY_FLAG_COLLIDES) && isSet(test, ENTITY_FLAG_COLLIDES);
     }
+    entity->p = desiredP;
+
 }
 
 
@@ -138,7 +167,7 @@ void updateEntities(GameState *gameState)
         {
             case ENTITY_TYPE_PADDLE:
             {
-                specs.speed = 500.0f;
+                specs.speed = 1000.0f;
                 specs.drag = 2.0f;
                 if (input->left)
                 {
