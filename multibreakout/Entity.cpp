@@ -82,52 +82,57 @@ void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs sp
     Vec2 movementDelta = (0.5f * ddp * pow(delta, 2) + entity->dp * delta);
     entity->dp = ddp * delta + entity->dp;
     Vec2 desiredP = oldP + movementDelta;
+    float deltaLength = movementDelta.length();
     
-    for (Uint32 entityIndex = 0; entityIndex < gameState->entityCount; ++entityIndex)
+    if (isSet(entity, ENTITY_FLAG_COLLIDES))
     {
-        Entity *test = gameState->entities + entityIndex;
-        if (test == entity)
+        for (Uint32 entityIndex = 0; entityIndex < gameState->entityCount; ++entityIndex)
         {
-            continue;
-        }
-        
-        Rectangle testRect = fromDimAndCenter(test->p, test->w, test->h);
-        
-        Uint32 iterationCount = 4;
-        for (Uint32 iteration = 0; iteration <= iterationCount; ++iteration)
-        {
-            float t = iteration * (1.0 / iterationCount);
-            Vec2 testP = ((1.0 - t) * oldP) + (t * desiredP);
-            Rectangle entityRect = fromDimAndCenter(testP, entity->w, entity->h);
-            if (aabb(entityRect, testRect))
+            Entity *test = gameState->entities + entityIndex;
+            if (test == entity || !isSet(test, ENTITY_FLAG_COLLIDES))
             {
-                float leftover = (1.0f - t) * movementDelta.length();
-                printf("leftover %f \n", leftover);
+                continue;
+            }
+            
+            Rectangle testRect = fromDimAndCenter(test->p, test->w, test->h);
+            
+            Uint32 iterationCount = 4;
+            for (Uint32 iteration = 0; iteration <= iterationCount; ++iteration)
+            {
+                float t = iteration * (1.0 / iterationCount);
+                Vec2 testP = ((1.0 - t) * oldP) + (t * desiredP);
+                Rectangle entityRect = fromDimAndCenter(testP, entity->w, entity->h);
                 
-                if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
+                if (aabb(entityRect, testRect))
                 {
-                    Vec2 wallNorm(1, 0);
-                    Vec2 reflection = reflect(entity->dp, wallNorm);
-                    entity->dp += reflection;
-                    desiredP = testP + leftover * wallNorm;
+                    float remainingDistance = (1.0f - t) * deltaLength;
                     
-                    Rectangle verificationRect = fromDimAndCenter(desiredP, entity->w, entity->h);
-                    if (aabb(verificationRect, testRect))
+                    if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
                     {
-                        SDL_TriggerBreakpoint();
+                        Vec2 wallNorm(1.0f, 0.0f);
+                        Vec2 reflection = reflect(entity->dp, wallNorm);
+                        entity->dp = reflection;
+                        
+                        if (remainingDistance == 0.0f && iteration == iterationCount)
+                        {
+                            remainingDistance = deltaLength * (1.0f / iterationCount);
+                        }
+                        
+                        desiredP = testP + (remainingDistance * wallNorm);
+                        
+                        Rectangle verificationRect = fromDimAndCenter(desiredP, entity->w, entity->h);
+                        if (aabb(verificationRect, testRect))
+                        {
+                            SDL_TriggerBreakpoint();
+                        }
+                        
+                        break;
                     }
-                    
-                    break;
                 }
             }
         }
-        
-
-
-//        bool collides = isSet(entity, ENTITY_FLAG_COLLIDES) && isSet(test, ENTITY_FLAG_COLLIDES);
     }
     entity->p = desiredP;
-
 }
 
 
@@ -167,7 +172,7 @@ void updateEntities(GameState *gameState)
         {
             case ENTITY_TYPE_PADDLE:
             {
-                specs.speed = 1000.0f;
+                specs.speed = 500.0f;
                 specs.drag = 2.0f;
                 if (input->left)
                 {
