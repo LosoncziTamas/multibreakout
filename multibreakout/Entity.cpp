@@ -32,16 +32,27 @@ void addEntities(GameState *gameState)
     
     setFlag(paddle, ENTITY_FLAG_COLLIDES);
     
-    Entity* wall = gameState->entities + gameState->entityCount++;
+    Entity* leftWall = gameState->entities + gameState->entityCount++;
     
-    wall->storageIndex = gameState->entityCount - 1;
-    wall->w = 20.0f;
-    wall->h = SCREEN_HEIGHT;
-    wall->p = Vec2(150.f, SCREEN_HEIGHT * 0.5f);
-    wall->dp = Vec2();
-    wall->type = ENTITY_TYPE_OBSTACLE;
+    leftWall->storageIndex = gameState->entityCount - 1;
+    leftWall->w = 20.0f;
+    leftWall->h = SCREEN_HEIGHT;
+    leftWall->p = Vec2(150.f, SCREEN_HEIGHT * 0.5f);
+    leftWall->dp = Vec2();
+    leftWall->type = ENTITY_TYPE_OBSTACLE;
     
-    setFlag(wall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    setFlag(leftWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
+    Entity* rightWall = gameState->entities + gameState->entityCount++;
+    
+    rightWall->storageIndex = gameState->entityCount - 1;
+    rightWall->w = 20.0f;
+    rightWall->h = SCREEN_HEIGHT;
+    rightWall->p = Vec2(SCREEN_WIDTH - 150.f, SCREEN_HEIGHT * 0.5f);
+    rightWall->dp = Vec2();
+    rightWall->type = ENTITY_TYPE_OBSTACLE;
+    
+    setFlag(rightWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
     
     Entity* ball = gameState->entities + gameState->entityCount++;
     
@@ -56,13 +67,52 @@ void addEntities(GameState *gameState)
     setFlag(ball, ENTITY_FLAG_COLLIDES);
 }
 
-void resolveCollision(Entity* entity, Entity* test, float len)
+Vec2 getWallNorm(Entity* entity, Entity* wall)
+{
+    if (entity->p.x >= wall->p.x)
+    {
+        return Vec2(1.0f, 0.0f);
+    }
+    else if (entity->p.x <= wall->p.x)
+    {
+        return Vec2(-1.0f, 0.0f);
+    }
+    else
+    {
+        SDL_TriggerBreakpoint();
+        return Vec2();
+    }
+}
+
+bool resolveCollision(Entity* entity, Entity* test, float remainingDistance, Vec2* desiredP, Vec2 testP)
 {
     if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
     {
-        Vec2 wallNorm(1, 0);
-        entity->dp = reflect(entity->dp, wallNorm) * len;
+        Vec2 wallNorm = getWallNorm(entity, test);
+        entity->dp = reflect(entity->dp, wallNorm);
+        *desiredP = testP + (remainingDistance * wallNorm);
+        return true;
     }
+    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_OBSTACLE)
+    {
+        Vec2 wallNorm = getWallNorm(entity, test);
+        entity->dp = reflect(entity->dp, wallNorm);
+        *desiredP = testP + (remainingDistance * wallNorm);
+        return true;
+    }
+    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_PADDLE)
+    {
+        bool result = circleRectIntersect(*desiredP, entity->w * 0.5f, test->p, test->w, test->h);
+        if (result)
+        {
+            Vec2 norm = (*desiredP - test->p).normalize();
+            entity->dp = reflect(entity->dp, norm);
+            *desiredP = testP + (remainingDistance * norm);
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 void printEntity(Entity *entity)
@@ -106,24 +156,19 @@ void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs sp
                 if (aabb(entityRect, testRect))
                 {
                     float remainingDistance = (1.0f - t) * deltaLength;
-                    
-                    if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
+                    if (remainingDistance == 0.0f && iteration == iterationCount)
                     {
-                        Vec2 wallNorm(1.0f, 0.0f);
-                        Vec2 reflection = reflect(entity->dp, wallNorm);
-                        entity->dp = reflection;
-                        
-                        if (remainingDistance == 0.0f && iteration == iterationCount)
-                        {
-                            remainingDistance = deltaLength * (1.0f / iterationCount);
-                        }
-                        
-                        desiredP = testP + (remainingDistance * wallNorm);
-                        
+                        remainingDistance = deltaLength * (1.0f / iterationCount);
+                    }
+                    
+                    bool collides = resolveCollision(entity, test, remainingDistance, &desiredP, testP);
+                    
+                    if (collides)
+                    {
                         Rectangle verificationRect = fromDimAndCenter(desiredP, entity->w, entity->h);
                         if (aabb(verificationRect, testRect))
                         {
-                            SDL_TriggerBreakpoint();
+                      //      SDL_TriggerBreakpoint();
                         }
                         
                         break;
@@ -148,6 +193,44 @@ void drawEntityBounds(SDL_Renderer* renderer, Entity* entity) {
     SDL_RenderDrawRect(renderer, &rect);
 }
 
+void drawCircle(SDL_Renderer* renderer, Entity* entity)
+{
+    int x0 = round(entity->p.x);
+    int y0 = round(SCREEN_HEIGHT - entity->p.y);
+    int radius = entity->w * 0.5f;
+        
+    int x = radius-1;
+    int y = 0;
+    int dx = 1;
+    int dy = 1;
+    int err = dx - (radius << 1);
+
+    while (x >= y)
+    {
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderDrawPoint(renderer, x0 + x, y0 + y);
+        SDL_RenderDrawPoint(renderer, x0 + y, y0 + x);
+        SDL_RenderDrawPoint(renderer, x0 - y, y0 + x);
+        SDL_RenderDrawPoint(renderer, x0 - x, y0 + y);
+        SDL_RenderDrawPoint(renderer, x0 - x, y0 - y);
+        SDL_RenderDrawPoint(renderer, x0 - y, y0 - x);
+        SDL_RenderDrawPoint(renderer, x0 + y, y0 - x);
+        SDL_RenderDrawPoint(renderer, x0 + x, y0 - y);
+        
+        if (err <= 0)
+        {
+            y++;
+            err += dy;
+            dy +=2;
+        }
+        if (err > 0)
+        {
+            x--;
+            dx += 2;
+            err += (-radius << 1) + dx;
+        }
+    }
+}
 
 void updateEntities(GameState *gameState)
 {
@@ -185,8 +268,19 @@ void updateEntities(GameState *gameState)
             } break;
             case ENTITY_TYPE_BALL:
             {
-                //ddp.x = 1.0f;
-                //specs.speed = 200.0f;
+                specs.speed = 200.0f;
+                if (input->mouseRight) {
+                    Vec2 newVelocity(input->mouseX - entity->p.x, SCREEN_HEIGHT - input->mouseY - entity->p.y);
+                    entity->dp = Vec2();
+                    ddp = newVelocity.normalize();
+                }
+                else
+                {
+                    Vec2 normalized(entity->dp);
+                    ddp = normalized.normalize();
+                }
+                drawCircle(gameState->renderer, entity);
+                
             } break;
             case ENTITY_TYPE_OBSTACLE:
             {
