@@ -19,19 +19,8 @@ void clearFlag(Entity *entity, Uint32 flag)
     entity->flags &= ~flag;
 }
 
-void addEntities(GameState *gameState)
+void addWalls(GameState *gameState)
 {
-    Entity* paddle = gameState->entities + gameState->entityCount++;
-    
-    paddle->storageIndex = gameState->entityCount - 1;
-    paddle->w = 90.0f;
-    paddle->h = 25.0f;
-    paddle->p = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f);
-    paddle->dp = Vec2();
-    paddle->type = ENTITY_TYPE_PADDLE;
-    
-    setFlag(paddle, ENTITY_FLAG_COLLIDES);
-    
     Entity* leftWall = gameState->entities + gameState->entityCount++;
     
     leftWall->storageIndex = gameState->entityCount - 1;
@@ -54,6 +43,42 @@ void addEntities(GameState *gameState)
     
     setFlag(rightWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
     
+    Entity* topWall = gameState->entities + gameState->entityCount++;
+    
+    topWall->storageIndex = gameState->entityCount - 1;
+    topWall->w = 480.0f;
+    topWall->h = 20.0f;
+    topWall->p = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - 10);
+    topWall->dp = Vec2();
+    topWall->type = ENTITY_TYPE_OBSTACLE;
+    
+    setFlag(topWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
+    Entity* bottomWall = gameState->entities + gameState->entityCount++;
+    
+    bottomWall->storageIndex = gameState->entityCount - 1;
+    bottomWall->w = 480.0f;
+    bottomWall->h = 20.0f;
+    bottomWall->p = Vec2(SCREEN_WIDTH * 0.5f, 10);
+    bottomWall->dp = Vec2();
+    bottomWall->type = ENTITY_TYPE_OBSTACLE;
+    
+    setFlag(bottomWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+}
+
+void addEntities(GameState *gameState)
+{
+    Entity* paddle = gameState->entities + gameState->entityCount++;
+    
+    paddle->storageIndex = gameState->entityCount - 1;
+    paddle->w = 90.0f;
+    paddle->h = 25.0f;
+    paddle->p = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f + 21.0f);
+    paddle->dp = Vec2();
+    paddle->type = ENTITY_TYPE_PADDLE;
+    
+    setFlag(paddle, ENTITY_FLAG_COLLIDES);
+    
     Entity* ball = gameState->entities + gameState->entityCount++;
     
     ball->storageIndex = gameState->entityCount - 1;
@@ -69,13 +94,28 @@ void addEntities(GameState *gameState)
 
 Vec2 getWallNorm(Entity* entity, Entity* wall)
 {
-    if (entity->p.x >= wall->p.x)
+    Rectangle rect = fromDimAndCenter(wall->p, wall->w, wall->h);
+    
+    bool left = entity->p.x <= rect.bottomLeft.x;
+    bool right = entity->p.x >= rect.topRight.x;
+    bool top = entity->p.y >= rect.topRight.y;
+    bool bottom = entity->p.y <= rect.bottomLeft.y;
+    
+    if (right)
     {
         return Vec2(1.0f, 0.0f);
     }
-    else if (entity->p.x <= wall->p.x)
+    else if (left)
     {
         return Vec2(-1.0f, 0.0f);
+    }
+    else if (top)
+    {
+        return Vec2(0.0f, 1.0f);
+    }
+    else if (bottom)
+    {
+        return Vec2(0.0f, -1.0f);
     }
     else
     {
@@ -238,6 +278,7 @@ void updateEntities(GameState *gameState)
 {
     if (!initialized)
     {
+        addWalls(gameState);
         addEntities(gameState);
         initialized = true;
     }
