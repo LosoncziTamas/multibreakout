@@ -86,33 +86,34 @@ Vec2 getWallNorm(Entity* entity, Entity* wall)
 
 bool resolveCollision(Entity* entity, Entity* test, float remainingDistance, Vec2* desiredP, Vec2 testP)
 {
+    bool result = false;
+    
     if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
     {
         Vec2 wallNorm = getWallNorm(entity, test);
         entity->dp = reflect(entity->dp, wallNorm);
         *desiredP = testP + (remainingDistance * wallNorm);
-        return true;
+        result = true;
     }
     else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_OBSTACLE)
     {
         Vec2 wallNorm = getWallNorm(entity, test);
         entity->dp = reflect(entity->dp, wallNorm);
         *desiredP = testP + (remainingDistance * wallNorm);
-        return true;
+        result = true;
     }
     else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_PADDLE)
     {
-        bool result = circleRectIntersect(*desiredP, entity->w * 0.5f, test->p, test->w, test->h);
-        if (result)
+        if (circleRectIntersect(*desiredP, entity->w * 0.5f, test->p, test->w, test->h))
         {
             Vec2 norm = (*desiredP - test->p).normalize();
-            entity->dp = reflect(entity->dp, norm);
+            entity->dp = (norm * entity->dp.length()) + (norm * test->dp.length());
             *desiredP = testP + (remainingDistance * norm);
-            return true;
+            result = true;
         }
     }
     
-    return false;
+    return result;
 }
 
 void printEntity(Entity *entity)
@@ -168,7 +169,7 @@ void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs sp
                         Rectangle verificationRect = fromDimAndCenter(desiredP, entity->w, entity->h);
                         if (aabb(verificationRect, testRect))
                         {
-                      //      SDL_TriggerBreakpoint();
+                            
                         }
                         
                         break;
@@ -177,6 +178,7 @@ void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs sp
             }
         }
     }
+    
     entity->p = desiredP;
 }
 
