@@ -25,7 +25,7 @@ void callback(Brick* brick, Ball* ball) {
 }
 
 void initBricks(World* world) {
-    int brickWidth =30;
+    int brickWidth = 30;
     int brickHeight = 30;
     int columns = 4;
     int rows = 5;

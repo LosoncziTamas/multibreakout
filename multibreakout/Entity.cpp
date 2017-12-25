@@ -68,6 +68,9 @@ void addWalls(GameState *gameState)
 
 void addEntities(GameState *gameState)
 {
+    /* NOTE: currently dominance during collision resolution
+    is determined by the order of the entities */
+    
     Entity* paddle = gameState->entities + gameState->entityCount++;
     
     paddle->storageIndex = gameState->entityCount - 1;
@@ -78,18 +81,52 @@ void addEntities(GameState *gameState)
     paddle->type = ENTITY_TYPE_PADDLE;
     
     setFlag(paddle, ENTITY_FLAG_COLLIDES);
-    
+
     Entity* ball = gameState->entities + gameState->entityCount++;
     
     ball->storageIndex = gameState->entityCount - 1;
     float radius = 10.0f;
     ball->w = radius * 2.0f;
     ball->h = radius * 2.0f;
-    ball->p = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f);
+    ball->p = Vec2(SCREEN_WIDTH * 0.5f, 60);
     ball->dp = Vec2();
     ball->type = ENTITY_TYPE_BALL;
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
+    
+    ball = gameState->entities + gameState->entityCount++;
+    
+    ball->storageIndex = gameState->entityCount - 1;
+    ball->w = radius * 2.0f;
+    ball->h = radius * 2.0f;
+    ball->p = Vec2(SCREEN_WIDTH * 0.5f, 80);
+    ball->dp = Vec2();
+    ball->type = ENTITY_TYPE_BALL;
+    
+    setFlag(ball, ENTITY_FLAG_COLLIDES);
+
+    float brickWidth = 30;
+    float brickHeight = 30;
+    Uint32 columns = 4;
+    Uint32 rows = 5;
+    float halfWidth = brickWidth * 0.5f;
+    float halfHeight = brickHeight * 0.5f;
+    float pivotX = SCREEN_WIDTH * 0.5f - columns * halfHeight;
+    float pivotY = SCREEN_HEIGHT * 0.5f + rows * halfWidth;
+    
+    for (Uint32 columnIndex = 0; columnIndex < columns; ++columnIndex)
+    {
+        for (Uint32 rowIndex = 0; rowIndex < rows; ++rowIndex)
+        {
+            Entity* brick = gameState->entities + gameState->entityCount++;
+            brick->p = Vec2(pivotX + (columnIndex * brickWidth) + halfWidth,
+                            pivotY - (rowIndex * brickHeight) + halfHeight);
+            brick->w = brickWidth;
+            brick->h = brickHeight;
+            brick->type = ENTITY_TYPE_BRICK;
+            setFlag(brick, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+        }
+    }
 }
 
 Vec2 getWallNorm(Entity* entity, Entity* wall)
@@ -152,6 +189,28 @@ bool resolveCollision(Entity* entity, Entity* test, float remainingDistance, Vec
             result = true;
         }
     }
+    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_BRICK)
+    {
+        if (circleRectIntersect(*desiredP, entity->w * 0.5f, test->p, test->w, test->h))
+        {
+            Vec2 norm = (*desiredP - test->p).normalize();
+            entity->dp = norm * entity->dp.length();
+            *desiredP = testP + (remainingDistance * norm);
+            result = true;
+        }
+    }
+    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_BALL)
+    {
+        float distance = entity->p.distance(test->p);
+        bool collide = distance <= entity->w * 0.5 + test->w * 0.5;
+        if (collide)
+        {
+            Vec2 norm = (entity->p - test->p).normalize();
+            entity->dp = norm * entity->dp.length();
+            *desiredP = testP + (remainingDistance * norm);
+            return true;
+        }
+    }
     
     return result;
 }
@@ -203,15 +262,8 @@ void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs sp
                     }
                     
                     bool collides = resolveCollision(entity, test, remainingDistance, &desiredP, testP);
-                    
                     if (collides)
                     {
-                        Rectangle verificationRect = fromDimAndCenter(desiredP, entity->w, entity->h);
-                        if (aabb(verificationRect, testRect))
-                        {
-                            
-                        }
-                        
                         break;
                     }
                 }
@@ -278,8 +330,8 @@ void updateEntities(GameState *gameState)
 {
     if (!initialized)
     {
-        addWalls(gameState);
         addEntities(gameState);
+        addWalls(gameState);
         initialized = true;
     }
     
@@ -292,7 +344,7 @@ void updateEntities(GameState *gameState)
     {
         Entity *entity = gameState->entities + entityIndex;
         Vec2 ddp;
-        MovementSpecs specs;
+        MovementSpecs specs = {};
         
         switch (entity->type)
         {
@@ -312,6 +364,7 @@ void updateEntities(GameState *gameState)
             case ENTITY_TYPE_BALL:
             {
                 specs.speed = 200.0f;
+                specs.drag = 2.0f;
                 if (input->mouseRight) {
                     Vec2 newVelocity(input->mouseX - entity->p.x, SCREEN_HEIGHT - input->mouseY - entity->p.y);
                     entity->dp = Vec2();
@@ -327,7 +380,11 @@ void updateEntities(GameState *gameState)
             } break;
             case ENTITY_TYPE_OBSTACLE:
             {
-                //do nothing
+                
+            } break;
+            case ENTITY_TYPE_BRICK:
+            {
+                
             } break;
             default:
             {
