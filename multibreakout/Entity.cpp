@@ -129,36 +129,43 @@ void addEntities(GameState *gameState)
     }
 }
 
-Vec2 getWallNorm(Entity* entity, Entity* wall)
+Vec2 getSurfaceNorm(Vec2 desiredP, Entity* rectEntity)
 {
-    Rectangle rect = fromDimAndCenter(wall->p, wall->w, wall->h);
+    Rectangle rect = fromDimAndCenter(rectEntity->p, rectEntity->w, rectEntity->h);
     
-    bool left = entity->p.x <= rect.bottomLeft.x;
-    bool right = entity->p.x >= rect.topRight.x;
-    bool top = entity->p.y >= rect.topRight.y;
-    bool bottom = entity->p.y <= rect.bottomLeft.y;
+    bool left = desiredP.x <= rect.bottomLeft.x;
+    bool right = desiredP.x >= rect.topRight.x;
+    bool top = desiredP.y >= rect.topRight.y;
+    bool bottom = desiredP.y <= rect.bottomLeft.y;
+    
+    Vec2 result;
+    
+#if 0
+    if ((right && top) || (right && bottom) ||
+        (left && top) || (left && bottom))
+    {
+        result = (desiredP - rectEntity->p).normalize();
+    } else
+#endif
     
     if (right)
     {
-        return Vec2(1.0f, 0.0f);
+        result = Vec2(1.0f, 0.0f);
     }
     else if (left)
     {
-        return Vec2(-1.0f, 0.0f);
+        result = Vec2(-1.0f, 0.0f);
     }
     else if (top)
     {
-        return Vec2(0.0f, 1.0f);
+        result = Vec2(0.0f, 1.0f);
     }
     else if (bottom)
     {
-        return Vec2(0.0f, -1.0f);
+        result = Vec2(0.0f, -1.0f);
     }
-    else
-    {
-        SDL_TriggerBreakpoint();
-        return Vec2();
-    }
+    
+    return result;
 }
 
 bool resolveCollision(Entity* entity, Entity* test, float remainingDistance, Vec2* desiredP, Vec2 testP)
@@ -167,14 +174,18 @@ bool resolveCollision(Entity* entity, Entity* test, float remainingDistance, Vec
     
     if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
     {
-        Vec2 wallNorm = getWallNorm(entity, test);
+        Vec2 wallNorm = getSurfaceNorm(*desiredP, test);
         entity->dp = reflect(entity->dp, wallNorm);
         *desiredP = testP + (remainingDistance * wallNorm);
         result = true;
     }
     else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_OBSTACLE)
     {
-        Vec2 wallNorm = getWallNorm(entity, test);
+        Vec2 wallNorm = getSurfaceNorm(*desiredP, test);
+        if (wallNorm.length() == 0)
+        {
+            wallNorm = (entity->p - *desiredP).normalize();
+        }
         entity->dp = reflect(entity->dp, wallNorm);
         *desiredP = testP + (remainingDistance * wallNorm);
         result = true;
@@ -193,8 +204,12 @@ bool resolveCollision(Entity* entity, Entity* test, float remainingDistance, Vec
     {
         if (circleRectIntersect(*desiredP, entity->w * 0.5f, test->p, test->w, test->h))
         {
-            Vec2 norm = (*desiredP - test->p).normalize();
-            entity->dp = norm * entity->dp.length();
+            Vec2 norm = getSurfaceNorm(*desiredP, test);
+            if (norm.length() == 0)
+            {
+                norm = (*desiredP - test->p).normalize();
+            }
+            entity->dp = reflect(entity->dp, norm);
             *desiredP = testP + (remainingDistance * norm);
             result = true;
         }
