@@ -66,22 +66,8 @@ void addWalls(GameState *gameState)
     setFlag(bottomWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
 }
 
-void addEntities(GameState *gameState)
+void addBalls(GameState *gameState)
 {
-    /* NOTE: currently dominance during collision resolution
-    is determined by the order of the entities */
-    
-    Entity* paddle = gameState->entities + gameState->entityCount++;
-    
-    paddle->storageIndex = gameState->entityCount - 1;
-    paddle->w = 90.0f;
-    paddle->h = 25.0f;
-    paddle->p = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f + 21.0f);
-    paddle->dp = Vec2();
-    paddle->type = ENTITY_TYPE_PADDLE;
-    
-    setFlag(paddle, ENTITY_FLAG_COLLIDES);
-
     Entity* ball = gameState->entities + gameState->entityCount++;
     
     ball->storageIndex = gameState->entityCount - 1;
@@ -104,6 +90,47 @@ void addEntities(GameState *gameState)
     ball->type = ENTITY_TYPE_BALL;
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
+    
+    ball = gameState->entities + gameState->entityCount++;
+    
+    ball->storageIndex = gameState->entityCount - 1;
+    ball->w = radius * 2.0f;
+    ball->h = radius * 2.0f;
+    ball->p = Vec2(300, 80);
+    ball->dp = Vec2();
+    ball->type = ENTITY_TYPE_BALL;
+    
+    setFlag(ball, ENTITY_FLAG_COLLIDES);
+    
+    ball = gameState->entities + gameState->entityCount++;
+    
+    ball->storageIndex = gameState->entityCount - 1;
+    ball->w = radius * 2.0f;
+    ball->h = radius * 2.0f;
+    ball->p = Vec2(500, 80);
+    ball->dp = Vec2();
+    ball->type = ENTITY_TYPE_BALL;
+    
+    setFlag(ball, ENTITY_FLAG_COLLIDES);
+}
+
+void addEntities(GameState *gameState)
+{
+    /* NOTE: currently dominance during collision resolution
+    is determined by the order of the entities */
+    
+    Entity* paddle = gameState->entities + gameState->entityCount++;
+    
+    paddle->storageIndex = gameState->entityCount - 1;
+    paddle->w = 90.0f;
+    paddle->h = 25.0f;
+    paddle->p = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f + 21.0f);
+    paddle->dp = Vec2();
+    paddle->type = ENTITY_TYPE_PADDLE;
+    
+    setFlag(paddle, ENTITY_FLAG_COLLIDES);
+    
+    addBalls(gameState);
 
     float brickWidth = 30;
     float brickHeight = 30;
@@ -127,6 +154,18 @@ void addEntities(GameState *gameState)
             setFlag(brick, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
         }
     }
+    
+    Entity* projectile = gameState->entities + gameState->entityCount++;
+    
+    
+    projectile->storageIndex = gameState->entityCount - 1;
+    projectile->p = Vec2(400, 100);
+    projectile->dp = Vec2(0.0f, 1.0f);
+    projectile->w = 15.0f;
+    projectile->h = 30.0f;
+    projectile->type = ENTITY_TYPE_PROJECTILE;
+
+    setFlag(projectile, ENTITY_FLAG_COLLIDES);
 }
 
 Vec2 getSurfaceNorm(Vec2 desiredP, Entity* rectEntity)
@@ -233,7 +272,6 @@ bool resolveCollision(Entity* entity, Entity* test, float remainingDistance, Vec
 void printEntity(Entity *entity)
 {
     printf("dp.x: %f dp.y: %f \n", entity->dp.x, entity->dp.y);
-
 }
 
 void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs specs)
@@ -367,6 +405,7 @@ void updateEntities(GameState *gameState)
             {
                 specs.speed = 500.0f;
                 specs.drag = 2.0f;
+                
                 if (input->left)
                 {
                     ddp.x = -1.0;
@@ -380,7 +419,9 @@ void updateEntities(GameState *gameState)
             {
                 specs.speed = 200.0f;
                 specs.drag = 2.0f;
-                if (input->mouseRight) {
+                
+                if (input->mouseRight)
+                {
                     Vec2 newVelocity(input->mouseX - entity->p.x, SCREEN_HEIGHT - input->mouseY - entity->p.y);
                     entity->dp = Vec2();
                     ddp = newVelocity.normalize();
@@ -393,14 +434,25 @@ void updateEntities(GameState *gameState)
                 drawCircle(gameState->renderer, entity);
                 
             } break;
+            case ENTITY_TYPE_PROJECTILE:
+            {
+                specs.speed = 1000.0f;
+                
+                if (input->mouseLeft)
+                {
+                    entity->p = Vec2(input->mouseX, SCREEN_HEIGHT - input->mouseY);
+                    entity->dp = Vec2(0.0f, 1.0f);
+                    ddp = entity->dp;
+                }
+                else
+                {
+                    Vec2 normalized(entity->dp);
+                    ddp = normalized.normalize();
+                }
+            } break;
             case ENTITY_TYPE_OBSTACLE:
-            {
-                
-            } break;
             case ENTITY_TYPE_BRICK:
-            {
-                
-            } break;
+            break;
             default:
             {
                 SDL_TriggerBreakpoint();
