@@ -8,6 +8,7 @@ struct GameState;
 
 enum EntityType
 {
+    ENTITY_TYPE_NULL,
     ENTITY_TYPE_BALL,
     ENTITY_TYPE_PADDLE,
     ENTITY_TYPE_BRICK,
