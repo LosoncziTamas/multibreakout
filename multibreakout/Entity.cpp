@@ -80,7 +80,7 @@ void addBalls(GameState *gameState)
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
     
-    ball = gameState->entities + gameState->entityCount++;
+    /*ball = gameState->entities + gameState->entityCount++;
     
     ball->storageIndex = gameState->entityCount - 1;
     ball->w = radius * 2.0f;
@@ -111,7 +111,7 @@ void addBalls(GameState *gameState)
     ball->dp = Vec2();
     ball->type = ENTITY_TYPE_BALL;
     
-    setFlag(ball, ENTITY_FLAG_COLLIDES);
+    setFlag(ball, ENTITY_FLAG_COLLIDES);*/
 }
 
 void addEntities(GameState *gameState)
@@ -155,8 +155,7 @@ void addEntities(GameState *gameState)
         }
     }
     
-    Entity* projectile = gameState->entities + gameState->entityCount++;
-    
+    /*Entity* projectile = gameState->entities + gameState->entityCount++;
     
     projectile->storageIndex = gameState->entityCount - 1;
     projectile->p = Vec2(400, 100);
@@ -165,7 +164,7 @@ void addEntities(GameState *gameState)
     projectile->h = 30.0f;
     projectile->type = ENTITY_TYPE_PROJECTILE;
 
-    setFlag(projectile, ENTITY_FLAG_COLLIDES);
+    setFlag(projectile, ENTITY_FLAG_COLLIDES);*/
 }
 
 Vec2 getSurfaceNorm(Vec2 desiredP, Entity* rectEntity)
@@ -401,18 +400,22 @@ void updateEntities(GameState *gameState)
     SDL_SetRenderDrawColor(gameState->renderer, 130, 189, 240, 0);
     SDL_RenderClear(gameState->renderer);
     
+    CollisionSpecs* colliders = pushArray(&gameState->gameMemory, gameState->entityCount, CollisionSpecs);
+    MovementSpecs* movements = pushArray(&gameState->gameMemory, gameState->entityCount, MovementSpecs);
+    
     for (Uint32 entityIndex = 0; entityIndex < gameState->entityCount; ++entityIndex)
     {
         Entity *entity = gameState->entities + entityIndex;
+        MovementSpecs* specs = movements + entityIndex;
+
         Vec2 ddp;
-        MovementSpecs specs = {};
         
         switch (entity->type)
         {
             case ENTITY_TYPE_PADDLE:
             {
-                specs.speed = 500.0f;
-                specs.drag = 2.0f;
+                specs->speed = 500.0f;
+                specs->drag = 2.0f;
                 
                 if (input->left)
                 {
@@ -425,8 +428,8 @@ void updateEntities(GameState *gameState)
             } break;
             case ENTITY_TYPE_BALL:
             {
-                specs.speed = 200.0f;
-                specs.drag = 2.0f;
+                specs->speed = 200.0f;
+                specs->drag = 2.0f;
                 
                 if (input->mouseRight)
                 {
@@ -444,7 +447,7 @@ void updateEntities(GameState *gameState)
             } break;
             case ENTITY_TYPE_PROJECTILE:
             {
-                specs.speed = 1000.0f;
+                specs->speed = 1000.0f;
                 
                 if (input->mouseLeft)
                 {
@@ -469,10 +472,103 @@ void updateEntities(GameState *gameState)
         
         if (!isSet(entity, ENTITY_FLAG_STATIC))
         {
-            moveEntity(gameState, entity, ddp, specs);
+            float delta = gameState->delta;
+            
+            ddp *= specs->speed;
+            ddp += - specs->drag * entity->dp;
+            
+            CollisionSpecs* collider = colliders + entityIndex;
+            
+            Vec2 movementDelta = (0.5f * ddp * pow(delta, 2) + entity->dp * delta);
+            
+            collider->oldP = entity->p;
+            collider->desiredDp = ddp * delta + entity->dp;
+            collider->desiredP = entity->p + movementDelta;
+            collider->deltaLength = movementDelta.length();
         }
+    }
+    
+    Uint32 iterationCount = 4;
+    for (Uint32 iteration = 0; iteration <= iterationCount; ++iteration)
+    {
+        float t = iteration * (1.0 / iterationCount);
+        
+        for (Uint32 entityIndex = 0; entityIndex < gameState->entityCount; ++entityIndex)
+        {
+            bool stop = false;
+            Entity* entity = gameState->entities + entityIndex;
+            
+            CollisionSpecs* collider = colliders + entity->storageIndex;
+            Vec2 entityLerpP = ((1.0 - t) * collider->oldP) + (t * collider->desiredP);
+            if (isSet(entity, ENTITY_FLAG_STATIC))
+            {
+                entityLerpP = entity->p;
+            }
+            
+            Rectangle entityRect = fromDimAndCenter(entityLerpP, entity->w, entity->h);
+            
+            for (Uint32 entityIndex = 0; entityIndex < gameState->entityCount; ++entityIndex)
+            {
+                Entity* test = gameState->entities + entityIndex;
+                if (test == entity || !isSet(test, ENTITY_FLAG_COLLIDES))
+                {
+                    continue;
+                }
+                
+                CollisionSpecs* testCollider = colliders + test->storageIndex;
+                Vec2 testLerpP = ((1.0 - t) * testCollider->oldP) + (t * testCollider->desiredP);
+                if (isSet(test, ENTITY_FLAG_STATIC))
+                {
+                    testLerpP = test->p;
+                }
+                Rectangle testRect = fromDimAndCenter(testLerpP, test->w, test->h);
+                
+                if (!(isSet(entity, ENTITY_FLAG_STATIC) && isSet(test, ENTITY_FLAG_STATIC)) && aabb(entityRect, testRect))
+                {
+#if 0
+                    float remainingDistance = (1.0f - t) * deltaLength;
+                    if (remainingDistance == 0.0f && iteration == iterationCount)
+                    {
+                        remainingDistance = deltaLength * (1.0f / iterationCount);
+                    }
+            
+                    bool collides = resolveCollision(entity, test, remainingDistance, &desiredP, testP);
+                    if (collides)
+                    {
+                        break;
+                    }
+#endif
+                    testCollider->desiredP = testCollider->oldP;
+                    collider->desiredP = collider->oldP;
+                    
+                    stop = true;
+                    break;
+                }
+            }
+            
+            if (stop) {
+                break;
+            }
+        }
+    }
+    
+    //TODO: Collision result finalization
+    for (Uint32 entityIndex = 0; entityIndex < gameState->entityCount; ++entityIndex)
+    {
+        Entity* entity = gameState->entities + entityIndex;
+        CollisionSpecs* collider = colliders + entity->storageIndex;
+        
+        if (!isSet(entity, ENTITY_FLAG_STATIC))
+        {
+            entity->p = collider->desiredP;
+            entity->dp = collider->desiredDp;
+        }
+        
         drawEntityBounds(gameState->renderer, entity);
     }
+    
+    clearArray(colliders, gameState->entityCount, CollisionSpecs);
+    clearArray(movements, gameState->entityCount, MovementSpecs);
     
     SDL_RenderPresent(gameState->renderer);
 }
