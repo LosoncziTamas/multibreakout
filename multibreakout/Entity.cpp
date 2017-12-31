@@ -274,6 +274,14 @@ void printEntity(Entity *entity)
     printf("dp.x: %f dp.y: %f \n", entity->dp.x, entity->dp.y);
 }
 
+struct CollisionSpecs
+{
+    Vec2 desiredP;
+    Vec2 desiredDp;
+    Vec2 oldP;
+    float deltaLength;
+};
+
 void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs specs)
 {
     float delta = gameState->delta;

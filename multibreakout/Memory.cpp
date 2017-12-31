@@ -7,3 +7,12 @@ void* pushSize(Memory *memory, size_t size) {
     
     return result;
 }
+
+void clearSize(size_t size, void *ptr)
+{
+    Uint8 *byte = (Uint8 *)ptr;
+    while(size--)
+    {
+        *byte++ = 0;
+    }
+}

@@ -4,15 +4,21 @@
 #include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_assert.h>
 
-#define PushStruct(memory, type) (type *)pushSize(memory, sizeof(type))
-#define PushArray(memory, count, type) (type *)pushSize(memory, (count)*sizeof(type))
+#define pushStruct(memory, type) (type *)pushSize(memory, sizeof(type))
+#define pushArray(memory, count, type) (type *)pushSize(memory, (count)*sizeof(type))
 
-struct Memory {
+#define clearStruct(instance) clearSize(sizeof(instance), &(instance))
+#define clearArray(instance, count, type) clearSize((count) * sizeof(type), (instance))
+
+struct Memory
+{
     Uint8 *base;
     size_t size;
     size_t used;
 };
 
 void* pushSize(Memory *memory, size_t size);
+
+void clearSize(size_t size, void *ptr);
 
 #endif
