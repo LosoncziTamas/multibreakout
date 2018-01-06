@@ -80,14 +80,23 @@ void addBalls(GameState *gameState)
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
     
-#if 0
-    
     ball = gameState->entities + gameState->entityCount++;
     
     ball->storageIndex = gameState->entityCount - 1;
     ball->w = radius * 2.0f;
     ball->h = radius * 2.0f;
-    ball->p = Vec2(SCREEN_WIDTH * 0.5f, 80);
+    ball->p = Vec2(SCREEN_WIDTH * 0.5f, 90);
+    ball->dp = Vec2();
+    ball->type = ENTITY_TYPE_BALL;
+    
+    setFlag(ball, ENTITY_FLAG_COLLIDES);
+
+    ball = gameState->entities + gameState->entityCount++;
+    
+    ball->storageIndex = gameState->entityCount - 1;
+    ball->w = radius * 2.0f;
+    ball->h = radius * 2.0f;
+    ball->p = Vec2(SCREEN_WIDTH * 0.5f - ball->w, 80);
     ball->dp = Vec2();
     ball->type = ENTITY_TYPE_BALL;
     
@@ -98,24 +107,12 @@ void addBalls(GameState *gameState)
     ball->storageIndex = gameState->entityCount - 1;
     ball->w = radius * 2.0f;
     ball->h = radius * 2.0f;
-    ball->p = Vec2(300, 80);
+    ball->p = Vec2(SCREEN_WIDTH * 0.5f + ball->w, 80);
     ball->dp = Vec2();
     ball->type = ENTITY_TYPE_BALL;
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
     
-    ball = gameState->entities + gameState->entityCount++;
-    
-    ball->storageIndex = gameState->entityCount - 1;
-    ball->w = radius * 2.0f;
-    ball->h = radius * 2.0f;
-    ball->p = Vec2(500, 80);
-    ball->dp = Vec2();
-    ball->type = ENTITY_TYPE_BALL;
-    
-    setFlag(ball, ENTITY_FLAG_COLLIDES);
-    
-#endif
 }
 
 void addEntities(GameState *gameState)
@@ -521,7 +518,6 @@ void updateEntities(GameState *gameState)
         
         for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
         {
-            bool stop = false;
             Entity* entity = gameState->entities + entityIndex;
             
             CollisionSpecs* collider = colliders + entity->storageIndex;
@@ -544,29 +540,97 @@ void updateEntities(GameState *gameState)
                 
                 if (!(isSet(entity, ENTITY_FLAG_STATIC) && isSet(test, ENTITY_FLAG_STATIC)) && aabb(entityRect, testRect))
                 {
-#if 0
-                    float remainingDistance = (1.0f - t) * deltaLength;
+                    float remainingDistance = (1.0f - t) * collider->deltaLength;
                     if (remainingDistance == 0.0f && iteration == iterationCount)
                     {
-                        remainingDistance = deltaLength * (1.0f / iterationCount);
+                        remainingDistance = collider->deltaLength * (1.0f / iterationCount);
                     }
-            
-                    bool collides = resolveCollision(entity, test, remainingDistance, &desiredP, testP);
-                    if (collides)
-                    {
-                        break;
-                    }
-#endif
-                    testCollider->desiredP = testCollider->oldP;
-                    collider->desiredP = collider->oldP;
                     
-                    stop = true;
-                    break;
+                    float testRemainingDistance = (1.0f - t) * testCollider->deltaLength;
+                    if (testRemainingDistance == 0.0f && iteration == iterationCount)
+                    {
+                        testRemainingDistance = testCollider->deltaLength * (1.0f / iterationCount);
+                    }
+                    
+                    if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
+                    {
+                        Vec2 wallNorm = getSurfaceNorm(collider->desiredP, test);
+                        collider->desiredDp = reflect(entity->dp, wallNorm);
+                        collider->desiredP = entityLerpP + (remainingDistance * wallNorm);
+                        
+                        testCollider->desiredP = testCollider->oldP;
+
+                    }
+                    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_OBSTACLE)
+                    {
+                        Vec2 wallNorm = getSurfaceNorm(collider->desiredP, test);
+                        if (wallNorm.length() == 0)
+                        {
+                            wallNorm = (entity->p - collider->desiredP).normalize();
+                        }
+                        collider->desiredDp = reflect(entity->dp, wallNorm);
+                        collider->desiredP = entityLerpP + (remainingDistance * wallNorm);
+                        
+                        testCollider->desiredP = testCollider->oldP;
+                    }
+                    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_PADDLE)
+                    {
+                        if (circleRectIntersect(collider->desiredP, entity->w * 0.5f, testLerpP, test->w, test->h))
+                        {
+                            //TODO: implement better force distribution
+                            
+                            float extraForceLength = test->dp.length() * 0.5f;
+                            
+                            {
+                                Vec2 norm = (collider->desiredP - testLerpP).normalize();
+                                collider->desiredDp = (norm * entity->dp.length()) + (norm * extraForceLength);
+                                collider->desiredP = entityLerpP + (remainingDistance * norm);
+                            }
+                            
+                            {
+                                Vec2 testNorm = (testLerpP - collider->desiredP).normalize();
+                                testNorm.y = 0.0f;
+                                testCollider->desiredP = testLerpP + (testRemainingDistance * testNorm);
+                                testCollider->desiredDp = testNorm * extraForceLength;
+                            }
+
+                        }
+                    }
+                    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_BALL)
+                    {
+                        float distance = entityLerpP.distance(testLerpP);
+                        bool collide = distance <= entity->w * 0.5 + test->w * 0.5;
+                        if (collide)
+                        {
+                            {
+                                Vec2 norm = (entityLerpP - testLerpP).normalize();
+                                collider->desiredDp = norm * entity->dp.length();
+                                collider->desiredP = entityLerpP + (remainingDistance * norm);
+                            }
+                            
+                            {
+                                Vec2 testNorm = (testLerpP - entityLerpP).normalize();
+                                testCollider->desiredDp = testNorm * test->dp.length();
+                                testCollider->desiredP = testLerpP + (testRemainingDistance * testNorm);
+                            }
+                        }
+                    }
+                    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_BRICK)
+                    {
+                        if (circleRectIntersect(collider->desiredP, entity->w * 0.5f, testLerpP, test->w, test->h))
+                        {
+                            Vec2 norm = getSurfaceNorm(collider->desiredP, test);
+                            if (norm.length() == 0)
+                            {
+                                norm = (collider->desiredP - testLerpP).normalize();
+                            }
+                            collider->desiredDp = reflect(entity->dp, norm);
+                            collider->desiredP = entityLerpP + (remainingDistance * norm);
+                            
+                            testCollider->desiredP = testCollider->oldP;
+                        }
+                    }
                 }
-            }
-            
-            if (stop) {
-                break;
             }
         }
     }
