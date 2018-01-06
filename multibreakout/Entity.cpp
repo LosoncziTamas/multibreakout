@@ -117,9 +117,6 @@ void addBalls(GameState *gameState)
 
 void addEntities(GameState *gameState)
 {
-    /* NOTE: currently dominance during collision resolution
-    is determined by the order of the entities */
-    
     Entity* nullEntity = gameState->entities + gameState->entityCount++;
     
     nullEntity->storageIndex = gameState->entityCount - 1;
@@ -176,107 +173,6 @@ void addEntities(GameState *gameState)
     setFlag(projectile, ENTITY_FLAG_COLLIDES);
 }
 
-Vec2 getSurfaceNorm(Vec2 desiredP, Entity* rectEntity)
-{
-    Rectangle rect = fromDimAndCenter(rectEntity->p, rectEntity->w, rectEntity->h);
-    
-    bool left = desiredP.x <= rect.bottomLeft.x;
-    bool right = desiredP.x >= rect.topRight.x;
-    bool top = desiredP.y >= rect.topRight.y;
-    bool bottom = desiredP.y <= rect.bottomLeft.y;
-    
-    Vec2 result;
-    
-#if 0
-    if ((right && top) || (right && bottom) ||
-        (left && top) || (left && bottom))
-    {
-        result = (desiredP - rectEntity->p).normalize();
-    } else
-#endif
-    
-    if (right)
-    {
-        result = Vec2(1.0f, 0.0f);
-    }
-    else if (left)
-    {
-        result = Vec2(-1.0f, 0.0f);
-    }
-    else if (top)
-    {
-        result = Vec2(0.0f, 1.0f);
-    }
-    else if (bottom)
-    {
-        result = Vec2(0.0f, -1.0f);
-    }
-    
-    return result;
-}
-
-bool resolveCollision(Entity* entity, Entity* test, float remainingDistance, Vec2* desiredP, Vec2 testP)
-{
-    bool result = false;
-    
-    if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
-    {
-        Vec2 wallNorm = getSurfaceNorm(*desiredP, test);
-        entity->dp = reflect(entity->dp, wallNorm);
-        *desiredP = testP + (remainingDistance * wallNorm);
-        result = true;
-    }
-    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_OBSTACLE)
-    {
-        Vec2 wallNorm = getSurfaceNorm(*desiredP, test);
-        if (wallNorm.length() == 0)
-        {
-            wallNorm = (entity->p - *desiredP).normalize();
-        }
-        entity->dp = reflect(entity->dp, wallNorm);
-        *desiredP = testP + (remainingDistance * wallNorm);
-        result = true;
-    }
-    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_PADDLE)
-    {
-        if (circleRectIntersect(*desiredP, entity->w * 0.5f, test->p, test->w, test->h))
-        {
-            Vec2 norm = (*desiredP - test->p).normalize();
-            entity->dp = (norm * entity->dp.length()) + (norm * test->dp.length());
-            *desiredP = testP + (remainingDistance * norm);
-            result = true;
-        }
-    }
-    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_BRICK)
-    {
-        if (circleRectIntersect(*desiredP, entity->w * 0.5f, test->p, test->w, test->h))
-        {
-            Vec2 norm = getSurfaceNorm(*desiredP, test);
-            if (norm.length() == 0)
-            {
-                norm = (*desiredP - test->p).normalize();
-            }
-            entity->dp = reflect(entity->dp, norm);
-            *desiredP = testP + (remainingDistance * norm);
-            result = true;
-        }
-    }
-    else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_BALL)
-    {
-        float distance = entity->p.distance(test->p);
-        bool collide = distance <= entity->w * 0.5 + test->w * 0.5;
-        if (collide)
-        {
-            Vec2 norm = (entity->p - test->p).normalize();
-            entity->dp = norm * entity->dp.length();
-            *desiredP = testP + (remainingDistance * norm);
-            return true;
-        }
-    }
-    
-    return result;
-}
-
 void printEntity(Entity *entity)
 {
     printf("dp.x: %f dp.y: %f \n", entity->dp.x, entity->dp.y);
@@ -289,61 +185,6 @@ struct CollisionSpecs
     Vec2 oldP;
     float deltaLength;
 };
-
-void moveEntity(GameState *gameState, Entity *entity, Vec2 ddp, MovementSpecs specs)
-{
-    float delta = gameState->delta;
-    
-    ddp *= specs.speed;
-    ddp += - specs.drag * entity->dp;
-    
-    Vec2 oldP = entity->p;
-    Vec2 movementDelta = (0.5f * ddp * pow(delta, 2) + entity->dp * delta);
-    entity->dp = ddp * delta + entity->dp;
-    Vec2 desiredP = oldP + movementDelta;
-    float deltaLength = movementDelta.length();
-    
-    if (isSet(entity, ENTITY_FLAG_COLLIDES))
-    {
-        for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
-        {
-            Entity *test = gameState->entities + entityIndex;
-            if (test == entity || !isSet(test, ENTITY_FLAG_COLLIDES))
-            {
-                continue;
-            }
-            
-            Rectangle testRect = fromDimAndCenter(test->p, test->w, test->h);
-            
-            Uint32 iterationCount = 4;
-            for (Uint32 iteration = 0; iteration <= iterationCount; ++iteration)
-            {
-                float t = iteration * (1.0 / iterationCount);
-                Vec2 testP = ((1.0 - t) * oldP) + (t * desiredP);
-                Rectangle entityRect = fromDimAndCenter(testP, entity->w, entity->h);
-                
-                if (aabb(entityRect, testRect))
-                {
-                    float remainingDistance = (1.0f - t) * deltaLength;
-                    if (remainingDistance == 0.0f && iteration == iterationCount)
-                    {
-                        remainingDistance = deltaLength * (1.0f / iterationCount);
-                    }
-                    
-                    bool collides = resolveCollision(entity, test, remainingDistance, &desiredP, testP);
-                    if (collides)
-                    {
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    entity->p = desiredP;
-}
-
-
 
 void drawEntityBounds(SDL_Renderer* renderer, Entity* entity) {
     SDL_Rect rect;
@@ -403,6 +244,35 @@ void setStaticCollider(CollisionSpecs* collider, Vec2 center)
     collider->desiredDp = Vec2();
     collider->desiredP = center;
     collider->oldP = center;
+}
+
+Vec2 getSurfaceNorm(Vec2 vector, Rectangle* surfaceRect)
+{
+    bool left = vector.x <= surfaceRect->bottomLeft.x;
+    bool right = vector.x >= surfaceRect->topRight.x;
+    bool top = vector.y >= surfaceRect->topRight.y;
+    bool bottom = vector.y <= surfaceRect->bottomLeft.y;
+    
+    Vec2 result;
+    
+    if (right)
+    {
+        result = Vec2(1.0f, 0.0f);
+    }
+    else if (left)
+    {
+        result = Vec2(-1.0f, 0.0f);
+    }
+    else if (top)
+    {
+        result = Vec2(0.0f, 1.0f);
+    }
+    else if (bottom)
+    {
+        result = Vec2(0.0f, -1.0f);
+    }
+    
+    return result;
 }
 
 void updateEntities(GameState *gameState)
@@ -554,7 +424,7 @@ void updateEntities(GameState *gameState)
                     
                     if (entity->type == ENTITY_TYPE_PADDLE && test->type == ENTITY_TYPE_OBSTACLE)
                     {
-                        Vec2 wallNorm = getSurfaceNorm(collider->desiredP, test);
+                        Vec2 wallNorm = getSurfaceNorm(collider->desiredP, &testRect);
                         collider->desiredDp = reflect(entity->dp, wallNorm);
                         collider->desiredP = entityLerpP + (remainingDistance * wallNorm);
                         
@@ -563,7 +433,7 @@ void updateEntities(GameState *gameState)
                     }
                     else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_OBSTACLE)
                     {
-                        Vec2 wallNorm = getSurfaceNorm(collider->desiredP, test);
+                        Vec2 wallNorm = getSurfaceNorm(collider->desiredP, &testRect);
                         if (wallNorm.length() == 0)
                         {
                             wallNorm = (entity->p - collider->desiredP).normalize();
@@ -578,7 +448,6 @@ void updateEntities(GameState *gameState)
                         if (circleRectIntersect(collider->desiredP, entity->w * 0.5f, testLerpP, test->w, test->h))
                         {
                             //TODO: implement better force distribution
-                            
                             float extraForceLength = test->dp.length() * 0.5f;
                             
                             {
@@ -619,7 +488,7 @@ void updateEntities(GameState *gameState)
                     {
                         if (circleRectIntersect(collider->desiredP, entity->w * 0.5f, testLerpP, test->w, test->h))
                         {
-                            Vec2 norm = getSurfaceNorm(collider->desiredP, test);
+                            Vec2 norm = getSurfaceNorm(collider->desiredP, &testRect);
                             if (norm.length() == 0)
                             {
                                 norm = (collider->desiredP - testLerpP).normalize();
@@ -635,7 +504,6 @@ void updateEntities(GameState *gameState)
         }
     }
     
-    //TODO: Collision result finalization
     for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
     {
         Entity* entity = gameState->entities + entityIndex;
