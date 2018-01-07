@@ -159,8 +159,16 @@ void updatePaddles(GameState* gameState)
         PaddleLogic* paddle = gameState->paddles + paddleIndex;
         if (paddle->flags & PADDLE_FLAG_PLAYER_CONTROLLED)
         {
-            paddle->moveLeft = gameState->input.left;
-            paddle->moveRight = gameState->input.right;
+            if (paddle->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
+            {
+                paddle->moveLeft = gameState->input.left;
+                paddle->moveRight = gameState->input.right;
+            }
+            else if (paddle->flags & PADDLE_FLAG_ORIENTATION_TOP)
+            {
+                paddle->moveLeft = gameState->input.right;
+                paddle->moveRight = gameState->input.left;
+            }
         }
         else
         {
