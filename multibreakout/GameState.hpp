@@ -37,6 +37,8 @@ struct GameState {
     
     Entity entities[128];
     Uint32 entityCount;
+    PaddleLogic paddles[4];
+    Uint32 paddleCount;
 };
 
 #endif

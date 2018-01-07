@@ -90,7 +90,7 @@ void addBalls(GameState *gameState)
     ball->type = ENTITY_TYPE_BALL;
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
-
+#if 0
     ball = gameState->entities + gameState->entityCount++;
     
     ball->storageIndex = gameState->entityCount - 1;
@@ -112,7 +112,61 @@ void addBalls(GameState *gameState)
     ball->type = ENTITY_TYPE_BALL;
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
+#endif
+}
+
+void addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
+{
+    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
+    Entity* paddle = gameState->entities + gameState->entityCount++;
     
+    paddle->storageIndex = gameState->entityCount - 1;
+    paddle->w = 90.0f;
+    paddle->h = 25.0f;
+    paddle->p = pos;
+    paddle->dp = Vec2();
+    paddle->type = ENTITY_TYPE_PADDLE;
+    
+    setFlag(paddle, ENTITY_FLAG_COLLIDES);
+    
+    SDL_assert(SDL_arraysize(gameState->paddles) > gameState->paddleCount);
+    PaddleLogic* logic = gameState->paddles + gameState->paddleCount++;
+    
+    logic->entityIndex = paddle->storageIndex;
+    logic->flags = paddleFlags;
+}
+
+PaddleLogic* getLogicForPaddle(GameState* gameState, Uint32 entityIndex)
+{
+    PaddleLogic* paddle = 0;
+    
+    for (Uint32 paddleIndex = 0; paddleIndex < gameState->paddleCount; ++paddleIndex)
+    {
+        paddle = gameState->paddles + paddleIndex;
+        if (paddle->entityIndex == entityIndex)
+        {
+            break;
+        }
+    }
+    
+    return paddle;
+}
+
+void updatePaddles(GameState* gameState)
+{
+    for (Uint32 paddleIndex = 0; paddleIndex < gameState->paddleCount; ++paddleIndex)
+    {
+        PaddleLogic* paddle = gameState->paddles + paddleIndex;
+        if (paddle->flags & PADDLE_FLAG_PLAYER_CONTROLLED)
+        {
+            paddle->moveLeft = gameState->input.left;
+            paddle->moveRight = gameState->input.right;
+        }
+        else
+        {
+            //TODO: get AI generated input
+        }
+    }
 }
 
 void addEntities(GameState *gameState)
@@ -124,16 +178,14 @@ void addEntities(GameState *gameState)
     
     SDL_assert(nullEntity->storageIndex == 0);
     
-    Entity* paddle = gameState->entities + gameState->entityCount++;
+    float paddleHeight = DEFAULT_HEIGHT;
+    addPaddle(gameState,
+              Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f + 21.0f),
+              PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
     
-    paddle->storageIndex = gameState->entityCount - 1;
-    paddle->w = 90.0f;
-    paddle->h = 25.0f;
-    paddle->p = Vec2(SCREEN_WIDTH * 0.5f, DEFAULT_HEIGHT * 0.5f + 21.0f);
-    paddle->dp = Vec2();
-    paddle->type = ENTITY_TYPE_PADDLE;
-    
-    setFlag(paddle, ENTITY_FLAG_COLLIDES);
+    addPaddle(gameState,
+              Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - (21.0f + paddleHeight * 0.5f)),
+              PADDLE_FLAG_ORIENTATION_TOP);
     
     addBalls(gameState);
 
@@ -172,8 +224,6 @@ void addEntities(GameState *gameState)
 
     setFlag(projectile, ENTITY_FLAG_COLLIDES);
 }
-
-
 
 void drawEntityBounds(SDL_Renderer* renderer, Entity* entity) {
     SDL_Rect rect;
@@ -281,8 +331,8 @@ void updateEntities(GameState *gameState)
         initialized = true;
     }
     
-    GameInput *input = &gameState->input;
-        
+    updatePaddles(gameState);
+    
     SDL_SetRenderDrawColor(gameState->renderer, 130, 189, 240, 0);
     SDL_RenderClear(gameState->renderer);
     
@@ -304,23 +354,29 @@ void updateEntities(GameState *gameState)
                 specs->speed = 500.0f;
                 specs->drag = 2.0f;
                 
-                if (input->left)
+                PaddleLogic* paddle = getLogicForPaddle(gameState, entityIndex);
+                if (paddle)
                 {
-                    ddp.x = -1.0;
+                    if (paddle->moveLeft)
+                    {
+                        ddp.x = -1.0;
+                    }
+                    else if (paddle->moveRight)
+                    {
+                        ddp.x = 1.0;
+                    }
                 }
-                else if (input->right)
-                {
-                    ddp.x = 1.0;
-                }
+
             } break;
             case ENTITY_TYPE_BALL:
             {
                 specs->speed = 200.0f;
                 specs->drag = 2.0f;
                 
-                if (input->mouseRight)
+                if (gameState->input.mouseRight)
                 {
-                    Vec2 newVelocity(input->mouseX - entity->p.x, SCREEN_HEIGHT - input->mouseY - entity->p.y);
+                    Vec2 newVelocity(gameState->input.mouseX - entity->p.x,
+                                     SCREEN_HEIGHT - gameState->input.mouseY - entity->p.y);
                     entity->dp = Vec2();
                     ddp = newVelocity.normalize();
                 }
@@ -336,9 +392,10 @@ void updateEntities(GameState *gameState)
             {
                 specs->speed = 1000.0f;
                 
-                if (input->mouseLeft)
+                if (gameState->input.mouseLeft)
                 {
-                    entity->p = Vec2(input->mouseX, SCREEN_HEIGHT - input->mouseY);
+                    entity->p = Vec2(gameState->input.mouseX,
+                                     SCREEN_HEIGHT - gameState->input.mouseY);
                     entity->dp = Vec2(0.0f, 1.0f);
                     ddp = entity->dp;
                 }
