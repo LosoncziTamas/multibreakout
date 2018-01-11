@@ -54,6 +54,7 @@ struct PaddleLogic
     Uint32 flags;
     bool moveLeft;
     bool moveRight;
+    Entity* ball;
 };
 
 void updateEntities(GameState *gameState);

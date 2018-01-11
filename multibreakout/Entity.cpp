@@ -79,7 +79,7 @@ void addBalls(GameState *gameState)
     ball->type = ENTITY_TYPE_BALL;
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
-    
+ #if 0
     ball = gameState->entities + gameState->entityCount++;
     
     ball->storageIndex = gameState->entityCount - 1;
@@ -90,7 +90,7 @@ void addBalls(GameState *gameState)
     ball->type = ENTITY_TYPE_BALL;
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
-#if 0
+
     ball = gameState->entities + gameState->entityCount++;
     
     ball->storageIndex = gameState->entityCount - 1;
@@ -152,6 +152,11 @@ PaddleLogic* getLogicForPaddle(GameState* gameState, Uint32 entityIndex)
     return paddle;
 }
 
+struct EnemyAi
+{
+    
+};
+
 void updatePaddles(GameState* gameState)
 {
     for (Uint32 paddleIndex = 0; paddleIndex < gameState->paddleCount; ++paddleIndex)
@@ -172,7 +177,31 @@ void updatePaddles(GameState* gameState)
         }
         else
         {
-            //TODO: get AI generated input
+            Entity* enemyEntity = gameState->entities + paddle->entityIndex;
+            
+            Rectangle enemyRectangle = {};
+            enemyRectangle.bottomLeft = Vec2(160, SCREEN_HEIGHT * 0.5f);
+            enemyRectangle.topRight = Vec2(640, SCREEN_HEIGHT);
+
+            for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
+            {
+                Entity* entity = gameState->entities + entityIndex;
+                if (entity->type == ENTITY_TYPE_BALL && entity != paddle->ball)
+                {
+                    bool danger = isInRectangle(enemyRectangle, entity->p);
+                    if (danger)
+                    {
+                        float minDistance = enemyEntity->w * 0.45f;
+                        paddle->moveLeft = entity->p.x - enemyEntity->p.x < minDistance;
+                        paddle->moveRight = entity->p.x - enemyEntity->p.x > minDistance;
+                    }
+                    else
+                    {
+                        paddle->moveLeft = false;
+                        paddle->moveRight = false;
+                    }
+                }
+            }
         }
     }
 }
