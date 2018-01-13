@@ -134,6 +134,22 @@ void addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
     
     logic->entityIndex = paddle->storageIndex;
     logic->flags = paddleFlags;
+    
+    if (!(logic->flags & PADDLE_FLAG_PLAYER_CONTROLLED))
+    {
+        SDL_assert(SDL_arraysize(gameState->enemyControls) > gameState->enemyControlCount);
+        EnemyControl* enemyControl = gameState->enemyControls + gameState->enemyControlCount++;
+        
+        enemyControl->paddleLogicIndex = gameState->paddleCount - 1;
+        enemyControl->state = ENEMY_STATE_IDLE;
+        enemyControl->target = Vec2();
+        
+        Rectangle rect = {};
+        rect.bottomLeft = Vec2(160, SCREEN_HEIGHT * 0.5f);
+        rect.topRight = Vec2(640, SCREEN_HEIGHT);
+        
+        enemyControl->dangerZone = rect;
+    }
 }
 
 PaddleLogic* getLogicForPaddle(GameState* gameState, Uint32 entityIndex)
@@ -152,10 +168,21 @@ PaddleLogic* getLogicForPaddle(GameState* gameState, Uint32 entityIndex)
     return paddle;
 }
 
-struct EnemyAi
+EnemyControl* getEnemyControl(GameState* gameState, Uint32 paddleLogicIndex)
 {
+    EnemyControl* enemyControl = 0;
     
-};
+    for (Uint32 enemyControlIndex = 0; enemyControlIndex < gameState->enemyControlCount; ++enemyControlIndex)
+    {
+        enemyControl = gameState->enemyControls + enemyControlIndex;
+        if (enemyControl->paddleLogicIndex == paddleLogicIndex)
+        {
+            break;
+        }
+    }
+    
+    return enemyControl;
+}
 
 void updatePaddles(GameState* gameState)
 {
@@ -177,18 +204,17 @@ void updatePaddles(GameState* gameState)
         }
         else
         {
+            EnemyControl* enemyControl = getEnemyControl(gameState, paddleIndex);
+            SDL_assert(enemyControl);
+
             Entity* enemyEntity = gameState->entities + paddle->entityIndex;
             
-            Rectangle enemyRectangle = {};
-            enemyRectangle.bottomLeft = Vec2(160, SCREEN_HEIGHT * 0.5f);
-            enemyRectangle.topRight = Vec2(640, SCREEN_HEIGHT);
-
             for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
             {
                 Entity* entity = gameState->entities + entityIndex;
                 if (entity->type == ENTITY_TYPE_BALL && entity != paddle->ball)
                 {
-                    bool danger = isInRectangle(enemyRectangle, entity->p);
+                    bool danger = isInRectangle(enemyControl->dangerZone, entity->p);
                     if (danger)
                     {
                         float minDistance = enemyEntity->w * 0.45f;

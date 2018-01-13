@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL_stdinc.h>
 #include "Vec2.hpp"
+#include "Physics.hpp"
 
 struct GameState;
 
@@ -55,6 +56,21 @@ struct PaddleLogic
     bool moveLeft;
     bool moveRight;
     Entity* ball;
+};
+
+enum EnemyState
+{
+    ENEMY_STATE_IDLE,
+    ENEMY_STATE_STEERING,
+    ENEMY_STATE_DEFENDING
+};
+
+struct EnemyControl
+{
+    Uint32 paddleLogicIndex;
+    EnemyState state;
+    Rectangle dangerZone;
+    Vec2 target;
 };
 
 void updateEntities(GameState *gameState);
