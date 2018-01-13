@@ -209,22 +209,77 @@ void updatePaddles(GameState* gameState)
 
             Entity* enemyEntity = gameState->entities + paddle->entityIndex;
             
+            paddle->moveLeft = false;
+            paddle->moveRight = false;
+            
             for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
             {
                 Entity* entity = gameState->entities + entityIndex;
+                //NOTE: this implementation implies there is only one ball
                 if (entity->type == ENTITY_TYPE_BALL && entity != paddle->ball)
                 {
                     bool danger = isInRectangle(enemyControl->dangerZone, entity->p);
-                    if (danger)
-                    {
-                        float minDistance = enemyEntity->w * 0.45f;
-                        paddle->moveLeft = entity->p.x - enemyEntity->p.x < minDistance;
-                        paddle->moveRight = entity->p.x - enemyEntity->p.x > minDistance;
-                    }
-                    else
-                    {
-                        paddle->moveLeft = false;
-                        paddle->moveRight = false;
+                    switch (enemyControl->state) {
+                        case ENEMY_STATE_IDLE:
+                        {
+                            if (!danger)
+                            {
+                                //select to random target position
+                                enemyControl->target.x = SCREEN_WIDTH * 0.5f;
+                                enemyControl->state = ENEMY_STATE_STEERING;
+                                printf("ENEMY_STATE_STEERING \n");
+                            }
+                            else
+                            {
+                                enemyControl->state = ENEMY_STATE_DEFENDING;
+                                printf("ENEMY_STATE_DEFENDING \n");
+                            }
+                            
+                        } break;
+                        case ENEMY_STATE_STEERING:
+                        {
+                            float minDistance = enemyEntity->w * 0.45f;
+
+                            if (danger)
+                            {
+                                enemyControl->state = ENEMY_STATE_DEFENDING;
+                                printf("ENEMY_STATE_DEFENDING \n");
+                            }
+                            else
+                            {
+                                bool reachedTarget = SDL_fabs(enemyControl->target.x - enemyEntity->p.x) < minDistance;
+                                if (reachedTarget)
+                                {
+                                    //release ball if has
+                                    //should it switch state?
+                                    printf("REACHED_TARGET \n");
+                                }
+                                else
+                                {
+                                    paddle->moveLeft =enemyControl->target.x - enemyEntity->p.x < minDistance;
+                                    paddle->moveRight = enemyControl->target.x - enemyEntity->p.x > minDistance;
+                                    //move toward the target
+                                }
+                            }
+
+                        } break;
+                        case ENEMY_STATE_DEFENDING:
+                        {
+                            if (danger)
+                            {
+                                float minDistance = enemyEntity->w * 0.45f;
+                                paddle->moveLeft = entity->p.x - enemyEntity->p.x < minDistance;
+                                paddle->moveRight = entity->p.x - enemyEntity->p.x > minDistance;
+                                //move toward the ball
+                            }
+                            else
+                            {
+                                printf("ENEMY_STATE_IDLE \n");
+                                enemyControl->state = ENEMY_STATE_IDLE;
+                            }
+                        } break;
+                        default:
+                            break;
                     }
                 }
             }
