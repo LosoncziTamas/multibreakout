@@ -55,6 +55,7 @@ struct PaddleLogic
     Uint32 flags;
     bool moveLeft;
     bool moveRight;
+    bool releaseBall;
     Entity* ball;
 };
 
@@ -63,6 +64,12 @@ enum EnemyState
     ENEMY_STATE_IDLE,
     ENEMY_STATE_STEERING,
     ENEMY_STATE_DEFENDING
+};
+
+struct BallLogic
+{
+    Uint32 entityIndex;
+    Entity* paddle;
 };
 
 struct EnemyControl

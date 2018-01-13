@@ -43,6 +43,9 @@ struct GameState {
     
     EnemyControl enemyControls[3];
     Uint32 enemyControlCount;
+    
+    BallLogic balls[16];
+    Uint32 ballCount;
 };
 
 #endif

@@ -66,7 +66,7 @@ void addWalls(GameState *gameState)
     setFlag(bottomWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
 }
 
-void addBalls(GameState *gameState)
+Entity* addBall(GameState *gameState)
 {
     Entity* ball = gameState->entities + gameState->entityCount++;
     
@@ -79,6 +79,8 @@ void addBalls(GameState *gameState)
     ball->type = ENTITY_TYPE_BALL;
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
+
+    return ball;
  #if 0
     ball = gameState->entities + gameState->entityCount++;
     
@@ -115,7 +117,7 @@ void addBalls(GameState *gameState)
 #endif
 }
 
-void addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
+Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
 {
     SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
     Entity* paddle = gameState->entities + gameState->entityCount++;
@@ -150,6 +152,8 @@ void addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
         
         enemyControl->dangerZone = rect;
     }
+    
+    return paddle;
 }
 
 PaddleLogic* getLogicForPaddle(GameState* gameState, Uint32 entityIndex)
@@ -201,6 +205,8 @@ void updatePaddles(GameState* gameState)
                 paddle->moveLeft = gameState->input.right;
                 paddle->moveRight = gameState->input.left;
             }
+            
+            paddle->releaseBall = gameState->input.space;
         }
         else
         {
@@ -256,7 +262,7 @@ void updatePaddles(GameState* gameState)
                                 }
                                 else
                                 {
-                                    paddle->moveLeft =enemyControl->target.x - enemyEntity->p.x < minDistance;
+                                    paddle->moveLeft = enemyControl->target.x - enemyEntity->p.x < minDistance;
                                     paddle->moveRight = enemyControl->target.x - enemyEntity->p.x > minDistance;
                                     //move toward the target
                                 }
@@ -287,6 +293,22 @@ void updatePaddles(GameState* gameState)
     }
 }
 
+BallLogic* getBallLogic(GameState* gameState, Uint32 ballEntityIndex)
+{
+    BallLogic* ballLogic = 0;
+    
+    for (Uint32 ballLogicIndex = 0; ballLogicIndex < gameState->ballCount; ++ballLogicIndex)
+    {
+        ballLogic = gameState->balls + ballLogicIndex;
+        if (ballLogic->entityIndex == ballEntityIndex)
+        {
+            break;
+        }
+    }
+    
+    return ballLogic;
+}
+
 void addEntities(GameState *gameState)
 {
     Entity* nullEntity = gameState->entities + gameState->entityCount++;
@@ -297,16 +319,29 @@ void addEntities(GameState *gameState)
     SDL_assert(nullEntity->storageIndex == 0);
     
     float paddleHeight = DEFAULT_HEIGHT;
-    addPaddle(gameState,
-              Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f + 21.0f),
-              PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
+    
     
     addPaddle(gameState,
               Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - (21.0f + paddleHeight * 0.5f)),
               PADDLE_FLAG_ORIENTATION_TOP);
     
-    addBalls(gameState);
+    Entity* player = addPaddle(gameState,
+              Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f + 21.0f),
+              PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
+    
+    PaddleLogic* playerLogic = getLogicForPaddle(gameState, player->storageIndex);
+    
+    Entity* ball = addBall(gameState);
 
+    SDL_assert(SDL_arraysize(gameState->balls) > gameState->ballCount);
+    BallLogic* ballLogic = gameState->balls + gameState->ballCount++;
+    
+    ballLogic->entityIndex = ball->storageIndex;
+    
+    //TODO: extract to function
+    playerLogic->ball = ball;
+    ballLogic->paddle = player;
+    
     float brickWidth = 30;
     float brickHeight = 30;
     Uint32 columns = 4;
@@ -491,18 +526,44 @@ void updateEntities(GameState *gameState)
                 specs->speed = 200.0f;
                 specs->drag = 2.0f;
                 
-                if (gameState->input.mouseRight)
+                BallLogic* ballLogic = getBallLogic(gameState, entityIndex);
+                SDL_assert(ballLogic);
+                
+                if (ballLogic->paddle)
                 {
-                    Vec2 newVelocity(gameState->input.mouseX - entity->p.x,
-                                     SCREEN_HEIGHT - gameState->input.mouseY - entity->p.y);
-                    entity->dp = Vec2();
-                    ddp = newVelocity.normalize();
+                    Entity* paddleEntity = ballLogic->paddle;
+                    PaddleLogic* paddleLogic = getLogicForPaddle(gameState, paddleEntity->storageIndex);
+                    SDL_assert(paddleLogic);
+                    if (paddleLogic->releaseBall)
+                    {
+                        ddp.y = 1.0f;
+                        Vec2 launchForce(0.0f, 250.0f);
+                        entity->dp = paddleEntity->dp + launchForce;
+                        
+                        ballLogic->paddle = 0;
+                        paddleLogic->ball = 0;
+                    }
+                    else
+                    {
+                        entity->dp = paddleEntity->dp;
+                    }
                 }
                 else
                 {
-                    Vec2 normalized(entity->dp);
-                    ddp = normalized.normalize();
+                    if (gameState->input.mouseRight)
+                    {
+                        Vec2 newVelocity(gameState->input.mouseX - entity->p.x,
+                                         SCREEN_HEIGHT - gameState->input.mouseY - entity->p.y);
+                        entity->dp = Vec2();
+                        ddp = newVelocity.normalize();
+                    }
+                    else
+                    {
+                        Vec2 normalized(entity->dp);
+                        ddp = normalized.normalize();
+                    }
                 }
+
                 drawCircle(gameState->renderer, entity);
                 
             } break;
