@@ -66,10 +66,25 @@ enum EnemyState
     ENEMY_STATE_DEFENDING
 };
 
+enum EntityPowerUp
+{
+    POWER_UP_NONE,
+    POWER_UP_ENLARGE,
+    POWER_UP_SHRINK
+};
+
+struct BrickLogic
+{
+    Uint32 entityIndex;
+    EntityPowerUp powerUp;
+    Uint32 hitPoints;
+};
+
 struct BallLogic
 {
     Uint32 entityIndex;
     Entity* paddle;
+    EntityPowerUp powerUp;
 };
 
 struct EnemyControl

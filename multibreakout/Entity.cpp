@@ -81,40 +81,6 @@ Entity* addBall(GameState *gameState)
     setFlag(ball, ENTITY_FLAG_COLLIDES);
 
     return ball;
- #if 0
-    ball = gameState->entities + gameState->entityCount++;
-    
-    ball->storageIndex = gameState->entityCount - 1;
-    ball->w = radius * 2.0f;
-    ball->h = radius * 2.0f;
-    ball->p = Vec2(SCREEN_WIDTH * 0.5f, 90);
-    ball->dp = Vec2();
-    ball->type = ENTITY_TYPE_BALL;
-    
-    setFlag(ball, ENTITY_FLAG_COLLIDES);
-
-    ball = gameState->entities + gameState->entityCount++;
-    
-    ball->storageIndex = gameState->entityCount - 1;
-    ball->w = radius * 2.0f;
-    ball->h = radius * 2.0f;
-    ball->p = Vec2(SCREEN_WIDTH * 0.5f - ball->w, 80);
-    ball->dp = Vec2();
-    ball->type = ENTITY_TYPE_BALL;
-    
-    setFlag(ball, ENTITY_FLAG_COLLIDES);
-    
-    ball = gameState->entities + gameState->entityCount++;
-    
-    ball->storageIndex = gameState->entityCount - 1;
-    ball->w = radius * 2.0f;
-    ball->h = radius * 2.0f;
-    ball->p = Vec2(SCREEN_WIDTH * 0.5f + ball->w, 80);
-    ball->dp = Vec2();
-    ball->type = ENTITY_TYPE_BALL;
-    
-    setFlag(ball, ENTITY_FLAG_COLLIDES);
-#endif
 }
 
 Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
@@ -309,6 +275,22 @@ BallLogic* getBallLogic(GameState* gameState, Uint32 ballEntityIndex)
     return ballLogic;
 }
 
+Entity* addBrick(GameState *gameState, Vec2 pos, float brickWidth, float brickHeight)
+{
+    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
+    Entity* brick = gameState->entities + gameState->entityCount++;
+    
+    brick->p = pos;
+    brick->w = brickWidth;
+    brick->h = brickHeight;
+    brick->type = ENTITY_TYPE_BRICK;
+    brick->storageIndex = gameState->entityCount - 1;
+    
+    setFlag(brick, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
+    return brick;
+}
+
 void addEntities(GameState *gameState)
 {
     Entity* nullEntity = gameState->entities + gameState->entityCount++;
@@ -319,7 +301,6 @@ void addEntities(GameState *gameState)
     SDL_assert(nullEntity->storageIndex == 0);
     
     float paddleHeight = DEFAULT_HEIGHT;
-    
     
     addPaddle(gameState,
               Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - (21.0f + paddleHeight * 0.5f)),
@@ -355,14 +336,17 @@ void addEntities(GameState *gameState)
     {
         for (Uint32 rowIndex = 0; rowIndex < rows; ++rowIndex)
         {
-            Entity* brick = gameState->entities + gameState->entityCount++;
-            brick->p = Vec2(pivotX + (columnIndex * brickWidth) + halfWidth,
-                            pivotY - (rowIndex * brickHeight) + halfHeight);
-            brick->w = brickWidth;
-            brick->h = brickHeight;
-            brick->type = ENTITY_TYPE_BRICK;
-            brick->storageIndex = gameState->entityCount - 1;
-            setFlag(brick, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+            Vec2 pos(pivotX + (columnIndex * brickWidth) + halfWidth,
+                     pivotY - (rowIndex * brickHeight) + halfHeight);
+            
+            Entity* brick = addBrick(gameState, pos, brickWidth, brickHeight);
+            
+            SDL_assert(SDL_arraysize(gameState->bricks) > gameState->brickCount);
+            BrickLogic* brickLogic = gameState->bricks + gameState->brickCount++;
+            
+            brickLogic->entityIndex = brick->storageIndex;
+            brickLogic->hitPoints = 1;
+            brickLogic->powerUp = POWER_UP_NONE;
         }
     }
     

@@ -46,6 +46,9 @@ struct GameState {
     
     BallLogic balls[16];
     Uint32 ballCount;
+    
+    BrickLogic bricks[64];
+    Uint32 brickCount;
 };
 
 #endif
