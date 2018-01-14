@@ -259,6 +259,44 @@ void updatePaddles(GameState* gameState)
     }
 }
 
+void updateBricks(GameState* gameState)
+{
+    for (Uint32 brickIndex = 0; brickIndex < gameState->brickCount; ++brickIndex)
+    {
+        BrickLogic* brickLogic = gameState->bricks + brickIndex;
+        if (brickLogic->collidedBall)
+        {
+            brickLogic->collidedBall->powerUp = brickLogic->powerUp;
+            printf("Ball powerup updated \n");
+
+#if 0
+            if (--brickLogic->hitPoints == 0)
+            {
+                printf("destroy brick \n");
+            }
+#endif
+            brickLogic->collidedBall = 0;
+        }
+    }
+
+}
+
+void updateBalls(GameState* gameState)
+{
+    for (Uint32 ballIndex = 0; ballIndex < gameState->ballCount; ++ballIndex)
+    {
+        BallLogic* ballLogic = gameState->balls + ballIndex;
+        if (ballLogic->collidedPaddle)
+        {
+            ballLogic->collidedPaddle->powerUp = ballLogic->powerUp;
+            printf("Paddle powerup updated \n");
+
+            ballLogic->powerUp = POWER_UP_NONE;
+            ballLogic->collidedPaddle = 0;
+        }
+    }
+}
+
 BallLogic* getBallLogic(GameState* gameState, Uint32 ballEntityIndex)
 {
     BallLogic* ballLogic = 0;
@@ -273,6 +311,22 @@ BallLogic* getBallLogic(GameState* gameState, Uint32 ballEntityIndex)
     }
     
     return ballLogic;
+}
+
+BrickLogic* getBrickLogic(GameState* gameState, Uint32 brickEntityIndex)
+{
+    BrickLogic* brickLogic = 0;
+    
+    for (Uint32 brickLogicIndex = 0; brickLogicIndex < gameState->ballCount; ++brickLogicIndex)
+    {
+        brickLogic = gameState->bricks + brickLogicIndex;
+        if (brickLogic->entityIndex == brickLogicIndex)
+        {
+            break;
+        }
+    }
+    
+    return brickLogic;
 }
 
 Entity* addBrick(GameState *gameState, Vec2 pos, float brickWidth, float brickHeight)
@@ -318,6 +372,7 @@ void addEntities(GameState *gameState)
     BallLogic* ballLogic = gameState->balls + gameState->ballCount++;
     
     ballLogic->entityIndex = ball->storageIndex;
+    ballLogic->powerUp = POWER_UP_NONE;
     
     //TODO: extract to function
     playerLogic->ball = ball;
@@ -459,6 +514,30 @@ Vec2 getSurfaceNorm(Vec2 vector, Rectangle* surfaceRect)
     return result;
 }
 
+float getPaddleSize(EntityPowerUp powerUp)
+{
+    switch (powerUp) {
+        case POWER_UP_ENLARGE:
+            return 120.0f;
+        case POWER_UP_SHRINK:
+            return 70.0f;
+        default:
+            return 90.0f;
+    }
+}
+
+float getPaddleSpeed(EntityPowerUp powerUp)
+{
+    switch (powerUp) {
+        case POWER_UP_ACCELERATE:
+            return 700.0f;
+        case POWER_UP_DECELERATE:
+            return 250.0f;
+        default:
+            return 500.0f;
+    }
+}
+
 void updateEntities(GameState *gameState)
 {
     if (!initialized)
@@ -468,6 +547,8 @@ void updateEntities(GameState *gameState)
         initialized = true;
     }
     
+    updateBricks(gameState);
+    updateBalls(gameState);
     updatePaddles(gameState);
     
     SDL_SetRenderDrawColor(gameState->renderer, 130, 189, 240, 0);
@@ -488,22 +569,20 @@ void updateEntities(GameState *gameState)
         {
             case ENTITY_TYPE_PADDLE:
             {
-                specs->speed = 500.0f;
-                specs->drag = 2.0f;
-                
                 PaddleLogic* paddle = getLogicForPaddle(gameState, entityIndex);
-                if (paddle)
+                SDL_assert(paddle);
+                specs->drag = 2.0f;
+                specs->speed = getPaddleSpeed(paddle->powerUp);
+                entity->w = getPaddleSize(paddle->powerUp);
+                
+                if (paddle->moveLeft)
                 {
-                    if (paddle->moveLeft)
-                    {
-                        ddp.x = -1.0;
-                    }
-                    else if (paddle->moveRight)
-                    {
-                        ddp.x = 1.0;
-                    }
+                    ddp.x = -1.0;
                 }
-
+                else if (paddle->moveRight)
+                {
+                    ddp.x = 1.0;
+                }
             } break;
             case ENTITY_TYPE_BALL:
             {
@@ -678,7 +757,10 @@ void updateEntities(GameState *gameState)
                                 testCollider->desiredP = testLerpP + (testRemainingDistance * testNorm);
                                 testCollider->desiredDp = testNorm * extraForceLength * 0.1f;
                             }
-
+                            
+                            BallLogic* ballLogic = getBallLogic(gameState, entity->storageIndex);
+                            SDL_assert(ballLogic);
+                            ballLogic->collidedPaddle = getLogicForPaddle(gameState, test->storageIndex);
                         }
                     }
                     else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_BALL)
@@ -714,6 +796,10 @@ void updateEntities(GameState *gameState)
                             collider->oldP = collider->desiredP;
                             collider->desiredP = entityLerpP + (remainingDistance * norm);
                             collider->desiredDp = reflect(entity->dp, norm);
+                            
+                            BrickLogic* brickLogic = getBrickLogic(gameState, test->storageIndex);
+                            SDL_assert(brickLogic);
+                            brickLogic->collidedBall = getBallLogic(gameState, entity->storageIndex);
                         }
                     }
                 }

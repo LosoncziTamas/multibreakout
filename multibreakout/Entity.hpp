@@ -49,14 +49,32 @@ enum PaddleFlags
     PADDLE_FLAG_PLAYER_CONTROLLED = (1 << 4)
 };
 
+enum EntityPowerUp
+{
+    POWER_UP_NONE,
+    POWER_UP_ENLARGE,
+    POWER_UP_SHRINK,
+    POWER_UP_ACCELERATE,
+    POWER_UP_DECELERATE
+};
+
 struct PaddleLogic
 {
     Uint32 entityIndex;
     Uint32 flags;
+    EntityPowerUp powerUp;
     bool moveLeft;
     bool moveRight;
     bool releaseBall;
     Entity* ball;
+};
+
+struct BallLogic
+{
+    Uint32 entityIndex;
+    Entity* paddle;
+    EntityPowerUp powerUp;
+    PaddleLogic* collidedPaddle;
 };
 
 enum EnemyState
@@ -66,26 +84,15 @@ enum EnemyState
     ENEMY_STATE_DEFENDING
 };
 
-enum EntityPowerUp
-{
-    POWER_UP_NONE,
-    POWER_UP_ENLARGE,
-    POWER_UP_SHRINK
-};
-
 struct BrickLogic
 {
     Uint32 entityIndex;
     EntityPowerUp powerUp;
     Uint32 hitPoints;
+    //For now we assume that a brick can only interact with a ball
+    BallLogic* collidedBall;
 };
 
-struct BallLogic
-{
-    Uint32 entityIndex;
-    Entity* paddle;
-    EntityPowerUp powerUp;
-};
 
 struct EnemyControl
 {
