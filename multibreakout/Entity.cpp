@@ -122,7 +122,7 @@ Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
     return paddle;
 }
 
-PaddleLogic* getLogicForPaddle(GameState* gameState, Uint32 entityIndex)
+PaddleLogic* getPaddleLogic(GameState* gameState, Uint32 entityIndex)
 {
     PaddleLogic* paddle = 0;
     
@@ -317,10 +317,10 @@ BrickLogic* getBrickLogic(GameState* gameState, Uint32 brickEntityIndex)
 {
     BrickLogic* brickLogic = 0;
     
-    for (Uint32 brickLogicIndex = 0; brickLogicIndex < gameState->ballCount; ++brickLogicIndex)
+    for (Uint32 brickLogicIndex = 0; brickLogicIndex < gameState->brickCount; ++brickLogicIndex)
     {
         brickLogic = gameState->bricks + brickLogicIndex;
-        if (brickLogic->entityIndex == brickLogicIndex)
+        if (brickLogic->entityIndex == brickEntityIndex)
         {
             break;
         }
@@ -364,7 +364,7 @@ void addEntities(GameState *gameState)
               Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f + 21.0f),
               PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
     
-    PaddleLogic* playerLogic = getLogicForPaddle(gameState, player->storageIndex);
+    PaddleLogic* playerLogic = getPaddleLogic(gameState, player->storageIndex);
     
     Entity* ball = addBall(gameState);
 
@@ -401,7 +401,31 @@ void addEntities(GameState *gameState)
             
             brickLogic->entityIndex = brick->storageIndex;
             brickLogic->hitPoints = 1;
-            brickLogic->powerUp = POWER_UP_NONE;
+            if (rowIndex % 2 == 1)
+            {
+                if (columnIndex % 2 == 1)
+                {
+                    brickLogic->powerUp = POWER_UP_SHRINK;
+
+                }
+                else
+                {
+                    brickLogic->powerUp = POWER_UP_ENLARGE;
+
+                }
+            }
+            else
+            {
+                if (columnIndex % 2 == 1)
+                {
+                    brickLogic->powerUp = POWER_UP_ACCELERATE;
+                    
+                }
+                else
+                {
+                    brickLogic->powerUp = POWER_UP_DECELERATE;
+                }
+            }
         }
     }
     
@@ -417,14 +441,14 @@ void addEntities(GameState *gameState)
     setFlag(projectile, ENTITY_FLAG_COLLIDES);
 }
 
-void drawEntityBounds(SDL_Renderer* renderer, Entity* entity) {
+void drawEntityBounds(SDL_Renderer* renderer, Entity* entity, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
     SDL_Rect rect;
     rect.w = entity->w;
     rect.h = entity->h;
     rect.x = entity->p.x - (entity->w * 0.5f);
     rect.y = SCREEN_HEIGHT - (entity->p.y + entity->h * 0.5f);
     
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
     SDL_RenderDrawRect(renderer, &rect);
 }
 
@@ -538,6 +562,27 @@ float getPaddleSpeed(EntityPowerUp powerUp)
     }
 }
 
+void setPowerUpColor(EntityPowerUp powerUp, Uint8* r, Uint8* g, Uint8* b)
+{
+    switch (powerUp) {
+        case POWER_UP_ENLARGE:
+            *g = 255;
+            break;
+        case POWER_UP_ACCELERATE:
+            *b = 255;
+            break;
+        case POWER_UP_DECELERATE:
+            *r = 255;
+            break;
+        case POWER_UP_SHRINK:
+            *g = 255;
+            *r = 255;
+            break;
+        default:
+            break;
+    }
+}
+
 void updateEntities(GameState *gameState)
 {
     if (!initialized)
@@ -569,7 +614,7 @@ void updateEntities(GameState *gameState)
         {
             case ENTITY_TYPE_PADDLE:
             {
-                PaddleLogic* paddle = getLogicForPaddle(gameState, entityIndex);
+                PaddleLogic* paddle = getPaddleLogic(gameState, entityIndex);
                 SDL_assert(paddle);
                 specs->drag = 2.0f;
                 specs->speed = getPaddleSpeed(paddle->powerUp);
@@ -595,7 +640,7 @@ void updateEntities(GameState *gameState)
                 if (ballLogic->paddle)
                 {
                     Entity* paddleEntity = ballLogic->paddle;
-                    PaddleLogic* paddleLogic = getLogicForPaddle(gameState, paddleEntity->storageIndex);
+                    PaddleLogic* paddleLogic = getPaddleLogic(gameState, paddleEntity->storageIndex);
                     SDL_assert(paddleLogic);
                     if (paddleLogic->releaseBall)
                     {
@@ -760,7 +805,7 @@ void updateEntities(GameState *gameState)
                             
                             BallLogic* ballLogic = getBallLogic(gameState, entity->storageIndex);
                             SDL_assert(ballLogic);
-                            ballLogic->collidedPaddle = getLogicForPaddle(gameState, test->storageIndex);
+                            ballLogic->collidedPaddle = getPaddleLogic(gameState, test->storageIndex);
                         }
                     }
                     else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_BALL)
@@ -820,7 +865,30 @@ void updateEntities(GameState *gameState)
             entity->dp = collider->desiredDp;
         }
         
-        drawEntityBounds(gameState->renderer, entity);
+        
+        Uint8 r = 0;
+        Uint8 g = 0;
+        Uint8 b = 0;
+        Uint8 a = 255;
+        
+        if (entity->type == ENTITY_TYPE_BRICK)
+        {
+            BrickLogic* brickLogic = getBrickLogic(gameState, entity->storageIndex);
+            setPowerUpColor(brickLogic->powerUp, &r, &g, &b);
+        }
+        else if (entity->type == ENTITY_TYPE_BALL)
+        {
+            BallLogic* ballLogic = getBallLogic(gameState, entity->storageIndex);
+            setPowerUpColor(ballLogic->powerUp, &r, &g, &b);
+        }
+        else if (entity->type == ENTITY_TYPE_PADDLE)
+        {
+            PaddleLogic* paddleLogic = getPaddleLogic(gameState, entity->storageIndex);
+            setPowerUpColor(paddleLogic->powerUp, &r, &g, &b);
+        }
+        
+        drawEntityBounds(gameState->renderer, entity, r, g, b, a);
+        
     }
     
     clearArray(colliders, gameState->entityCount, CollisionSpecs);
