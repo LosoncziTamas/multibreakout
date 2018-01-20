@@ -133,6 +133,11 @@ Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
             rect.bottomLeft = Vec2(160, 0);
             rect.topRight = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT);
         }
+        else if (logic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+        {
+            rect.bottomLeft = Vec2(SCREEN_WIDTH * 0.5f, 0);
+            rect.topRight = Vec2(640, SCREEN_HEIGHT);
+        }
 
         enemyControl->dangerZone = rect;
     }
@@ -142,6 +147,8 @@ Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
 
 PaddleLogic* getPaddleLogic(GameState* gameState, Uint32 entityIndex)
 {
+    SDL_assert(gameState->entities[entityIndex].type == ENTITY_TYPE_PADDLE);
+    
     PaddleLogic* paddle = 0;
     
     for (Uint32 paddleIndex = 0; paddleIndex < gameState->paddleCount; ++paddleIndex)
@@ -193,6 +200,11 @@ void updatePaddles(GameState* gameState)
             {
                 paddle->moveLeft = gameState->input.left;
                 paddle->moveRight = gameState->input.right;
+            }
+            else if (paddle->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+            {
+                paddle->moveLeft = gameState->input.right;
+                paddle->moveRight = gameState->input.left;
             }
             
             paddle->releaseBall = gameState->input.space;
@@ -371,6 +383,8 @@ void updateBalls(GameState* gameState)
 
 BallLogic* getBallLogic(GameState* gameState, Uint32 ballEntityIndex)
 {
+    SDL_assert(gameState->entities[ballEntityIndex].type == ENTITY_TYPE_BALL);
+    
     BallLogic* ballLogic = 0;
     
     for (Uint32 ballLogicIndex = 0; ballLogicIndex < gameState->ballCount; ++ballLogicIndex)
@@ -387,6 +401,8 @@ BallLogic* getBallLogic(GameState* gameState, Uint32 ballEntityIndex)
 
 BrickLogic* getBrickLogic(GameState* gameState, Uint32 brickEntityIndex)
 {
+    SDL_assert(gameState->entities[brickEntityIndex].type == ENTITY_TYPE_BRICK);
+    
     BrickLogic* brickLogic = 0;
     
     for (Uint32 brickLogicIndex = 0; brickLogicIndex < gameState->brickCount; ++brickLogicIndex)
@@ -433,8 +449,12 @@ void addEntities(GameState *gameState)
               PADDLE_FLAG_ORIENTATION_TOP);
     
     Entity* player = addPaddle(gameState,
-              Vec2(161 + paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
-              PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_PLAYER_CONTROLLED);
+              Vec2(640 - paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
+              PADDLE_FLAG_ORIENTATION_RIGHT|PADDLE_FLAG_PLAYER_CONTROLLED);
+    
+    /*Entity* player = addPaddle(gameState,
+                               Vec2(161 + paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
+                               PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_PLAYER_CONTROLLED);*/
     
     /*Entity* player = addPaddle(gameState,
               Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f + 21.0f),
@@ -902,7 +922,7 @@ void updateEntities(GameState *gameState)
                             
                             {
                                 Vec2 testNorm = (testLerpP - collider->desiredP).normalize();
-                                PaddleLogic* paddleLogic = getPaddleLogic(gameState, entity->storageIndex);
+                                PaddleLogic* paddleLogic = getPaddleLogic(gameState, test->storageIndex);
                                 
                                 if (paddleLogic->flags & (PADDLE_FLAG_ORIENTATION_TOP|PADDLE_FLAG_ORIENTATION_BOTTOM))
                                 {
