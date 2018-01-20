@@ -51,18 +51,18 @@ enum PaddleFlags
 
 enum EntityPowerUp
 {
-    POWER_UP_NONE,
-    POWER_UP_ENLARGE,
-    POWER_UP_SHRINK,
-    POWER_UP_ACCELERATE,
-    POWER_UP_DECELERATE
+    POWER_UP_NONE = 0,
+    POWER_UP_ENLARGE = (1 << 0),
+    POWER_UP_SHRINK = (1 << 1),
+    POWER_UP_ACCELERATE = (1 << 2),
+    POWER_UP_DECELERATE = (1 << 3)
 };
 
 struct PaddleLogic
 {
     Uint32 entityIndex;
     Uint32 flags;
-    EntityPowerUp powerUp;
+    Uint32 powerUps;
     bool moveLeft;
     bool moveRight;
     bool releaseBall;

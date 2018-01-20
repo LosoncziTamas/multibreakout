@@ -199,12 +199,12 @@ void updatePaddles(GameState* gameState)
                                 //select to random target position
                                 enemyControl->target.x = SCREEN_WIDTH * 0.5f;
                                 enemyControl->state = ENEMY_STATE_STEERING;
-                                printf("ENEMY_STATE_STEERING \n");
+                                //printf("ENEMY_STATE_STEERING \n");
                             }
                             else
                             {
                                 enemyControl->state = ENEMY_STATE_DEFENDING;
-                                printf("ENEMY_STATE_DEFENDING \n");
+                                //printf("ENEMY_STATE_DEFENDING \n");
                             }
                             
                         } break;
@@ -215,7 +215,7 @@ void updatePaddles(GameState* gameState)
                             if (danger)
                             {
                                 enemyControl->state = ENEMY_STATE_DEFENDING;
-                                printf("ENEMY_STATE_DEFENDING \n");
+                                //printf("ENEMY_STATE_DEFENDING \n");
                             }
                             else
                             {
@@ -224,7 +224,7 @@ void updatePaddles(GameState* gameState)
                                 {
                                     //release ball if has
                                     //should it switch state?
-                                    printf("REACHED_TARGET \n");
+                                    //printf("REACHED_TARGET \n");
                                 }
                                 else
                                 {
@@ -281,6 +281,58 @@ void updateBricks(GameState* gameState)
 
 }
 
+void setPaddlePowerUp(PaddleLogic* paddleLogic, EntityPowerUp newPowerUp)
+{
+
+    if (!paddleLogic->powerUps)
+    {
+        paddleLogic->powerUps |= newPowerUp;
+    }
+    else
+    {
+        if (paddleLogic->powerUps & POWER_UP_DECELERATE)
+        {
+            if (newPowerUp == POWER_UP_ACCELERATE)
+            {
+                paddleLogic->powerUps &= ~(POWER_UP_DECELERATE|POWER_UP_ACCELERATE);
+                newPowerUp = POWER_UP_NONE;
+            }
+        }
+        if (paddleLogic->powerUps & POWER_UP_ACCELERATE)
+        {
+            if (newPowerUp == POWER_UP_DECELERATE)
+            {
+                paddleLogic->powerUps &= ~(POWER_UP_DECELERATE|POWER_UP_ACCELERATE);
+                newPowerUp = POWER_UP_NONE;
+            }
+        }
+        
+        if (paddleLogic->powerUps & POWER_UP_SHRINK)
+        {
+            if (newPowerUp == POWER_UP_ENLARGE)
+            {
+                paddleLogic->powerUps &= ~(POWER_UP_SHRINK|POWER_UP_ENLARGE);
+                newPowerUp = POWER_UP_NONE;
+            }
+        }
+        if (paddleLogic->powerUps & POWER_UP_ENLARGE)
+        {
+            if (newPowerUp == POWER_UP_SHRINK)
+            {
+                paddleLogic->powerUps &= ~(POWER_UP_SHRINK|POWER_UP_ENLARGE);
+                newPowerUp = POWER_UP_NONE;
+            }
+        }
+        
+        paddleLogic->powerUps |= newPowerUp;
+    }
+    SDL_assert(!((paddleLogic->powerUps & POWER_UP_SHRINK) && (paddleLogic->powerUps & POWER_UP_ENLARGE)));
+    SDL_assert(!((paddleLogic->powerUps & POWER_UP_DECELERATE) && (paddleLogic->powerUps & POWER_UP_ACCELERATE)));
+    
+    printf("Paddle powerup updated 0x%08x\n", paddleLogic->powerUps);
+}
+
+
 void updateBalls(GameState* gameState)
 {
     for (Uint32 ballIndex = 0; ballIndex < gameState->ballCount; ++ballIndex)
@@ -288,10 +340,12 @@ void updateBalls(GameState* gameState)
         BallLogic* ballLogic = gameState->balls + ballIndex;
         if (ballLogic->collidedPaddle)
         {
-            ballLogic->collidedPaddle->powerUp = ballLogic->powerUp;
-            printf("Paddle powerup updated \n");
+            if (ballLogic->powerUp)
+            {
+                setPaddlePowerUp(ballLogic->collidedPaddle, ballLogic->powerUp);
+                ballLogic->powerUp = POWER_UP_NONE;
+            }
 
-            ballLogic->powerUp = POWER_UP_NONE;
             ballLogic->collidedPaddle = 0;
         }
     }
@@ -538,27 +592,36 @@ Vec2 getSurfaceNorm(Vec2 vector, Rectangle* surfaceRect)
     return result;
 }
 
-float getPaddleSize(EntityPowerUp powerUp)
+float getPaddleSize(Uint32 paddlePowerUps)
 {
-    switch (powerUp) {
-        case POWER_UP_ENLARGE:
-            return 120.0f;
-        case POWER_UP_SHRINK:
-            return 70.0f;
-        default:
-            return 90.0f;
+    if (paddlePowerUps & POWER_UP_ENLARGE)
+    {
+        return 120.0f;
+    }
+    else if (paddlePowerUps & POWER_UP_SHRINK)
+    {
+        return 70.0f;
+    }
+    else
+    {
+        return 90.0f;
     }
 }
 
-float getPaddleSpeed(EntityPowerUp powerUp)
+float getPaddleSpeed(Uint32 paddlePowerUps)
 {
-    switch (powerUp) {
-        case POWER_UP_ACCELERATE:
-            return 700.0f;
-        case POWER_UP_DECELERATE:
-            return 250.0f;
-        default:
-            return 500.0f;
+    if (paddlePowerUps & POWER_UP_ACCELERATE)
+    {
+        return 700.0f;
+    }
+    else if (paddlePowerUps & POWER_UP_DECELERATE)
+    {
+        return 250.0f;
+    }
+    else
+    {
+        return 500.0f;
+
     }
 }
 
@@ -578,10 +641,15 @@ void setPowerUpColor(EntityPowerUp powerUp, Uint8* r, Uint8* g, Uint8* b)
             *g = 255;
             *r = 255;
             break;
+        case POWER_UP_NONE:
+            break;
         default:
+            SDL_TriggerBreakpoint();
             break;
     }
 }
+
+
 
 void updateEntities(GameState *gameState)
 {
@@ -617,8 +685,8 @@ void updateEntities(GameState *gameState)
                 PaddleLogic* paddle = getPaddleLogic(gameState, entityIndex);
                 SDL_assert(paddle);
                 specs->drag = 2.0f;
-                specs->speed = getPaddleSpeed(paddle->powerUp);
-                entity->w = getPaddleSize(paddle->powerUp);
+                specs->speed = getPaddleSpeed(paddle->powerUps);
+                entity->w = getPaddleSize(paddle->powerUps);
                 
                 if (paddle->moveLeft)
                 {
@@ -865,7 +933,6 @@ void updateEntities(GameState *gameState)
             entity->dp = collider->desiredDp;
         }
         
-        
         Uint8 r = 0;
         Uint8 g = 0;
         Uint8 b = 0;
@@ -884,11 +951,11 @@ void updateEntities(GameState *gameState)
         else if (entity->type == ENTITY_TYPE_PADDLE)
         {
             PaddleLogic* paddleLogic = getPaddleLogic(gameState, entity->storageIndex);
-            setPowerUpColor(paddleLogic->powerUp, &r, &g, &b);
+            //setPowerUpColor(paddleLogic->powerUp, &r, &g, &b);
         }
         
         drawEntityBounds(gameState->renderer, entity, r, g, b, a);
-        
+    
     }
     
     clearArray(colliders, gameState->entityCount, CollisionSpecs);
