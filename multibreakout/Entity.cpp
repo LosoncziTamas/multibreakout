@@ -281,53 +281,48 @@ void updateBricks(GameState* gameState)
 
 }
 
+void setPowerUpFlags(PaddleLogic* paddleLogic, Uint32 flags)
+{
+    paddleLogic->powerUps |= flags;
+}
+
+void clearPowerUpFlags(PaddleLogic* paddleLogic, Uint32 flags)
+{
+    paddleLogic->powerUps &= ~flags;
+}
+
+bool isSet(PaddleLogic* paddleLogic, Uint32 flags)
+{
+    return paddleLogic->powerUps & flags;
+}
+
 void setPaddlePowerUp(PaddleLogic* paddleLogic, EntityPowerUp newPowerUp)
 {
 
     if (!paddleLogic->powerUps)
     {
-        paddleLogic->powerUps |= newPowerUp;
+        setPowerUpFlags(paddleLogic, newPowerUp);
     }
     else
     {
-        if (paddleLogic->powerUps & POWER_UP_DECELERATE)
+        if ((isSet(paddleLogic, POWER_UP_DECELERATE) && newPowerUp == POWER_UP_ACCELERATE) ||
+            (isSet(paddleLogic, POWER_UP_ACCELERATE) && newPowerUp == POWER_UP_DECELERATE))
         {
-            if (newPowerUp == POWER_UP_ACCELERATE)
-            {
-                paddleLogic->powerUps &= ~(POWER_UP_DECELERATE|POWER_UP_ACCELERATE);
-                newPowerUp = POWER_UP_NONE;
-            }
+            clearPowerUpFlags(paddleLogic, (POWER_UP_DECELERATE|POWER_UP_ACCELERATE));
+            newPowerUp = POWER_UP_NONE;
         }
-        if (paddleLogic->powerUps & POWER_UP_ACCELERATE)
+        if ((isSet(paddleLogic, POWER_UP_SHRINK) && newPowerUp == POWER_UP_ENLARGE) ||
+            (isSet(paddleLogic, POWER_UP_ENLARGE) && newPowerUp == POWER_UP_SHRINK))
         {
-            if (newPowerUp == POWER_UP_DECELERATE)
-            {
-                paddleLogic->powerUps &= ~(POWER_UP_DECELERATE|POWER_UP_ACCELERATE);
-                newPowerUp = POWER_UP_NONE;
-            }
+            clearPowerUpFlags(paddleLogic, (POWER_UP_SHRINK|POWER_UP_ENLARGE));
+            newPowerUp = POWER_UP_NONE;
         }
         
-        if (paddleLogic->powerUps & POWER_UP_SHRINK)
-        {
-            if (newPowerUp == POWER_UP_ENLARGE)
-            {
-                paddleLogic->powerUps &= ~(POWER_UP_SHRINK|POWER_UP_ENLARGE);
-                newPowerUp = POWER_UP_NONE;
-            }
-        }
-        if (paddleLogic->powerUps & POWER_UP_ENLARGE)
-        {
-            if (newPowerUp == POWER_UP_SHRINK)
-            {
-                paddleLogic->powerUps &= ~(POWER_UP_SHRINK|POWER_UP_ENLARGE);
-                newPowerUp = POWER_UP_NONE;
-            }
-        }
-        
-        paddleLogic->powerUps |= newPowerUp;
+        setPowerUpFlags(paddleLogic, newPowerUp);
     }
-    SDL_assert(!((paddleLogic->powerUps & POWER_UP_SHRINK) && (paddleLogic->powerUps & POWER_UP_ENLARGE)));
-    SDL_assert(!((paddleLogic->powerUps & POWER_UP_DECELERATE) && (paddleLogic->powerUps & POWER_UP_ACCELERATE)));
+    
+    SDL_assert(!(isSet(paddleLogic, POWER_UP_SHRINK) && isSet(paddleLogic, POWER_UP_ENLARGE)));
+    SDL_assert(!(isSet(paddleLogic, POWER_UP_ACCELERATE) && isSet(paddleLogic, POWER_UP_DECELERATE)));
     
     printf("Paddle powerup updated 0x%08x\n", paddleLogic->powerUps);
 }
@@ -621,7 +616,6 @@ float getPaddleSpeed(Uint32 paddlePowerUps)
     else
     {
         return 500.0f;
-
     }
 }
 
@@ -642,12 +636,11 @@ void setPowerUpColor(EntityPowerUp powerUp, Uint8* r, Uint8* g, Uint8* b)
             *r = 255;
             break;
         case POWER_UP_NONE:
-            break;
         default:
-            SDL_TriggerBreakpoint();
             break;
     }
 }
+
 
 
 
@@ -951,7 +944,23 @@ void updateEntities(GameState *gameState)
         else if (entity->type == ENTITY_TYPE_PADDLE)
         {
             PaddleLogic* paddleLogic = getPaddleLogic(gameState, entity->storageIndex);
-            //setPowerUpColor(paddleLogic->powerUp, &r, &g, &b);
+
+            if (isSet(paddleLogic, POWER_UP_ENLARGE))
+            {
+                g = 255;
+            }
+            if (isSet(paddleLogic, POWER_UP_ACCELERATE))
+            {
+                b = 255;
+            }
+            if (isSet(paddleLogic, POWER_UP_DECELERATE))
+            {
+                r = 255;
+            }
+            if (isSet(paddleLogic, POWER_UP_SHRINK))
+            {
+                g = 128;
+            }
         }
         
         drawEntityBounds(gameState->renderer, entity, r, g, b, a);
