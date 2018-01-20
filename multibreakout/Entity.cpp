@@ -219,6 +219,8 @@ void updatePaddles(GameState* gameState)
             paddle->moveLeft = false;
             paddle->moveRight = false;
             
+            bool verticallyMoving = paddle->flags & (PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_ORIENTATION_RIGHT);
+            
             for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
             {
                 Entity* entity = gameState->entities + entityIndex;
@@ -232,39 +234,75 @@ void updatePaddles(GameState* gameState)
                             if (!danger)
                             {
                                 //select to random target position
-                                enemyControl->target.x = SCREEN_WIDTH * 0.5f;
+                                
+                                if (verticallyMoving)
+                                {
+                                    enemyControl->target.y = SCREEN_HEIGHT * 0.5f;
+                                }
+                                else
+                                {
+                                    enemyControl->target.x = SCREEN_WIDTH * 0.5f;
+                                }
+                                
                                 enemyControl->state = ENEMY_STATE_STEERING;
-                                //printf("ENEMY_STATE_STEERING \n");
+                                printf("ENEMY_STATE_STEERING \n");
                             }
                             else
                             {
                                 enemyControl->state = ENEMY_STATE_DEFENDING;
-                                //printf("ENEMY_STATE_DEFENDING \n");
+                                printf("ENEMY_STATE_DEFENDING \n");
                             }
                             
                         } break;
                         case ENEMY_STATE_STEERING:
                         {
-                            float minDistance = enemyEntity->w * 0.45f;
+                            float minDistance;
+                            
+                            if (verticallyMoving)
+                            {
+                                minDistance = enemyEntity->h * 0.45f;
+                            }
+                            else
+                            {
+                                minDistance = enemyEntity->w * 0.45f;
+                            }
 
                             if (danger)
                             {
                                 enemyControl->state = ENEMY_STATE_DEFENDING;
-                                //printf("ENEMY_STATE_DEFENDING \n");
+                                printf("ENEMY_STATE_DEFENDING \n");
                             }
                             else
                             {
-                                bool reachedTarget = SDL_fabs(enemyControl->target.x - enemyEntity->p.x) < minDistance;
+                                bool reachedTarget;
+                                
+                                if (verticallyMoving)
+                                {
+                                    reachedTarget = SDL_fabs(enemyControl->target.y - enemyEntity->p.y) < minDistance;
+                                }
+                                else
+                                {
+                                    reachedTarget = SDL_fabs(enemyControl->target.x - enemyEntity->p.x) < minDistance;
+                                }
+                                
                                 if (reachedTarget)
                                 {
                                     //release ball if has
                                     //should it switch state?
-                                    //printf("REACHED_TARGET \n");
+                                    printf("REACHED_TARGET \n");
                                 }
                                 else
                                 {
-                                    paddle->moveLeft = enemyControl->target.x - enemyEntity->p.x < minDistance;
-                                    paddle->moveRight = enemyControl->target.x - enemyEntity->p.x > minDistance;
+                                    if (verticallyMoving)
+                                    {
+                                        paddle->moveRight = enemyControl->target.y - enemyEntity->p.y < minDistance;
+                                        paddle->moveLeft = enemyControl->target.y - enemyEntity->p.y > minDistance;
+                                    }
+                                    else
+                                    {
+                                        paddle->moveLeft = enemyControl->target.x - enemyEntity->p.x < minDistance;
+                                        paddle->moveRight = enemyControl->target.x - enemyEntity->p.x > minDistance;
+                                    }
                                     //move toward the target
                                 }
                             }
@@ -274,9 +312,21 @@ void updatePaddles(GameState* gameState)
                         {
                             if (danger)
                             {
-                                float minDistance = enemyEntity->w * 0.45f;
-                                paddle->moveLeft = entity->p.x - enemyEntity->p.x < minDistance;
-                                paddle->moveRight = entity->p.x - enemyEntity->p.x > minDistance;
+                                float minDistance;
+                                
+                                if (verticallyMoving)
+                                {
+                                    minDistance = enemyEntity->h * 0.45f;
+                                    paddle->moveRight = entity->p.y - enemyEntity->p.y < minDistance;
+                                    paddle->moveLeft = entity->p.y - enemyEntity->p.y > minDistance;
+                                }
+                                else
+                                {
+                                    minDistance = enemyEntity->w * 0.45f;
+                                    paddle->moveLeft = entity->p.x - enemyEntity->p.x < minDistance;
+                                    paddle->moveRight = entity->p.x - enemyEntity->p.x > minDistance;
+                                }
+
                                 //move toward the ball
                             }
                             else
@@ -448,19 +498,20 @@ void addEntities(GameState *gameState)
               Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - (21.0f + paddleHeight * 0.5f)),
               PADDLE_FLAG_ORIENTATION_TOP);
     
-    Entity* player = addPaddle(gameState,
-              Vec2(640 - paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
-              PADDLE_FLAG_ORIENTATION_RIGHT|PADDLE_FLAG_PLAYER_CONTROLLED);
+    addPaddle(gameState,
+              Vec2(161 + paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
+              PADDLE_FLAG_ORIENTATION_LEFT);
     
-    /*Entity* player = addPaddle(gameState,
-                               Vec2(161 + paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
-                               PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_PLAYER_CONTROLLED);*/
+    addPaddle(gameState,
+              Vec2(639 - paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
+              PADDLE_FLAG_ORIENTATION_RIGHT);
+
     
-    /*Entity* player = addPaddle(gameState,
+    Entity* bottomPlayer = addPaddle(gameState,
               Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f + 21.0f),
-              PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);*/
+              PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
     
-    PaddleLogic* playerLogic = getPaddleLogic(gameState, player->storageIndex);
+    PaddleLogic* playerLogic = getPaddleLogic(gameState, bottomPlayer->storageIndex);
     
     Entity* ball = addBall(gameState);
 
@@ -472,7 +523,7 @@ void addEntities(GameState *gameState)
     
     //TODO: extract to function
     playerLogic->ball = ball;
-    ballLogic->paddle = player;
+    ballLogic->paddle = bottomPlayer;
     
     float brickWidth = 30;
     float brickHeight = 30;
