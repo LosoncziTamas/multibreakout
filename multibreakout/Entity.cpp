@@ -89,8 +89,6 @@ Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
     Entity* paddle = gameState->entities + gameState->entityCount++;
     
     paddle->storageIndex = gameState->entityCount - 1;
-    paddle->w = 90.0f;
-    paddle->h = 25.0f;
     paddle->p = pos;
     paddle->dp = Vec2();
     paddle->type = ENTITY_TYPE_PADDLE;
@@ -103,6 +101,17 @@ Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
     logic->entityIndex = paddle->storageIndex;
     logic->flags = paddleFlags;
     
+    if (logic->flags & (PADDLE_FLAG_ORIENTATION_TOP|PADDLE_FLAG_ORIENTATION_BOTTOM))
+    {
+        paddle->w = 90.0f;
+        paddle->h = 25.0f;
+    }
+    else
+    {
+        paddle->w = 25.0;
+        paddle->h = 90.0f;
+    }
+    
     if (!(logic->flags & PADDLE_FLAG_PLAYER_CONTROLLED))
     {
         SDL_assert(SDL_arraysize(gameState->enemyControls) > gameState->enemyControlCount);
@@ -113,9 +122,18 @@ Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
         enemyControl->target = Vec2();
         
         Rectangle rect = {};
-        rect.bottomLeft = Vec2(160, SCREEN_HEIGHT * 0.5f);
-        rect.topRight = Vec2(640, SCREEN_HEIGHT);
         
+        if (logic->flags & PADDLE_FLAG_ORIENTATION_TOP)
+        {
+            rect.bottomLeft = Vec2(160, SCREEN_HEIGHT * 0.5f);
+            rect.topRight = Vec2(640, SCREEN_HEIGHT);
+        }
+        else if (logic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+        {
+            rect.bottomLeft = Vec2(160, 0);
+            rect.topRight = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT);
+        }
+
         enemyControl->dangerZone = rect;
     }
     
@@ -170,6 +188,11 @@ void updatePaddles(GameState* gameState)
             {
                 paddle->moveLeft = gameState->input.right;
                 paddle->moveRight = gameState->input.left;
+            }
+            else if (paddle->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+            {
+                paddle->moveLeft = gameState->input.left;
+                paddle->moveRight = gameState->input.right;
             }
             
             paddle->releaseBall = gameState->input.space;
@@ -410,8 +433,12 @@ void addEntities(GameState *gameState)
               PADDLE_FLAG_ORIENTATION_TOP);
     
     Entity* player = addPaddle(gameState,
+              Vec2(161 + paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
+              PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_PLAYER_CONTROLLED);
+    
+    /*Entity* player = addPaddle(gameState,
               Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f + 21.0f),
-              PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
+              PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);*/
     
     PaddleLogic* playerLogic = getPaddleLogic(gameState, player->storageIndex);
     
@@ -488,56 +515,6 @@ void addEntities(GameState *gameState)
     projectile->type = ENTITY_TYPE_PROJECTILE;
 
     setFlag(projectile, ENTITY_FLAG_COLLIDES);
-}
-
-void drawEntityBounds(SDL_Renderer* renderer, Entity* entity, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
-    SDL_Rect rect;
-    rect.w = entity->w;
-    rect.h = entity->h;
-    rect.x = entity->p.x - (entity->w * 0.5f);
-    rect.y = SCREEN_HEIGHT - (entity->p.y + entity->h * 0.5f);
-    
-    SDL_SetRenderDrawColor(renderer, r, g, b, a);
-    SDL_RenderDrawRect(renderer, &rect);
-}
-
-void drawCircle(SDL_Renderer* renderer, Entity* entity)
-{
-    int x0 = round(entity->p.x);
-    int y0 = round(SCREEN_HEIGHT - entity->p.y);
-    int radius = entity->w * 0.5f;
-        
-    int x = radius-1;
-    int y = 0;
-    int dx = 1;
-    int dy = 1;
-    int err = dx - (radius << 1);
-
-    while (x >= y)
-    {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderDrawPoint(renderer, x0 + x, y0 + y);
-        SDL_RenderDrawPoint(renderer, x0 + y, y0 + x);
-        SDL_RenderDrawPoint(renderer, x0 - y, y0 + x);
-        SDL_RenderDrawPoint(renderer, x0 - x, y0 + y);
-        SDL_RenderDrawPoint(renderer, x0 - x, y0 - y);
-        SDL_RenderDrawPoint(renderer, x0 - y, y0 - x);
-        SDL_RenderDrawPoint(renderer, x0 + y, y0 - x);
-        SDL_RenderDrawPoint(renderer, x0 + x, y0 - y);
-        
-        if (err <= 0)
-        {
-            y++;
-            err += dy;
-            dy +=2;
-        }
-        if (err > 0)
-        {
-            x--;
-            dx += 2;
-            err += (-radius << 1) + dx;
-        }
-    }
 }
 
 struct CollisionSpecs
@@ -641,8 +618,55 @@ void setPowerUpColor(EntityPowerUp powerUp, Uint8* r, Uint8* g, Uint8* b)
     }
 }
 
+void drawEntityBounds(SDL_Renderer* renderer, Entity* entity, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+    SDL_Rect rect;
+    rect.w = entity->w;
+    rect.h = entity->h;
+    rect.x = entity->p.x - (entity->w * 0.5f);
+    rect.y = SCREEN_HEIGHT - (entity->p.y + entity->h * 0.5f);
+    
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_RenderDrawRect(renderer, &rect);
+}
 
-
+void drawCircle(SDL_Renderer* renderer, Entity* entity)
+{
+    int x0 = round(entity->p.x);
+    int y0 = round(SCREEN_HEIGHT - entity->p.y);
+    int radius = entity->w * 0.5f;
+    
+    int x = radius-1;
+    int y = 0;
+    int dx = 1;
+    int dy = 1;
+    int err = dx - (radius << 1);
+    
+    while (x >= y)
+    {
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderDrawPoint(renderer, x0 + x, y0 + y);
+        SDL_RenderDrawPoint(renderer, x0 + y, y0 + x);
+        SDL_RenderDrawPoint(renderer, x0 - y, y0 + x);
+        SDL_RenderDrawPoint(renderer, x0 - x, y0 + y);
+        SDL_RenderDrawPoint(renderer, x0 - x, y0 - y);
+        SDL_RenderDrawPoint(renderer, x0 - y, y0 - x);
+        SDL_RenderDrawPoint(renderer, x0 + y, y0 - x);
+        SDL_RenderDrawPoint(renderer, x0 + x, y0 - y);
+        
+        if (err <= 0)
+        {
+            y++;
+            err += dy;
+            dy +=2;
+        }
+        if (err > 0)
+        {
+            x--;
+            dx += 2;
+            err += (-radius << 1) + dx;
+        }
+    }
+}
 
 void updateEntities(GameState *gameState)
 {
@@ -679,16 +703,36 @@ void updateEntities(GameState *gameState)
                 SDL_assert(paddle);
                 specs->drag = 2.0f;
                 specs->speed = getPaddleSpeed(paddle->powerUps);
-                entity->w = getPaddleSize(paddle->powerUps);
+                if (paddle->flags & (PADDLE_FLAG_ORIENTATION_TOP|PADDLE_FLAG_ORIENTATION_BOTTOM))
+                {
+                    if (paddle->moveLeft)
+                    {
+                        ddp.x = -1.0;
+                    }
+                    else if (paddle->moveRight)
+                    {
+                        ddp.x = 1.0;
+                    }
+                    entity->w = getPaddleSize(paddle->powerUps);
+                }
+                else if (paddle->flags & (PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_ORIENTATION_RIGHT))
+                {
+                    if (paddle->moveLeft)
+                    {
+                        ddp.y = +1.0;
+                    }
+                    else if (paddle->moveRight)
+                    {
+                        ddp.y = -1.0;
+                    }
+                    entity->h = getPaddleSize(paddle->powerUps);
+                }
+                else
+                {
+                    SDL_TriggerBreakpoint();
+                }
+
                 
-                if (paddle->moveLeft)
-                {
-                    ddp.x = -1.0;
-                }
-                else if (paddle->moveRight)
-                {
-                    ddp.x = 1.0;
-                }
             } break;
             case ENTITY_TYPE_BALL:
             {
@@ -858,7 +902,17 @@ void updateEntities(GameState *gameState)
                             
                             {
                                 Vec2 testNorm = (testLerpP - collider->desiredP).normalize();
-                                testNorm.y = 0.0f;
+                                PaddleLogic* paddleLogic = getPaddleLogic(gameState, entity->storageIndex);
+                                
+                                if (paddleLogic->flags & (PADDLE_FLAG_ORIENTATION_TOP|PADDLE_FLAG_ORIENTATION_BOTTOM))
+                                {
+                                    testNorm.y = 0.0f;
+                                }
+                                else
+                                {
+                                    testNorm.x = 0.0f;
+                                }
+                                
                                 testCollider->oldP = testCollider->desiredP;
                                 testCollider->desiredP = testLerpP + (testRemainingDistance * testNorm);
                                 testCollider->desiredDp = testNorm * extraForceLength * 0.1f;
