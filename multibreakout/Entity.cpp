@@ -48,7 +48,7 @@ void addWalls(GameState *gameState)
     topWall->storageIndex = gameState->entityCount - 1;
     topWall->w = 480.0f;
     topWall->h = 20.0f;
-    topWall->p = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - 10);
+    topWall->p = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT + 10);
     topWall->dp = Vec2();
     topWall->type = ENTITY_TYPE_OBSTACLE;
     
@@ -59,11 +59,58 @@ void addWalls(GameState *gameState)
     bottomWall->storageIndex = gameState->entityCount - 1;
     bottomWall->w = 480.0f;
     bottomWall->h = 20.0f;
-    bottomWall->p = Vec2(SCREEN_WIDTH * 0.5f, 10);
+    bottomWall->p = Vec2(SCREEN_WIDTH * 0.5f, -10);
     bottomWall->dp = Vec2();
     bottomWall->type = ENTITY_TYPE_OBSTACLE;
     
     setFlag(bottomWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
+    Entity* obstacle = gameState->entities + gameState->entityCount++;
+    
+    float obstacleDim = 30.0f;
+    
+    obstacle->storageIndex = gameState->entityCount - 1;
+    obstacle->w = obstacleDim;
+    obstacle->h = obstacleDim;
+    obstacle->p = Vec2(160 + obstacleDim * 0.5f, obstacleDim * 0.5f);
+    obstacle->dp = Vec2();
+    obstacle->type = ENTITY_TYPE_OBSTACLE;
+    
+    setFlag(obstacle, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
+    obstacle = gameState->entities + gameState->entityCount++;
+    
+    obstacle->storageIndex = gameState->entityCount - 1;
+    obstacle->w = obstacleDim;
+    obstacle->h = obstacleDim;
+    obstacle->p = Vec2(160 + obstacleDim * 0.5f, SCREEN_HEIGHT - obstacleDim * 0.5f);
+    obstacle->dp = Vec2();
+    obstacle->type = ENTITY_TYPE_OBSTACLE;
+    
+    setFlag(obstacle, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
+    obstacle = gameState->entities + gameState->entityCount++;
+    
+    obstacle->storageIndex = gameState->entityCount - 1;
+    obstacle->w = obstacleDim;
+    obstacle->h = obstacleDim;
+    obstacle->p = Vec2(SCREEN_WIDTH - 160 - obstacleDim * 0.5f, obstacleDim * 0.5f);
+    obstacle->dp = Vec2();
+    obstacle->type = ENTITY_TYPE_OBSTACLE;
+    
+    setFlag(obstacle, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
+    obstacle = gameState->entities + gameState->entityCount++;
+    
+    obstacle->storageIndex = gameState->entityCount - 1;
+    obstacle->w = obstacleDim;
+    obstacle->h = obstacleDim;
+    obstacle->p = Vec2(SCREEN_WIDTH - 160 - obstacleDim * 0.5f, SCREEN_HEIGHT - obstacleDim * 0.5f);
+    obstacle->dp = Vec2();
+    obstacle->type = ENTITY_TYPE_OBSTACLE;
+    
+    setFlag(obstacle, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
 }
 
 Entity* addBall(GameState *gameState)
@@ -316,13 +363,13 @@ void updatePaddles(GameState* gameState)
                                 
                                 if (verticallyMoving)
                                 {
-                                    minDistance = enemyEntity->h * 0.45f;
+                                    minDistance = enemyEntity->h * 0.1f;
                                     paddle->moveRight = entity->p.y - enemyEntity->p.y < minDistance;
                                     paddle->moveLeft = entity->p.y - enemyEntity->p.y > minDistance;
                                 }
                                 else
                                 {
-                                    minDistance = enemyEntity->w * 0.45f;
+                                    minDistance = enemyEntity->w * 0.1f;
                                     paddle->moveLeft = entity->p.x - enemyEntity->p.x < minDistance;
                                     paddle->moveRight = entity->p.x - enemyEntity->p.x > minDistance;
                                 }
@@ -495,7 +542,7 @@ void addEntities(GameState *gameState)
     float paddleHeight = DEFAULT_HEIGHT;
     
     addPaddle(gameState,
-              Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - (21.0f + paddleHeight * 0.5f)),
+              Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - paddleHeight * 0.5f),
               PADDLE_FLAG_ORIENTATION_TOP);
     
     addPaddle(gameState,
@@ -508,7 +555,7 @@ void addEntities(GameState *gameState)
 
     
     Entity* bottomPlayer = addPaddle(gameState,
-              Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f + 21.0f),
+              Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f),
               PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
     
     PaddleLogic* playerLogic = getPaddleLogic(gameState, bottomPlayer->storageIndex);
