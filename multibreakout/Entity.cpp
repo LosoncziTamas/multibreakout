@@ -113,7 +113,7 @@ void addWalls(GameState *gameState)
     
 }
 
-Entity* addBall(GameState *gameState)
+Entity* addBall(GameState *gameState, Vec2 pos)
 {
     Entity* ball = gameState->entities + gameState->entityCount++;
     
@@ -121,12 +121,12 @@ Entity* addBall(GameState *gameState)
     float radius = 10.0f;
     ball->w = radius * 2.0f;
     ball->h = radius * 2.0f;
-    ball->p = Vec2(SCREEN_WIDTH * 0.5f, 60);
+    ball->p = pos;
     ball->dp = Vec2();
     ball->type = ENTITY_TYPE_BALL;
     
     setFlag(ball, ENTITY_FLAG_COLLIDES);
-
+    
     return ball;
 }
 
@@ -185,7 +185,7 @@ Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
             rect.bottomLeft = Vec2(SCREEN_WIDTH * 0.5f, 0);
             rect.topRight = Vec2(640, SCREEN_HEIGHT);
         }
-
+        
         enemyControl->dangerZone = rect;
     }
     
@@ -226,6 +226,52 @@ EnemyControl* getEnemyControl(GameState* gameState, Uint32 paddleLogicIndex)
     return enemyControl;
 }
 
+float getPitfallDistance(Vec2 enemyPos, Vec2 ballPos, PaddleLogic* enemyLogic)
+{
+    bool verticallyMoving = enemyLogic->flags & (PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_ORIENTATION_RIGHT);
+    
+    if (verticallyMoving)
+    {
+        return SDL_fabs(enemyPos.x - ballPos.x);
+    }
+    else
+    {
+        return SDL_fabs(enemyPos.y - ballPos.y);
+    }
+}
+
+Entity* getBallInDangerZone(EnemyControl* enemyControl, PaddleLogic* enemyLogic, GameState* gameState, Vec2 enemyPos)
+{
+    Entity* ball = 0;
+    
+    for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
+    {
+        Entity* entity = gameState->entities + entityIndex;
+        if (entity->type == ENTITY_TYPE_BALL && enemyLogic->ball != entity)
+        {
+            if (isInRectangle(enemyControl->dangerZone, entity->p))
+            {
+                if (!ball)
+                {
+                    ball = entity;
+                }
+                else
+                {
+                    Entity* newBall = entity;
+                    
+                    if (getPitfallDistance(enemyPos, newBall->p, enemyLogic) < getPitfallDistance(enemyPos, ball->p, enemyLogic))
+                    {
+                        ball = newBall;
+                    }
+                }
+            }
+        }
+    }
+    
+    return ball;
+    
+}
+
 void updatePaddles(GameState* gameState)
 {
     for (Uint32 paddleIndex = 0; paddleIndex < gameState->paddleCount; ++paddleIndex)
@@ -260,7 +306,7 @@ void updatePaddles(GameState* gameState)
         {
             EnemyControl* enemyControl = getEnemyControl(gameState, paddleIndex);
             SDL_assert(enemyControl);
-
+            
             Entity* enemyEntity = gameState->entities + paddle->entityIndex;
             
             paddle->moveLeft = false;
@@ -268,124 +314,117 @@ void updatePaddles(GameState* gameState)
             
             bool verticallyMoving = paddle->flags & (PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_ORIENTATION_RIGHT);
             
-            for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
-            {
-                Entity* entity = gameState->entities + entityIndex;
-                //NOTE: this implementation implies there is only one ball
-                if (entity->type == ENTITY_TYPE_BALL && entity != paddle->ball)
+            Entity* ballInDangerZone = getBallInDangerZone(enemyControl, paddle, gameState, enemyEntity->p);
+            
+            switch (enemyControl->state) {
+                case ENEMY_STATE_IDLE:
                 {
-                    bool danger = isInRectangle(enemyControl->dangerZone, entity->p);
-                    switch (enemyControl->state) {
-                        case ENEMY_STATE_IDLE:
+                    if (!ballInDangerZone)
+                    {
+                        //select to random target position
+                        
+                        if (verticallyMoving)
                         {
-                            if (!danger)
-                            {
-                                //select to random target position
-                                
-                                if (verticallyMoving)
-                                {
-                                    enemyControl->target.y = SCREEN_HEIGHT * 0.5f;
-                                }
-                                else
-                                {
-                                    enemyControl->target.x = SCREEN_WIDTH * 0.5f;
-                                }
-                                
-                                enemyControl->state = ENEMY_STATE_STEERING;
-                                printf("ENEMY_STATE_STEERING \n");
-                            }
-                            else
-                            {
-                                enemyControl->state = ENEMY_STATE_DEFENDING;
-                                printf("ENEMY_STATE_DEFENDING \n");
-                            }
-                            
-                        } break;
-                        case ENEMY_STATE_STEERING:
+                            enemyControl->target.y = SCREEN_HEIGHT * 0.5f;
+                        }
+                        else
                         {
-                            float minDistance;
-                            
+                            enemyControl->target.x = SCREEN_WIDTH * 0.5f;
+                        }
+                        
+                        enemyControl->state = ENEMY_STATE_STEERING;
+                        printf("ENEMY_STATE_STEERING \n");
+                    }
+                    else
+                    {
+                        enemyControl->state = ENEMY_STATE_DEFENDING;
+                        printf("ENEMY_STATE_DEFENDING \n");
+                    }
+                    
+                } break;
+                case ENEMY_STATE_STEERING:
+                {
+                    float minDistance;
+                    
+                    if (verticallyMoving)
+                    {
+                        minDistance = enemyEntity->h * 0.45f;
+                    }
+                    else
+                    {
+                        minDistance = enemyEntity->w * 0.45f;
+                    }
+                    
+                    if (ballInDangerZone)
+                    {
+                        enemyControl->state = ENEMY_STATE_DEFENDING;
+                        printf("ENEMY_STATE_DEFENDING \n");
+                    }
+                    else
+                    {
+                        bool reachedTarget;
+                        
+                        if (verticallyMoving)
+                        {
+                            reachedTarget = SDL_fabs(enemyControl->target.y - enemyEntity->p.y) < minDistance;
+                        }
+                        else
+                        {
+                            reachedTarget = SDL_fabs(enemyControl->target.x - enemyEntity->p.x) < minDistance;
+                        }
+                        
+                        if (reachedTarget)
+                        {
+                            //release ball if has
+                            //should it switch state?
+                            printf("REACHED_TARGET \n");
+                        }
+                        else
+                        {
                             if (verticallyMoving)
                             {
-                                minDistance = enemyEntity->h * 0.45f;
+                                paddle->moveRight = enemyControl->target.y - enemyEntity->p.y < minDistance;
+                                paddle->moveLeft = enemyControl->target.y - enemyEntity->p.y > minDistance;
                             }
                             else
                             {
-                                minDistance = enemyEntity->w * 0.45f;
+                                paddle->moveLeft = enemyControl->target.x - enemyEntity->p.x < minDistance;
+                                paddle->moveRight = enemyControl->target.x - enemyEntity->p.x > minDistance;
                             }
-
-                            if (danger)
-                            {
-                                enemyControl->state = ENEMY_STATE_DEFENDING;
-                                printf("ENEMY_STATE_DEFENDING \n");
-                            }
-                            else
-                            {
-                                bool reachedTarget;
-                                
-                                if (verticallyMoving)
-                                {
-                                    reachedTarget = SDL_fabs(enemyControl->target.y - enemyEntity->p.y) < minDistance;
-                                }
-                                else
-                                {
-                                    reachedTarget = SDL_fabs(enemyControl->target.x - enemyEntity->p.x) < minDistance;
-                                }
-                                
-                                if (reachedTarget)
-                                {
-                                    //release ball if has
-                                    //should it switch state?
-                                    printf("REACHED_TARGET \n");
-                                }
-                                else
-                                {
-                                    if (verticallyMoving)
-                                    {
-                                        paddle->moveRight = enemyControl->target.y - enemyEntity->p.y < minDistance;
-                                        paddle->moveLeft = enemyControl->target.y - enemyEntity->p.y > minDistance;
-                                    }
-                                    else
-                                    {
-                                        paddle->moveLeft = enemyControl->target.x - enemyEntity->p.x < minDistance;
-                                        paddle->moveRight = enemyControl->target.x - enemyEntity->p.x > minDistance;
-                                    }
-                                    //move toward the target
-                                }
-                            }
-
-                        } break;
-                        case ENEMY_STATE_DEFENDING:
-                        {
-                            if (danger)
-                            {
-                                float minDistance;
-                                
-                                if (verticallyMoving)
-                                {
-                                    minDistance = enemyEntity->h * 0.1f;
-                                    paddle->moveRight = entity->p.y - enemyEntity->p.y < minDistance;
-                                    paddle->moveLeft = entity->p.y - enemyEntity->p.y > minDistance;
-                                }
-                                else
-                                {
-                                    minDistance = enemyEntity->w * 0.1f;
-                                    paddle->moveLeft = entity->p.x - enemyEntity->p.x < minDistance;
-                                    paddle->moveRight = entity->p.x - enemyEntity->p.x > minDistance;
-                                }
-
-                                //move toward the ball
-                            }
-                            else
-                            {
-                                printf("ENEMY_STATE_IDLE \n");
-                                enemyControl->state = ENEMY_STATE_IDLE;
-                            }
-                        } break;
-                        default:
-                            break;
+                            //move toward the target
+                        }
                     }
-                }
+                    
+                } break;
+                case ENEMY_STATE_DEFENDING:
+                {
+                    if (ballInDangerZone)
+                    {
+                        float minDistance;
+                        
+                        if (verticallyMoving)
+                        {
+                            minDistance = enemyEntity->h * 0.1f;
+                            paddle->moveRight = ballInDangerZone->p.y - enemyEntity->p.y < minDistance;
+                            paddle->moveLeft = ballInDangerZone->p.y - enemyEntity->p.y > minDistance;
+                        }
+                        else
+                        {
+                            minDistance = enemyEntity->w * 0.1f;
+                            paddle->moveLeft = ballInDangerZone->p.x - enemyEntity->p.x < minDistance;
+                            paddle->moveRight = ballInDangerZone->p.x - enemyEntity->p.x > minDistance;
+                        }
+                        
+                        //move toward the ball
+                    }
+                    else
+                    {
+                        printf("ENEMY_STATE_IDLE \n");
+                        enemyControl->state = ENEMY_STATE_IDLE;
+                    }
+                } break;
+                default:
+                    break;
             }
         }
     }
@@ -400,7 +439,7 @@ void updateBricks(GameState* gameState)
         {
             brickLogic->collidedBall->powerUp = brickLogic->powerUp;
             printf("Ball powerup updated \n");
-
+            
 #if 0
             if (--brickLogic->hitPoints == 0)
             {
@@ -410,7 +449,7 @@ void updateBricks(GameState* gameState)
             brickLogic->collidedBall = 0;
         }
     }
-
+    
 }
 
 void setPowerUpFlags(PaddleLogic* paddleLogic, Uint32 flags)
@@ -430,7 +469,7 @@ bool isSet(PaddleLogic* paddleLogic, Uint32 flags)
 
 void setPaddlePowerUp(PaddleLogic* paddleLogic, EntityPowerUp newPowerUp)
 {
-
+    
     if (!paddleLogic->powerUps)
     {
         setPowerUpFlags(paddleLogic, newPowerUp);
@@ -472,7 +511,7 @@ void updateBalls(GameState* gameState)
                 setPaddlePowerUp(ballLogic->collidedPaddle, ballLogic->powerUp);
                 ballLogic->powerUp = POWER_UP_NONE;
             }
-
+            
             ballLogic->collidedPaddle = 0;
         }
     }
@@ -552,16 +591,18 @@ void addEntities(GameState *gameState)
     addPaddle(gameState,
               Vec2(639 - paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
               PADDLE_FLAG_ORIENTATION_RIGHT);
-
+    
     
     Entity* bottomPlayer = addPaddle(gameState,
-              Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f),
-              PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
+                                     Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f),
+                                     PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
     
     PaddleLogic* playerLogic = getPaddleLogic(gameState, bottomPlayer->storageIndex);
     
-    Entity* ball = addBall(gameState);
+    Entity* ball = addBall(gameState, Vec2(SCREEN_WIDTH * 0.5f, 400));
 
+    ball = addBall(gameState, Vec2(SCREEN_WIDTH * 0.5f, 60));
+    
     SDL_assert(SDL_arraysize(gameState->balls) > gameState->ballCount);
     BallLogic* ballLogic = gameState->balls + gameState->ballCount++;
     
@@ -600,12 +641,12 @@ void addEntities(GameState *gameState)
                 if (columnIndex % 2 == 1)
                 {
                     brickLogic->powerUp = POWER_UP_SHRINK;
-
+                    
                 }
                 else
                 {
                     brickLogic->powerUp = POWER_UP_ENLARGE;
-
+                    
                 }
             }
             else
@@ -631,7 +672,7 @@ void addEntities(GameState *gameState)
     projectile->w = 15.0f;
     projectile->h = 30.0f;
     projectile->type = ENTITY_TYPE_PROJECTILE;
-
+    
     setFlag(projectile, ENTITY_FLAG_COLLIDES);
 }
 
@@ -849,7 +890,7 @@ void updateEntities(GameState *gameState)
                 {
                     SDL_TriggerBreakpoint();
                 }
-
+                
                 
             } break;
             case ENTITY_TYPE_BALL:
@@ -894,7 +935,7 @@ void updateEntities(GameState *gameState)
                         ddp = normalized.normalize();
                     }
                 }
-
+                
                 drawCircle(gameState->renderer, entity);
                 
             } break;
@@ -917,7 +958,7 @@ void updateEntities(GameState *gameState)
             } break;
             case ENTITY_TYPE_OBSTACLE:
             case ENTITY_TYPE_BRICK:
-            break;
+                break;
             default:
             {
                 SDL_TriggerBreakpoint();
@@ -969,7 +1010,7 @@ void updateEntities(GameState *gameState)
                 
                 CollisionSpecs* testCollider = colliders + test->storageIndex;
                 Vec2 testLerpP = ((1.0 - t) * testCollider->oldP) + (t * testCollider->desiredP);
-
+                
                 Rectangle testRect = fromDimAndCenter(testLerpP, test->w, test->h);
                 
                 if (!(isSet(entity, ENTITY_FLAG_STATIC) && isSet(test, ENTITY_FLAG_STATIC)) && aabb(entityRect, testRect))
@@ -1089,7 +1130,7 @@ void updateEntities(GameState *gameState)
     {
         Entity* entity = gameState->entities + entityIndex;
         SDL_assert(entity->storageIndex > 0);
-
+        
         CollisionSpecs* collider = colliders + entity->storageIndex;
         
         if (!isSet(entity, ENTITY_FLAG_STATIC))
@@ -1116,7 +1157,7 @@ void updateEntities(GameState *gameState)
         else if (entity->type == ENTITY_TYPE_PADDLE)
         {
             PaddleLogic* paddleLogic = getPaddleLogic(gameState, entity->storageIndex);
-
+            
             if (isSet(paddleLogic, POWER_UP_ENLARGE))
             {
                 g = 255;
@@ -1136,7 +1177,7 @@ void updateEntities(GameState *gameState)
         }
         
         drawEntityBounds(gameState->renderer, entity, r, g, b, a);
-    
+        
     }
     
     clearArray(colliders, gameState->entityCount, CollisionSpecs);

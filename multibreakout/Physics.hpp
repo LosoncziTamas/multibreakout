@@ -20,4 +20,6 @@ bool circleRectIntersect(Vec2 circleCenter, float radius, Vec2 rectCenter, float
 
 Vec2 reflect(const Vec2& vec, const Vec2& norm);
 
+float distanceSqr(Vec2 v1, Vec2 v2);
+
 #endif
