@@ -130,57 +130,45 @@ Entity* addBall(GameState *gameState, Vec2 pos)
     return ball;
 }
 
-Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
+PaddleLogic* addPaddleLogic(Entity* paddleEntity, GameState* gameState, Uint32 paddleFlags)
 {
-    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
-    Entity* paddle = gameState->entities + gameState->entityCount++;
-    
-    paddle->storageIndex = gameState->entityCount - 1;
-    paddle->p = pos;
-    paddle->dp = Vec2();
-    paddle->type = ENTITY_TYPE_PADDLE;
-    
-    setFlag(paddle, ENTITY_FLAG_COLLIDES);
-    
+    SDL_assert(paddleEntity->type == ENTITY_TYPE_PADDLE);
     SDL_assert(SDL_arraysize(gameState->paddles) > gameState->paddleCount);
-    PaddleLogic* logic = gameState->paddles + gameState->paddleCount++;
     
-    logic->entityIndex = paddle->storageIndex;
-    logic->flags = paddleFlags;
+    PaddleLogic* paddleLogic = gameState->paddles + gameState->paddleCount++;
+    paddleLogic->entityIndex = paddleEntity->storageIndex;
+    paddleLogic->flags = paddleFlags;
     
-    if (logic->flags & (PADDLE_FLAG_ORIENTATION_TOP|PADDLE_FLAG_ORIENTATION_BOTTOM))
+    bool swapDimensions = paddleLogic->flags & (PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_ORIENTATION_RIGHT);
+    if (swapDimensions)
     {
-        paddle->w = 90.0f;
-        paddle->h = 25.0f;
+        float tmp = paddleEntity->h;
+        paddleEntity->h = paddleEntity->w;
+        paddleEntity->w = tmp;
     }
-    else
-    {
-        paddle->w = 25.0;
-        paddle->h = 90.0f;
-    }
-    
-    if (!(logic->flags & PADDLE_FLAG_PLAYER_CONTROLLED))
+
+    if (!(paddleLogic->flags & PADDLE_FLAG_PLAYER_CONTROLLED))
     {
         SDL_assert(SDL_arraysize(gameState->enemyControls) > gameState->enemyControlCount);
-        EnemyControl* enemyControl = gameState->enemyControls + gameState->enemyControlCount++;
         
+        EnemyControl* enemyControl = gameState->enemyControls + gameState->enemyControlCount++;
         enemyControl->paddleLogicIndex = gameState->paddleCount - 1;
         enemyControl->state = ENEMY_STATE_IDLE;
         enemyControl->target = Vec2();
         
         Rectangle rect = {};
         
-        if (logic->flags & PADDLE_FLAG_ORIENTATION_TOP)
+        if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_TOP)
         {
             rect.bottomLeft = Vec2(160, SCREEN_HEIGHT * 0.5f);
             rect.topRight = Vec2(640, SCREEN_HEIGHT);
         }
-        else if (logic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
         {
             rect.bottomLeft = Vec2(160, 0);
             rect.topRight = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT);
         }
-        else if (logic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
         {
             rect.bottomLeft = Vec2(SCREEN_WIDTH * 0.5f, 0);
             rect.topRight = Vec2(640, SCREEN_HEIGHT);
@@ -188,6 +176,23 @@ Entity* addPaddle(GameState* gameState, Vec2 pos, Uint32 paddleFlags)
         
         enemyControl->dangerZone = rect;
     }
+    
+    return paddleLogic;
+}
+
+Entity* addPaddleEntity(GameState* gameState, Vec2 pos)
+{
+    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
+    
+    Entity* paddle = gameState->entities + gameState->entityCount++;
+    paddle->storageIndex = gameState->entityCount - 1;
+    paddle->p = pos;
+    paddle->w = 90.0f;
+    paddle->h = 25.0f;
+    paddle->dp = Vec2();
+    paddle->type = ENTITY_TYPE_PADDLE;
+    
+    setFlag(paddle, ENTITY_FLAG_COLLIDES);
     
     return paddle;
 }
@@ -558,7 +563,7 @@ BrickLogic* getBrickLogic(GameState* gameState, Uint32 brickEntityIndex)
     return brickLogic;
 }
 
-Entity* addBrick(GameState *gameState, Vec2 pos, float brickWidth, float brickHeight)
+Entity* addBrickEntity(GameState *gameState, Vec2 pos, float brickWidth, float brickHeight)
 {
     SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
     Entity* brick = gameState->entities + gameState->entityCount++;
@@ -632,40 +637,45 @@ void addEntities(GameState *gameState)
     
     float paddleHeight = DEFAULT_HEIGHT;
     
-    Entity* topPaddleEntity = addPaddle(gameState,
-                                        Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - paddleHeight * 0.5f),
-                                        PADDLE_FLAG_ORIENTATION_TOP);
+    {
+        Entity* bottomPaddleEntity = addPaddleEntity(gameState, Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f));
+        PaddleLogic* bottomPaddleLogic = addPaddleLogic(bottomPaddleEntity, gameState, PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
+        
+        Entity* bottomBallEntity = addBall(gameState, Vec2());
+        BallLogic* bottomBallLogic = addBallLogic(bottomBallEntity, gameState);
+        
+        anchorBallToPaddle(bottomBallEntity, bottomPaddleEntity, bottomBallLogic, bottomPaddleLogic);
+    }
     
-    PaddleLogic* topPaddleLogic = getPaddleLogic(gameState, topPaddleEntity->storageIndex);
+    {
+        Entity* topPaddleEntity = addPaddleEntity(gameState, Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - paddleHeight * 0.5f));
+        PaddleLogic* topPaddleLogic = addPaddleLogic(topPaddleEntity, gameState, PADDLE_FLAG_ORIENTATION_TOP);
+        
+        Entity* topBallEntity = addBall(gameState, Vec2());
+        BallLogic* topBallLogic = addBallLogic(topBallEntity, gameState);
+        
+        anchorBallToPaddle(topBallEntity, topPaddleEntity, topBallLogic, topPaddleLogic);
+    }
     
-    Entity* topBallEntity = addBall(gameState, Vec2());
+    {
+        Entity* leftPaddleEntity = addPaddleEntity(gameState, Vec2(161 + paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f));
+        PaddleLogic* leftPaddleLogic = addPaddleLogic(leftPaddleEntity, gameState, PADDLE_FLAG_ORIENTATION_LEFT);
+        
+        Entity* leftBallEntity = addBall(gameState, Vec2());
+        BallLogic* leftBallLogic = addBallLogic(leftBallEntity, gameState);
+        
+        anchorBallToPaddle(leftBallEntity, leftPaddleEntity, leftBallLogic, leftPaddleLogic);
+    }
     
-    BallLogic* topBallLogic = addBallLogic(topBallEntity, gameState);
-    
-    anchorBallToPaddle(topBallEntity, topPaddleEntity, topBallLogic, topPaddleLogic);
-
-    
-    /*addPaddle(gameState,
-              Vec2(161 + paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
-              PADDLE_FLAG_ORIENTATION_LEFT);
-    
-    addPaddle(gameState,
-              Vec2(639 - paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
-              PADDLE_FLAG_ORIENTATION_RIGHT);*/
-    
-    
-    Entity* bottomPaddle = addPaddle(gameState,
-                                     Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f),
-                                     PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
-    
-    PaddleLogic* playerLogic = getPaddleLogic(gameState, bottomPaddle->storageIndex);
-    
-    Entity* bottomBallEntity = addBall(gameState, Vec2());
-
-    BallLogic* bottomBallLogic = addBallLogic(bottomBallEntity, gameState);
-    
-    
-    anchorBallToPaddle(bottomBallEntity, bottomPaddle, bottomBallLogic, playerLogic);
+    {
+        Entity* rightPaddleEntity = addPaddleEntity(gameState, Vec2(639 - paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f));
+        PaddleLogic* rightPaddleLogic = addPaddleLogic(rightPaddleEntity, gameState, PADDLE_FLAG_ORIENTATION_RIGHT);
+        
+        Entity* rightBallEntity = addBall(gameState, Vec2());
+        BallLogic* rightBallLogic = addBallLogic(rightBallEntity, gameState);
+        
+        anchorBallToPaddle(rightBallEntity, rightPaddleEntity, rightBallLogic, rightPaddleLogic);
+    }
     
     float brickWidth = 30;
     float brickHeight = 30;
@@ -683,7 +693,7 @@ void addEntities(GameState *gameState)
             Vec2 pos(pivotX + (columnIndex * brickWidth) + halfWidth,
                      pivotY - (rowIndex * brickHeight) + halfHeight);
             
-            Entity* brick = addBrick(gameState, pos, brickWidth, brickHeight);
+            Entity* brick = addBrickEntity(gameState, pos, brickWidth, brickHeight);
             
             SDL_assert(SDL_arraysize(gameState->bricks) > gameState->brickCount);
             BrickLogic* brickLogic = gameState->bricks + gameState->brickCount++;
@@ -962,8 +972,29 @@ void updateEntities(GameState *gameState)
                     SDL_assert(paddleLogic);
                     if (paddleLogic->releaseBall)
                     {
-                        ddp.y = 1.0f;
-                        Vec2 launchForce(0.0f, 250.0f);
+                        Vec2 launchForce;
+
+                        if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
+                        {
+                            ddp.y = 1.0f;
+                            launchForce = Vec2(0.0f, 250.0f);
+                        }
+                        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_TOP)
+                        {
+                            ddp.y = -1.0f;
+                            launchForce = Vec2(0.0f, -250.0f);
+                        }
+                        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+                        {
+                            ddp.x = 1.0f;
+                            launchForce = Vec2(250.0f, 0.0f);
+                        }
+                        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+                        {
+                            ddp.x = -1.0f;
+                            launchForce = Vec2(-250.0f, 0.0f);
+                        }
+    
                         entity->dp = paddleEntity->dp + launchForce;
                         
                         ballLogic->paddle = 0;
