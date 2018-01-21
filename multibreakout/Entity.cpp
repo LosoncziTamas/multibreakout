@@ -375,6 +375,11 @@ void updatePaddles(GameState* gameState)
                         
                         if (reachedTarget)
                         {
+                            if (paddle->ball)
+                            {
+                                paddle->releaseBall = true;
+                                enemyControl->state = ENEMY_STATE_IDLE;
+                            }
                             //release ball if has
                             //should it switch state?
                             printf("REACHED_TARGET \n");
@@ -569,6 +574,53 @@ Entity* addBrick(GameState *gameState, Vec2 pos, float brickWidth, float brickHe
     return brick;
 }
 
+void anchorBallToPaddle(Entity* ballEntity, Entity* paddleEntity, BallLogic* ballLogic, PaddleLogic* paddleLogic)
+{
+    SDL_assert(ballEntity->type == ENTITY_TYPE_BALL && paddleEntity->type == ENTITY_TYPE_PADDLE);
+    
+    float anchorOffset = 5.0f;
+    
+    if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+    {
+        ballEntity->p = paddleEntity->p;
+        ballEntity->p.x += paddleEntity->w * 0.5f + ballEntity->w * 0.5f + anchorOffset;
+    }
+    else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
+    {
+        ballEntity->p = paddleEntity->p;
+        ballEntity->p.y += paddleEntity->h * 0.5f + ballEntity->w * 0.5f + anchorOffset;
+    }
+    else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+    {
+        ballEntity->p = paddleEntity->p;
+        ballEntity->p.x -= paddleEntity->w * 0.5f + ballEntity->w * 0.5f + anchorOffset;
+    }
+    else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_TOP)
+    {
+        ballEntity->p = paddleEntity->p;
+        ballEntity->p.y -= paddleEntity->h * 0.5f + ballEntity->w * 0.5f + anchorOffset;
+    }
+    else
+    {
+        SDL_TriggerBreakpoint();
+    }
+    
+    paddleLogic->ball = ballEntity;
+    ballLogic->paddle = paddleEntity;
+}
+
+BallLogic* addBallLogic(Entity* ballEntity, GameState* gameState)
+{
+    SDL_assert(ballEntity->type == ENTITY_TYPE_BALL);
+    SDL_assert(SDL_arraysize(gameState->balls) > gameState->ballCount);
+    
+    BallLogic* ballLogic = gameState->balls + gameState->ballCount++;
+    ballLogic->entityIndex = ballEntity->storageIndex;
+    ballLogic->powerUp = POWER_UP_NONE;
+    
+    return ballLogic;
+}
+
 void addEntities(GameState *gameState)
 {
     Entity* nullEntity = gameState->entities + gameState->entityCount++;
@@ -580,38 +632,40 @@ void addEntities(GameState *gameState)
     
     float paddleHeight = DEFAULT_HEIGHT;
     
-    addPaddle(gameState,
-              Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - paddleHeight * 0.5f),
-              PADDLE_FLAG_ORIENTATION_TOP);
+    Entity* topPaddleEntity = addPaddle(gameState,
+                                        Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - paddleHeight * 0.5f),
+                                        PADDLE_FLAG_ORIENTATION_TOP);
     
-    addPaddle(gameState,
+    PaddleLogic* topPaddleLogic = getPaddleLogic(gameState, topPaddleEntity->storageIndex);
+    
+    Entity* topBallEntity = addBall(gameState, Vec2());
+    
+    BallLogic* topBallLogic = addBallLogic(topBallEntity, gameState);
+    
+    anchorBallToPaddle(topBallEntity, topPaddleEntity, topBallLogic, topPaddleLogic);
+
+    
+    /*addPaddle(gameState,
               Vec2(161 + paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
               PADDLE_FLAG_ORIENTATION_LEFT);
     
     addPaddle(gameState,
               Vec2(639 - paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f),
-              PADDLE_FLAG_ORIENTATION_RIGHT);
+              PADDLE_FLAG_ORIENTATION_RIGHT);*/
     
     
-    Entity* bottomPlayer = addPaddle(gameState,
+    Entity* bottomPaddle = addPaddle(gameState,
                                      Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f),
                                      PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
     
-    PaddleLogic* playerLogic = getPaddleLogic(gameState, bottomPlayer->storageIndex);
+    PaddleLogic* playerLogic = getPaddleLogic(gameState, bottomPaddle->storageIndex);
     
-    Entity* ball = addBall(gameState, Vec2(SCREEN_WIDTH * 0.5f, 400));
+    Entity* bottomBallEntity = addBall(gameState, Vec2());
 
-    ball = addBall(gameState, Vec2(SCREEN_WIDTH * 0.5f, 60));
+    BallLogic* bottomBallLogic = addBallLogic(bottomBallEntity, gameState);
     
-    SDL_assert(SDL_arraysize(gameState->balls) > gameState->ballCount);
-    BallLogic* ballLogic = gameState->balls + gameState->ballCount++;
     
-    ballLogic->entityIndex = ball->storageIndex;
-    ballLogic->powerUp = POWER_UP_NONE;
-    
-    //TODO: extract to function
-    playerLogic->ball = ball;
-    ballLogic->paddle = bottomPlayer;
+    anchorBallToPaddle(bottomBallEntity, bottomPaddle, bottomBallLogic, playerLogic);
     
     float brickWidth = 30;
     float brickHeight = 30;
