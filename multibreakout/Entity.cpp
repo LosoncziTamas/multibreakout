@@ -65,6 +65,8 @@ void addWalls(GameState *gameState)
     
     setFlag(bottomWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
     
+#if 0
+    
     Entity* obstacle = gameState->entities + gameState->entityCount++;
     
     float obstacleDim = 30.0f;
@@ -110,6 +112,7 @@ void addWalls(GameState *gameState)
     obstacle->type = ENTITY_TYPE_OBSTACLE;
     
     setFlag(obstacle, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+#endif
     
 }
 
@@ -244,6 +247,7 @@ float getPitfallDistance(Vec2 enemyPos, Vec2 ballPos, PaddleLogic* enemyLogic)
         return SDL_fabs(enemyPos.y - ballPos.y);
     }
 }
+
 BallLogic* getBallLogic(GameState* gameState, Uint32 ballEntityIndex)
 {
     SDL_assert(gameState->entities[ballEntityIndex].type == ENTITY_TYPE_BALL);
@@ -349,11 +353,11 @@ void updatePaddles(GameState* gameState)
                         
                         if (verticallyMoving)
                         {
-                            enemyControl->target.y = SCREEN_HEIGHT * 0.5f;
+                            enemyControl->target.y = rand() % static_cast<int>(SCREEN_HEIGHT) + 1;
                         }
                         else
                         {
-                            enemyControl->target.x = SCREEN_WIDTH * 0.5f;
+                            enemyControl->target.x = 160 + (rand() % static_cast<int>(SCREEN_HEIGHT) + 1);
                         }
                         
                         enemyControl->state = ENEMY_STATE_STEERING;
@@ -474,12 +478,12 @@ void updateBricks(GameState* gameState)
                 Entity* brickEntity = gameState->entities + brickLogic->entityIndex;
                 SDL_assert(brickEntity->type == ENTITY_TYPE_BRICK);
                 clearFlag(brickEntity, ENTITY_FLAG_COLLIDES);
+                gameState->activeBrickCount--;
                 printf("destroy brick \n");
             }
             brickLogic->collidedBall = 0;
         }
     }
-    
 }
 
 void setPowerUpFlags(PaddleLogic* paddleLogic, Uint32 flags)
@@ -580,6 +584,8 @@ Entity* addBrickEntity(GameState *gameState, Vec2 pos, float brickWidth, float b
     
     setFlag(brick, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
     
+    gameState->activeBrickCount++;
+    
     return brick;
 }
 
@@ -650,7 +656,8 @@ void addEntities(GameState *gameState)
         
         anchorBallToPaddle(bottomBallEntity, bottomPaddleEntity, bottomBallLogic, bottomPaddleLogic);
     }
-    
+
+#if 0
     {
         Entity* topPaddleEntity = addPaddleEntity(gameState, Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT - paddleHeight * 0.5f));
         PaddleLogic* topPaddleLogic = addPaddleLogic(topPaddleEntity, gameState, PADDLE_FLAG_ORIENTATION_TOP);
@@ -660,7 +667,7 @@ void addEntities(GameState *gameState)
         
         anchorBallToPaddle(topBallEntity, topPaddleEntity, topBallLogic, topPaddleLogic);
     }
-    
+
     {
         Entity* leftPaddleEntity = addPaddleEntity(gameState, Vec2(161 + paddleHeight * 0.5f, SCREEN_HEIGHT * 0.5f));
         PaddleLogic* leftPaddleLogic = addPaddleLogic(leftPaddleEntity, gameState, PADDLE_FLAG_ORIENTATION_LEFT);
@@ -680,57 +687,7 @@ void addEntities(GameState *gameState)
         
         anchorBallToPaddle(rightBallEntity, rightPaddleEntity, rightBallLogic, rightPaddleLogic);
     }
-    
-    float brickWidth = 30;
-    float brickHeight = 30;
-    Uint32 columns = 4;
-    Uint32 rows = 5;
-    float halfWidth = brickWidth * 0.5f;
-    float halfHeight = brickHeight * 0.5f;
-    float pivotX = SCREEN_WIDTH * 0.5f - columns * halfHeight;
-    float pivotY = SCREEN_HEIGHT * 0.5f + rows * halfWidth;
-    
-    for (Uint32 columnIndex = 0; columnIndex < columns; ++columnIndex)
-    {
-        for (Uint32 rowIndex = 0; rowIndex < rows; ++rowIndex)
-        {
-            Vec2 pos(pivotX + (columnIndex * brickWidth) + halfWidth,
-                     pivotY - (rowIndex * brickHeight) + halfHeight);
-            
-            Entity* brick = addBrickEntity(gameState, pos, brickWidth, brickHeight);
-            
-            SDL_assert(SDL_arraysize(gameState->bricks) > gameState->brickCount);
-            BrickLogic* brickLogic = gameState->bricks + gameState->brickCount++;
-            
-            brickLogic->entityIndex = brick->storageIndex;
-            brickLogic->hitPoints = 1;
-            if (rowIndex % 2 == 1)
-            {
-                if (columnIndex % 2 == 1)
-                {
-                    brickLogic->powerUp = POWER_UP_SHRINK;
-                    
-                }
-                else
-                {
-                    brickLogic->powerUp = POWER_UP_ENLARGE;
-                    
-                }
-            }
-            else
-            {
-                if (columnIndex % 2 == 1)
-                {
-                    brickLogic->powerUp = POWER_UP_ACCELERATE;
-                    
-                }
-                else
-                {
-                    brickLogic->powerUp = POWER_UP_DECELERATE;
-                }
-            }
-        }
-    }
+#endif
     
     Entity* projectile = gameState->entities + gameState->entityCount++;
     
@@ -742,6 +699,62 @@ void addEntities(GameState *gameState)
     projectile->type = ENTITY_TYPE_PROJECTILE;
     
     setFlag(projectile, ENTITY_FLAG_COLLIDES);
+}
+
+void addTestLevels(GameState *gameState)
+{
+    SDL_assert(SDL_arraysize(gameState->levels) > gameState->levelCount);
+    
+    Level* level = gameState->levels + gameState->levelCount++;
+    
+    Uint32 columns = 16;
+    Uint32 rows = 4;
+    
+    SDL_assert(SDL_arraysize(level->components) >= columns * rows);
+    
+    float brickDim = 30.0f;
+    Vec2 gameAreaTopLeft = Vec2(160.0f, 450.0f);
+    
+    //TODO: fix calc error here
+    for (Uint32 rowIndex = 1; rowIndex <= rows; ++rowIndex)
+    {
+        for (Uint32 columnIndex = 1; columnIndex <= columns; ++columnIndex)
+        {
+            
+            LevelComponent* levelComponent = level->components + columns * rowIndex + columnIndex;
+            
+            levelComponent->dim = Vec2(brickDim, brickDim);
+            levelComponent->hitPoints = 1;
+            levelComponent->powerUp = POWER_UP_NONE;
+            levelComponent->pos = Vec2(gameAreaTopLeft.x + (brickDim * 0.5f) + (columnIndex - 1) * brickDim,
+                                       gameAreaTopLeft.y - (brickDim * 0.5f) - (rowIndex - 1) * brickDim);
+            
+            level->componentCount++;
+        }
+    }
+    
+    SDL_assert(level->componentCount <= columns * rows);
+}
+
+void buildLevel(GameState* gameState)
+{
+    SDL_assert(SDL_arraysize(gameState->levels) > gameState->currentLevelIndex);
+
+    Level* currentLevel = gameState->levels + gameState->currentLevelIndex;
+    
+    for (Uint32 componentIndex = 0; componentIndex < currentLevel->componentCount; ++componentIndex)
+    {
+        LevelComponent* levelComponent = currentLevel->components + componentIndex;
+        
+        Entity* brickEntity = addBrickEntity(gameState, levelComponent->pos, levelComponent->dim.x, levelComponent->dim.y);
+        
+        SDL_assert(SDL_arraysize(gameState->bricks) > gameState->brickCount);
+        
+        BrickLogic* brickLogic = gameState->bricks + gameState->brickCount++;
+        brickLogic->entityIndex = brickEntity->storageIndex;
+        brickLogic->hitPoints = levelComponent->hitPoints;
+        brickLogic->powerUp = levelComponent->powerUp;
+    }
 }
 
 struct CollisionSpecs
@@ -899,7 +912,9 @@ void updateEntities(GameState *gameState)
 {
     if (!initialized)
     {
+        addTestLevels(gameState);
         addEntities(gameState);
+        buildLevel(gameState);
         addWalls(gameState);
         initialized = true;
     }
@@ -907,6 +922,24 @@ void updateEntities(GameState *gameState)
     updateBricks(gameState);
     updateBalls(gameState);
     updatePaddles(gameState);
+    
+    if (gameState->activeBrickCount == 0)
+    {
+        clearArray(gameState->entities, gameState->entityCount, Entity);
+        gameState->entityCount = 0;
+        clearArray(gameState->paddles, gameState->paddleCount, PaddleLogic);
+        gameState->paddleCount = 0;
+        clearArray(gameState->enemyControls, gameState->enemyControlCount, EnemyControl);
+        gameState->enemyControlCount = 0;
+        clearArray(gameState->balls, gameState->ballCount, BallLogic);
+        gameState->ballCount = 0;
+        clearArray(gameState->bricks, gameState->brickCount, BrickLogic);
+        gameState->brickCount = 0;
+        
+        addEntities(gameState);
+        addWalls(gameState);
+        
+    }
     
     SDL_SetRenderDrawColor(gameState->renderer, 130, 189, 240, 0);
     SDL_RenderClear(gameState->renderer);
@@ -963,7 +996,7 @@ void updateEntities(GameState *gameState)
             } break;
             case ENTITY_TYPE_BALL:
             {
-                specs->speed = 200.0f;
+                specs->speed = 500.0f;
                 specs->drag = 2.0f;
                 
                 BallLogic* ballLogic = getBallLogic(gameState, entityIndex);

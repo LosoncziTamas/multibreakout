@@ -35,7 +35,7 @@ struct GameState {
     World world;
     Menu menu;
     
-    Entity entities[128];
+    Entity entities[256];
     Uint32 entityCount;
     
     PaddleLogic paddles[4];
@@ -47,8 +47,14 @@ struct GameState {
     BallLogic balls[16];
     Uint32 ballCount;
     
-    BrickLogic bricks[64];
+    BrickLogic bricks[128];
     Uint32 brickCount;
+    
+    Uint32 activeBrickCount;
+    
+    Level levels[4];
+    Uint32 levelCount;
+    Uint32 currentLevelIndex;
 };
 
 #endif

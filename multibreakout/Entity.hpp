@@ -93,13 +93,26 @@ struct BrickLogic
     BallLogic* collidedBall;
 };
 
-
 struct EnemyControl
 {
     Uint32 paddleLogicIndex;
     EnemyState state;
     Rectangle dangerZone;
     Vec2 target;
+};
+
+struct LevelComponent
+{
+    Vec2 pos;
+    Vec2 dim;
+    Uint32 hitPoints;
+    EntityPowerUp powerUp;
+};
+
+struct Level
+{
+    LevelComponent components[128];
+    Uint32 componentCount;
 };
 
 void updateEntities(GameState *gameState);
