@@ -648,7 +648,7 @@ void addEntities(GameState *gameState)
     float paddleHeight = DEFAULT_HEIGHT;
     
     {
-        Entity* bottomPaddleEntity = addPaddleEntity(gameState, Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f));
+        Entity* bottomPaddleEntity = addPaddleEntity(gameState, Vec2(SCREEN_WIDTH * 0.5f, paddleHeight * 0.5f + 1));
         PaddleLogic* bottomPaddleLogic = addPaddleLogic(bottomPaddleEntity, gameState, PADDLE_FLAG_ORIENTATION_BOTTOM|PADDLE_FLAG_PLAYER_CONTROLLED);
         
         Entity* bottomBallEntity = addBallEntity(gameState, Vec2());
@@ -776,31 +776,43 @@ void setStaticCollider(CollisionSpecs* collider, Vec2 center)
 
 Vec2 getSurfaceNorm(Vec2 vector, Rectangle* surfaceRect)
 {
-    bool left = vector.x <= surfaceRect->bottomLeft.x;
-    bool right = vector.x >= surfaceRect->topRight.x;
-    bool top = vector.y >= surfaceRect->topRight.y;
-    bool bottom = vector.y <= surfaceRect->bottomLeft.y;
+    float left = vector.x <= surfaceRect->bottomLeft.x;
+    float right = vector.x >= surfaceRect->topRight.x;
+    float top = vector.y >= surfaceRect->topRight.y;
+    float bottom = vector.y <= surfaceRect->bottomLeft.y;
     
     Vec2 result;
+    Uint32 sideCount = 0;
     
     if (right)
     {
         result = Vec2(1.0f, 0.0f);
-    }
-    else if (left)
-    {
-        result = Vec2(-1.0f, 0.0f);
-    }
-    else if (top)
-    {
-        result = Vec2(0.0f, 1.0f);
-    }
-    else if (bottom)
-    {
-        result = Vec2(0.0f, -1.0f);
+        ++sideCount;
     }
     
-    return result;
+    if (left)
+    {
+        result = Vec2(-1.0f, 0.0f);
+        ++sideCount;
+    }
+    
+    if (top)
+    {
+        result = Vec2(0.0f, 1.0f);
+        ++sideCount;
+    }
+    
+    if (bottom)
+    {
+        result = Vec2(0.0f, -1.0f);
+        ++sideCount;
+    }
+    
+    
+    SDL_assert(!(left && right) || !(top && bottom));
+    SDL_assert(sideCount < 3);
+    
+    return sideCount > 1 ? Vec2(0.0f, 0.0f) : result;
 }
 
 float getPaddleSize(Uint32 paddlePowerUps)
@@ -1233,6 +1245,8 @@ void updateEntities(GameState *gameState)
                             {
                                 norm = (collider->desiredP - testLerpP).normalize();
                             }
+                            printf("x: %f y: %f \n", norm.x, norm.y);
+
                             collider->oldP = collider->desiredP;
                             collider->desiredP = entityLerpP + (remainingDistance * norm);
                             collider->desiredDp = reflect(entity->dp, norm);
