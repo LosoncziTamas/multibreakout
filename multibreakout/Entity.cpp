@@ -715,21 +715,20 @@ void addTestLevels(GameState *gameState)
     float brickDim = 30.0f;
     Vec2 gameAreaTopLeft = Vec2(160.0f, 450.0f);
     
-    //TODO: fix calc error here
-    for (Uint32 rowIndex = 1; rowIndex <= rows; ++rowIndex)
+    for (Uint32 rowIndex = 0; rowIndex < rows; ++rowIndex)
     {
-        for (Uint32 columnIndex = 1; columnIndex <= columns; ++columnIndex)
+        for (Uint32 columnIndex = 0; columnIndex < columns; ++columnIndex)
         {
-            
-            LevelComponent* levelComponent = level->components + columns * rowIndex + columnIndex;
+            Uint32 index = columns * rowIndex + columnIndex;
+            LevelComponent* levelComponent = level->components + index;
+            level->componentCount++;
             
             levelComponent->dim = Vec2(brickDim, brickDim);
             levelComponent->hitPoints = 1;
             levelComponent->powerUp = POWER_UP_NONE;
-            levelComponent->pos = Vec2(gameAreaTopLeft.x + (brickDim * 0.5f) + (columnIndex - 1) * brickDim,
-                                       gameAreaTopLeft.y - (brickDim * 0.5f) - (rowIndex - 1) * brickDim);
+            levelComponent->pos = Vec2(gameAreaTopLeft.x + (brickDim * 0.5f) + (columnIndex) * brickDim,
+                                       gameAreaTopLeft.y - (brickDim * 0.5f) - (rowIndex) * brickDim);
             
-            level->componentCount++;
         }
     }
     
