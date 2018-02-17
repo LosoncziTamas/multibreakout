@@ -32,8 +32,7 @@ Vec2& Vec2::operator*=(float rhs) {
 }
 
 Vec2& Vec2::normalize() {
-    float len = length();
-    //TODO: consider some other way to check
+    float len = length();    //TODO: consider some other way to check
     if (len != 0.0f) {
         x = x / len;
         y = y / len;

@@ -8,8 +8,10 @@ void* pushSize(Memory *memory, size_t size) {
     return result;
 }
 
-void clearSize(size_t size, void *ptr)
+void clearSize(Memory *memory, size_t size, void *ptr)
 {
+    memory->used -= size;
+
     Uint8 *byte = (Uint8 *)ptr;
     while(size--)
     {

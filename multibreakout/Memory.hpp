@@ -8,7 +8,7 @@
 #define pushArray(memory, count, type) (type *)pushSize(memory, (count)*sizeof(type))
 
 #define clearStruct(instance) clearSize(sizeof(instance), &(instance))
-#define clearArray(instance, count, type) clearSize((count) * sizeof(type), (instance))
+#define clearArray(memory, instance, count, type) clearSize(memory, (count) * sizeof(type), (instance))
 
 struct Memory
 {
@@ -19,6 +19,6 @@ struct Memory
 
 void* pushSize(Memory *memory, size_t size);
 
-void clearSize(size_t size, void *ptr);
+void clearSize(Memory *memory, size_t size, void *ptr);
 
 #endif

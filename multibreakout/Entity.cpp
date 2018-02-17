@@ -65,6 +65,19 @@ void addWalls(GameState *gameState)
     
     setFlag(bottomWall, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
     
+    Entity* obstacle = gameState->entities + gameState->entityCount++;
+    
+    float obstacleDim = 30.0f;
+    
+    obstacle->storageIndex = gameState->entityCount - 1;
+    obstacle->w = obstacleDim;
+    obstacle->h = obstacleDim;
+    obstacle->p = Vec2(300 + obstacleDim * 0.5f, 150 + obstacleDim * 0.5f);
+    obstacle->dp = Vec2();
+    obstacle->type = ENTITY_TYPE_OBSTACLE;
+    
+    setFlag(obstacle, ENTITY_FLAG_STATIC|ENTITY_FLAG_COLLIDES);
+    
 #if 0
     
     Entity* obstacle = gameState->entities + gameState->entityCount++;
@@ -471,7 +484,7 @@ void updateBricks(GameState* gameState)
         if (brickLogic->collidedBall)
         {
             brickLogic->collidedBall->powerUp = brickLogic->powerUp;
-            printf("Ball powerup updated \n");
+            //printf("Ball powerup updated \n");
             
             if (--brickLogic->hitPoints == 0)
             {
@@ -479,7 +492,7 @@ void updateBricks(GameState* gameState)
                 SDL_assert(brickEntity->type == ENTITY_TYPE_BRICK);
                 clearFlag(brickEntity, ENTITY_FLAG_COLLIDES);
                 gameState->activeBrickCount--;
-                printf("destroy brick \n");
+                //printf("destroy brick \n");
             }
             brickLogic->collidedBall = 0;
         }
@@ -701,14 +714,11 @@ void addEntities(GameState *gameState)
     setFlag(projectile, ENTITY_FLAG_COLLIDES);
 }
 
-void addTestLevels(GameState *gameState)
+void addTestLevel(GameState *gameState, Uint32 columns, Uint32 rows)
 {
     SDL_assert(SDL_arraysize(gameState->levels) > gameState->levelCount);
     
     Level* level = gameState->levels + gameState->levelCount++;
-    
-    Uint32 columns = 16;
-    Uint32 rows = 4;
     
     SDL_assert(SDL_arraysize(level->components) >= columns * rows);
     
@@ -776,33 +786,39 @@ void setStaticCollider(CollisionSpecs* collider, Vec2 center)
 
 Vec2 getSurfaceNorm(Vec2 vector, Rectangle* surfaceRect)
 {
+    float leftDiff = surfaceRect->bottomLeft.x - vector.x;
+    float rightDiff = vector.x - surfaceRect->topRight.x;
+    float topDiff = vector.y - surfaceRect->topRight.y;
+    float bottomDiff = surfaceRect->bottomLeft.y - vector.y;
+    
     float left = vector.x <= surfaceRect->bottomLeft.x;
     float right = vector.x >= surfaceRect->topRight.x;
     float top = vector.y >= surfaceRect->topRight.y;
     float bottom = vector.y <= surfaceRect->bottomLeft.y;
     
+    
     Vec2 result;
     Uint32 sideCount = 0;
     
-    if (right)
+    if (rightDiff > 0)
     {
         result = Vec2(1.0f, 0.0f);
         ++sideCount;
     }
     
-    if (left)
+    if (leftDiff > 0)
     {
         result = Vec2(-1.0f, 0.0f);
         ++sideCount;
     }
     
-    if (top)
+    if (topDiff > 0)
     {
         result = Vec2(0.0f, 1.0f);
         ++sideCount;
     }
     
-    if (bottom)
+    if (bottomDiff > 0)
     {
         result = Vec2(0.0f, -1.0f);
         ++sideCount;
@@ -812,8 +828,82 @@ Vec2 getSurfaceNorm(Vec2 vector, Rectangle* surfaceRect)
     SDL_assert(!(left && right) || !(top && bottom));
     SDL_assert(sideCount < 3);
     
-    return sideCount > 1 ? Vec2(0.0f, 0.0f) : result;
+    return result;
 }
+
+Vec2 getSurfaceNormForBall(Vec2 vector, Vec2 dp, Rectangle* surfaceRect)
+{
+    float leftDiff = surfaceRect->bottomLeft.x - vector.x;
+    float rightDiff = vector.x - surfaceRect->topRight.x;
+    float topDiff = vector.y - surfaceRect->topRight.y;
+    float bottomDiff = surfaceRect->bottomLeft.y - vector.y;
+    
+    
+    float left = vector.x <= surfaceRect->bottomLeft.x;
+    float right = vector.x >= surfaceRect->topRight.x;
+    float top = vector.y >= surfaceRect->topRight.y;
+    float bottom = vector.y <= surfaceRect->bottomLeft.y;
+    
+    
+    float angleThreshold = 0.9f;
+    dp.normalize();
+    bool correctReflectionAngle = fabsf(dp.x) > angleThreshold || fabsf(dp.y) > angleThreshold;
+    
+    Vec2 result;
+    Uint32 sideCount = 0;
+    
+    if (rightDiff > 0)
+    {
+        result = Vec2(1.0f, 0.0f);
+        ++sideCount;
+    }
+    
+    if (leftDiff > 0)
+    {
+        result = Vec2(-1.0f, 0.0f);
+        ++sideCount;
+    }
+    
+    //TODO: fine tune corner reflection for critical cases
+    
+    if (topDiff > 0)
+    {
+        result = Vec2(0.0f, 1.0f);
+
+        if (rightDiff > 0.0f && correctReflectionAngle)
+        {
+            result = Vec2(0.707f, 0.707f);
+            
+            printf("dp x: %f dp y: %f \n\n", dp.x, dp.y);
+            printf("wallNorm x: %f wallNorm y: %f \n", result.x, result.y);
+        }
+        ++sideCount;
+    }
+    
+    if (bottomDiff > 0)
+    {
+        result = Vec2(0.0f, -1.0f);
+
+        if (rightDiff > 0 && correctReflectionAngle)
+        {
+            result = Vec2(0.707f, -0.707f);
+            
+            printf("dp x: %f dp y: %f \n\n", dp.x, dp.y);
+            printf("wallNorm x: %f wallNorm y: %f \n", result.x, result.y);
+        }
+        
+        ++sideCount;
+    }
+    
+    
+    SDL_assert(!(left && right) || !(top && bottom));
+    SDL_assert(sideCount < 3);
+    
+
+    
+    return result;
+}
+
 
 float getPaddleSize(Uint32 paddlePowerUps)
 {
@@ -923,7 +1013,10 @@ void updateEntities(GameState *gameState)
 {
     if (!initialized)
     {
-        addTestLevels(gameState);
+        addTestLevel(gameState, 15, 3);
+        addTestLevel(gameState, 1, 2);
+        addTestLevel(gameState, 3, 2);
+
         addEntities(gameState);
         buildLevel(gameState);
         addWalls(gameState);
@@ -936,20 +1029,29 @@ void updateEntities(GameState *gameState)
     
     if (gameState->activeBrickCount == 0)
     {
-        clearArray(gameState->entities, gameState->entityCount, Entity);
-        gameState->entityCount = 0;
-        clearArray(gameState->paddles, gameState->paddleCount, PaddleLogic);
-        gameState->paddleCount = 0;
-        clearArray(gameState->enemyControls, gameState->enemyControlCount, EnemyControl);
-        gameState->enemyControlCount = 0;
-        clearArray(gameState->balls, gameState->ballCount, BallLogic);
-        gameState->ballCount = 0;
-        clearArray(gameState->bricks, gameState->brickCount, BrickLogic);
-        gameState->brickCount = 0;
-        
-        addEntities(gameState);
-        addWalls(gameState);
-        
+        ++gameState->currentLevelIndex;
+        if (gameState->levelCount == gameState->currentLevelIndex)
+        {
+            printf("Game over\n");
+            gameState->activeBrickCount = -1;
+        }
+        else
+        {
+            clearArray(&gameState->gameMemory, gameState->entities, gameState->entityCount, Entity);
+            gameState->entityCount = 0;
+            clearArray(&gameState->gameMemory, gameState->paddles, gameState->paddleCount, PaddleLogic);
+            gameState->paddleCount = 0;
+            clearArray(&gameState->gameMemory, gameState->enemyControls, gameState->enemyControlCount, EnemyControl);
+            gameState->enemyControlCount = 0;
+            clearArray(&gameState->gameMemory, gameState->balls, gameState->ballCount, BallLogic);
+            gameState->ballCount = 0;
+            clearArray(&gameState->gameMemory, gameState->bricks, gameState->brickCount, BrickLogic);
+            gameState->brickCount = 0;
+            
+            addEntities(gameState);
+            buildLevel(gameState);
+            addWalls(gameState);
+        }
     }
     
     SDL_SetRenderDrawColor(gameState->renderer, 130, 189, 240, 0);
@@ -1169,11 +1271,8 @@ void updateEntities(GameState *gameState)
                     }
                     else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_OBSTACLE)
                     {
-                        Vec2 wallNorm = getSurfaceNorm(collider->desiredP, &testRect);
-                        if (wallNorm.length() == 0)
-                        {
-                            wallNorm = (entity->p - collider->desiredP).normalize();
-                        }
+                        Vec2 wallNorm = getSurfaceNormForBall(collider->desiredP, collider->desiredDp, &testRect);
+
                         collider->oldP = collider->desiredP;
                         collider->desiredP = entityLerpP + (remainingDistance * wallNorm);
                         collider->desiredDp = reflect(entity->dp, wallNorm);
@@ -1241,11 +1340,15 @@ void updateEntities(GameState *gameState)
                         if (circleRectIntersect(collider->desiredP, entity->w * 0.5f, testLerpP, test->w, test->h))
                         {
                             Vec2 norm = getSurfaceNorm(collider->desiredP, &testRect);
-                            if (norm.length() == 0)
+                            /*if (norm.length() == 0)
                             {
-                                norm = (collider->desiredP - testLerpP).normalize();
-                            }
-                            printf("x: %f y: %f \n", norm.x, norm.y);
+                                //SDL_TriggerBreakpoint();
+                                Vec2 velNorm(collider->desiredDp);
+                                
+                                norm = velNorm.normalize();
+                            }*/
+
+                            //printf("x: %f y: %f \n", norm.x, norm.y);
 
                             collider->oldP = collider->desiredP;
                             collider->desiredP = entityLerpP + (remainingDistance * norm);
@@ -1316,8 +1419,8 @@ void updateEntities(GameState *gameState)
         }
     }
     
-    clearArray(colliders, gameState->entityCount, CollisionSpecs);
-    clearArray(movements, gameState->entityCount, MovementSpecs);
+    clearArray(&gameState->gameMemory, movements, gameState->entityCount, MovementSpecs);
+    clearArray(&gameState->gameMemory, colliders, gameState->entityCount, CollisionSpecs);
     
     SDL_RenderPresent(gameState->renderer);
 }
