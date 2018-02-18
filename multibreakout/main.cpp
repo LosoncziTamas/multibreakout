@@ -6,13 +6,13 @@
 #include "MultiBreakout.hpp"
 #include "GameState.hpp"
 
-#define HOTLOAD 0
+#define HOTLOAD 1
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 480;
 const float TARGET_UPDATE_HZ = 30.0f;
 
-typedef void (*gameUpdateFn)(GameState &gameState);
+typedef void (*gameUpdateFn)(GameState *gameState);
 
 struct GameCode {
     void *dll;
@@ -144,7 +144,7 @@ int main(void) {
             gameCode.update(gameState);
         }
 #else
-        gameUpdate(*gameState);
+        gameUpdate(gameState);
 #endif
         
         startCounter = end_counter;

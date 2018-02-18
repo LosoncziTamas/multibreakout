@@ -2,8 +2,6 @@
 #include "GameState.hpp"
 #include "Physics.hpp"
 
-static bool initialized;
-
 bool isSet(Entity *entity, Uint32 flag)
 {
     return entity->flags & flag;
@@ -1011,7 +1009,7 @@ void drawCircle(SDL_Renderer* renderer, Entity* entity)
 
 void updateEntities(GameState *gameState)
 {
-    if (!initialized)
+    if (!gameState->worldInitialized)
     {
         addTestLevel(gameState, 15, 3);
         addTestLevel(gameState, 1, 2);
@@ -1020,7 +1018,7 @@ void updateEntities(GameState *gameState)
         addEntities(gameState);
         buildLevel(gameState);
         addWalls(gameState);
-        initialized = true;
+        gameState->worldInitialized = true;
     }
     
     updateBricks(gameState);
@@ -1033,6 +1031,7 @@ void updateEntities(GameState *gameState)
         if (gameState->levelCount == gameState->currentLevelIndex)
         {
             printf("Game over\n");
+            //TODO: Beware of unsigned int decrement
             gameState->activeBrickCount = -1;
         }
         else

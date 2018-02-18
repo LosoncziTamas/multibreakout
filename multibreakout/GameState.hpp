@@ -35,6 +35,8 @@ struct GameState {
     World world;
     Menu menu;
     
+    bool worldInitialized;
+    
     Entity entities[256];
     Uint32 entityCount;
     
