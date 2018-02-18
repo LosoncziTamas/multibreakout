@@ -784,124 +784,65 @@ void setStaticCollider(CollisionSpecs* collider, Vec2 center)
 
 Vec2 getSurfaceNorm(Vec2 vector, Rectangle* surfaceRect)
 {
-    float leftDiff = surfaceRect->bottomLeft.x - vector.x;
-    float rightDiff = vector.x - surfaceRect->topRight.x;
-    float topDiff = vector.y - surfaceRect->topRight.y;
-    float bottomDiff = surfaceRect->bottomLeft.y - vector.y;
-    
     float left = vector.x <= surfaceRect->bottomLeft.x;
     float right = vector.x >= surfaceRect->topRight.x;
     float top = vector.y >= surfaceRect->topRight.y;
     float bottom = vector.y <= surfaceRect->bottomLeft.y;
     
-    
     Vec2 result;
     Uint32 sideCount = 0;
     
-    if (rightDiff > 0)
+    if (right)
     {
         result = Vec2(1.0f, 0.0f);
         ++sideCount;
     }
     
-    if (leftDiff > 0)
+    if (left)
     {
         result = Vec2(-1.0f, 0.0f);
         ++sideCount;
     }
     
-    if (topDiff > 0)
+    if (top)
     {
         result = Vec2(0.0f, 1.0f);
         ++sideCount;
     }
     
-    if (bottomDiff > 0)
+    if (bottom)
     {
         result = Vec2(0.0f, -1.0f);
         ++sideCount;
     }
     
-    
     SDL_assert(!(left && right) || !(top && bottom));
     SDL_assert(sideCount < 3);
     
-    return result;
-}
-
-Vec2 getSurfaceNormForBall(Vec2 vector, Vec2 dp, Rectangle* surfaceRect)
-{
-    float leftDiff = surfaceRect->bottomLeft.x - vector.x;
-    float rightDiff = vector.x - surfaceRect->topRight.x;
-    float topDiff = vector.y - surfaceRect->topRight.y;
-    float bottomDiff = surfaceRect->bottomLeft.y - vector.y;
-    
-    
-    float left = vector.x <= surfaceRect->bottomLeft.x;
-    float right = vector.x >= surfaceRect->topRight.x;
-    float top = vector.y >= surfaceRect->topRight.y;
-    float bottom = vector.y <= surfaceRect->bottomLeft.y;
-    
-    
-    float angleThreshold = 0.9f;
-    dp.normalize();
-    bool correctReflectionAngle = fabsf(dp.x) > angleThreshold || fabsf(dp.y) > angleThreshold;
-    
-    Vec2 result;
-    Uint32 sideCount = 0;
-    
-    if (rightDiff > 0)
+    if (top && right)
     {
-        result = Vec2(1.0f, 0.0f);
-        ++sideCount;
+        result = (vector - surfaceRect->topRight).normalize();
     }
     
-    if (leftDiff > 0)
+    if (bottom && right)
     {
-        result = Vec2(-1.0f, 0.0f);
-        ++sideCount;
+        Vec2 bottomRight(surfaceRect->topRight.x, surfaceRect->bottomLeft.y);
+        result = (vector - bottomRight).normalize();
     }
     
-    //TODO: fine tune corner reflection for critical cases
-    
-    if (topDiff > 0)
+    if (top && left)
     {
-        result = Vec2(0.0f, 1.0f);
-
-        if (rightDiff > 0.0f && correctReflectionAngle)
-        {
-            result = Vec2(0.707f, 0.707f);
-            
-            printf("dp x: %f dp y: %f \n\n", dp.x, dp.y);
-            printf("wallNorm x: %f wallNorm y: %f \n", result.x, result.y);
-        }
-        ++sideCount;
+        Vec2 topLeft(surfaceRect->bottomLeft.x, surfaceRect->topRight.y);
+        result = (vector - topLeft).normalize();
     }
     
-    if (bottomDiff > 0)
+    if (bottom && left)
     {
-        result = Vec2(0.0f, -1.0f);
-
-        if (rightDiff > 0 && correctReflectionAngle)
-        {
-            result = Vec2(0.707f, -0.707f);
-            
-            printf("dp x: %f dp y: %f \n\n", dp.x, dp.y);
-            printf("wallNorm x: %f wallNorm y: %f \n", result.x, result.y);
-        }
-        
-        ++sideCount;
+        result = (vector - surfaceRect->bottomLeft).normalize();
     }
-    
-    
-    SDL_assert(!(left && right) || !(top && bottom));
-    SDL_assert(sideCount < 3);
-    
-
     
     return result;
 }
-
 
 float getPaddleSize(Uint32 paddlePowerUps)
 {
@@ -1270,8 +1211,7 @@ void updateEntities(GameState *gameState)
                     }
                     else if (entity->type == ENTITY_TYPE_BALL && test->type == ENTITY_TYPE_OBSTACLE)
                     {
-                        Vec2 wallNorm = getSurfaceNormForBall(collider->desiredP, collider->desiredDp, &testRect);
-
+                        Vec2 wallNorm = getSurfaceNorm(collider->desiredP, &testRect);
                         collider->oldP = collider->desiredP;
                         collider->desiredP = entityLerpP + (remainingDistance * wallNorm);
                         collider->desiredDp = reflect(entity->dp, wallNorm);
@@ -1339,16 +1279,6 @@ void updateEntities(GameState *gameState)
                         if (circleRectIntersect(collider->desiredP, entity->w * 0.5f, testLerpP, test->w, test->h))
                         {
                             Vec2 norm = getSurfaceNorm(collider->desiredP, &testRect);
-                            /*if (norm.length() == 0)
-                            {
-                                //SDL_TriggerBreakpoint();
-                                Vec2 velNorm(collider->desiredDp);
-                                
-                                norm = velNorm.normalize();
-                            }*/
-
-                            //printf("x: %f y: %f \n", norm.x, norm.y);
-
                             collider->oldP = collider->desiredP;
                             collider->desiredP = entityLerpP + (remainingDistance * norm);
                             collider->desiredDp = reflect(entity->dp, norm);
