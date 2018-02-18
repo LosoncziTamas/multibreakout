@@ -199,6 +199,8 @@ int main(void)
         const Uint8 *state = SDL_GetKeyboardState(NULL);
         
         gameState->input.record = state[SDL_SCANCODE_R];
+        gameState->input.replay = state[SDL_SCANCODE_P];
+
         
         if (gameState->input.record && !gameState->oldInput.record)
         {
@@ -210,6 +212,18 @@ int main(void)
             {
                 stopRecordingInput(&platformState);
                 startInputPlayback(&platformState);
+            }
+        }
+        
+        if (gameState->input.replay && !gameState->oldInput.replay)
+        {
+            if (!platformState.replaying)
+            {
+                startInputPlayback(&platformState);
+            }
+            else
+            {
+                stopInputPlayback(&platformState);
             }
         }
         

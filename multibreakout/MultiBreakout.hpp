@@ -17,10 +17,11 @@ struct GameInput
     
     union
     {
-        bool buttons[7];
+        bool buttons[8];
         struct
         {
             bool record;
+            bool replay;
             bool space;
             bool up;
             bool down;
