@@ -1,51 +1,23 @@
 #include "multibreakout.h"
 
-Vec2 operator*(float real, Vec2 vec)
-{
-    Vec2 result;
-
-    result.x = real * vec.x;
-    result.y = real * vec.y;
-
-    return result;
-}
-
-Vec2 operator*(Vec2 vec, float real)
-{
-    Vec2 result = real * vec;
-
-    return result;
-}
-
-Vec2 vec2(float x, float y)
-{
-    Vec2 result;
-
-    result.x = x;
-    result.y = y;
-
-    return result;
-}
-
 void setFlag(Entity *entity, Uint32 flag)
 {
     entity->flags |= flag;
 }
 
-Entity* addPaddleEntity(GameState* gameState, Vec2 pos)
+Entity *addPaddleEntity(GameState *gameState, Vec2 pos)
 {
     SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
-    
-    Entity* paddle = gameState->entities + gameState->entityCount++;
+
+    Entity *paddle = gameState->entities + gameState->entityCount++;
     paddle->storageIndex = gameState->entityCount - 1;
     paddle->p = pos;
-    paddle->w = 90.0f;
-    paddle->h = 25.0f;
+    paddle->dimensions = vec2(3.0f, 1.0f);
     paddle->dp = Vec2();
     paddle->type = ENTITY_TYPE_PADDLE;
-    
+
     setFlag(paddle, ENTITY_FLAG_COLLIDES);
-    
+
     return paddle;
 }
 
@@ -60,7 +32,9 @@ void addEntities(GameState *gameState)
 
     float paddleHeight = 25.0f;
 
-    Entity *bottomPaddleEntity = addPaddleEntity(gameState, vec2(800 * 0.5f, paddleHeight * 0.5f + 1));
+    Vec2 paddlePos = vec2((gameState->tilesPerWidth / 2) * gameState->tileSideInMeters, gameState->tileSideInMeters * 0.5f);
+
+    Entity *bottomPaddleEntity = addPaddleEntity(gameState, paddlePos);
     //PaddleLogic *bottomPaddleLogic = addPaddleLogic(bottomPaddleEntity, gameState, PADDLE_FLAG_ORIENTATION_BOTTOM | PADDLE_FLAG_PLAYER_CONTROLLED);
 
     /*Entity *bottomBallEntity = addBallEntity(gameState, Vec2());
@@ -69,15 +43,30 @@ void addEntities(GameState *gameState)
     anchorBallToPaddle(bottomBallEntity, bottomPaddleEntity, bottomBallLogic, bottomPaddleLogic);*/
 }
 
-void drawEntityBounds(SDL_Renderer* renderer, Entity* entity, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
-    SDL_Rect rect;
-    rect.w = entity->w;
-    rect.h = entity->h;
-    rect.x = entity->p.x - (entity->w * 0.5f);
-    rect.y = 480 - (entity->p.y + entity->h * 0.5f);
+void beginDraw(SDL_Renderer *renderer)
+{
+    SDL_SetRenderDrawColor(renderer, 130, 189, 240, 0);
+    SDL_RenderClear(renderer);
+}
+
+void endDraw(SDL_Renderer *renderer)
+{
+    SDL_RenderPresent(renderer);
+}
+
+void drawRect(SDL_Renderer *renderer, GameState *gameState, Rect rectangle)
+{
+    SDL_Rect sdlRect;
+
+    Vec2 rectDimInPixels = getRectangleDim(rectangle) * gameState->metersToPixels;
+
+    sdlRect.w = rectDimInPixels.x;
+    sdlRect.h = rectDimInPixels.y;
+    sdlRect.x = rectangle.bottomLeftCorner.x * gameState->metersToPixels;
+    sdlRect.y = gameState->screenDimensions.y - (rectangle.topRightCorner.y * gameState->metersToPixels);
     
-    SDL_SetRenderDrawColor(renderer, r, g, b, a);
-    SDL_RenderDrawRect(renderer, &rect);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawRect(renderer, &sdlRect);
 }
 
 extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *GameInput, SDL_Renderer *renderer)
@@ -91,7 +80,20 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *GameInput, SDL_Ren
         //load assets
 
         //create world
+        gameState->tileSideInMeters = 0.5f;
+        gameState->worldDimensions = vec2(15.0f, 15.0f);
+        gameState->tilesPerWidth = gameState->worldDimensions.x / gameState->tileSideInMeters;
+        gameState->tilesPerHeight = gameState->worldDimensions.y / gameState->tileSideInMeters;
 
+        gameState->tileSideInPixels = 16;
+        gameState->metersToPixels = SDL_static_cast(float, gameState->tileSideInPixels) / gameState->tileSideInMeters;
+        
+        int screenWidth, screenHeight;
+        SDL_GetRendererOutputSize(renderer, &screenWidth, &screenHeight);
+
+        gameState->screenDimensions = vec2(screenWidth, screenHeight);
+        gameState->worldInScreenSpace = rectFromDimAndCenter(gameState->worldDimensions * gameState->metersToPixels, vec2(screenWidth * 0.5f, screenHeight * 0.5f));
+        
         //add entities
         addEntities(gameState);
 
@@ -102,10 +104,11 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *GameInput, SDL_Ren
 
     //update entities
 
-    SDL_SetRenderDrawColor(renderer, 130, 189, 240, 0);
-    SDL_RenderClear(renderer);
+    beginDraw(renderer);
 
-    drawEntityBounds(renderer, &gameState->entities[1], 255, 255, 255, 255);
+    Entity* paddle = &gameState->entities[1];
+    Rect paddleRect = rectFromDimAndCenter(paddle->dimensions, paddle->p);
+    drawRect(renderer, gameState, paddleRect);
 
-    SDL_RenderPresent(renderer);
+    endDraw(renderer);
 }

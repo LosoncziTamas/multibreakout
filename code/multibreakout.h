@@ -4,14 +4,9 @@
 #include <SDL2/SDL.h>
 
 #include "sdl_multibreakout.h"
+#include "multibreakout_math.h"
 
 extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *GameInput, SDL_Renderer *renderer);
-
-struct Vec2
-{
-    float x;
-    float y;
-};
 
 enum EntityType
 {
@@ -34,8 +29,7 @@ struct Entity
     Uint32 storageIndex;
     Vec2 p;
     Vec2 dp;
-    float w;
-    float h;
+    Vec2 dimensions;
     EntityType type;
     Uint32 flags;
 };
@@ -44,6 +38,16 @@ struct GameState
 {
     Entity entities[256];
     Uint32 entityCount;
+
+    Vec2 worldDimensions;
+    float tileSideInMeters;
+    Uint32 tilesPerWidth;
+    Uint32 tilesPerHeight;
+
+    Vec2 screenDimensions;
+    Rect worldInScreenSpace;
+    Uint32 tileSideInPixels;
+    float metersToPixels;
 };
 
 

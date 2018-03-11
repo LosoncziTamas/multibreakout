@@ -8,6 +8,14 @@
 	{
 		"cppcheck.lintingEnabled": true,
 		"cppcheck.enable": true,
-		"cppcheck.showStatusBarItem" : true
+		"cppcheck.showStatusBarItem": true,
+		"files.associations": {
+			"__split_buffer": "cpp",
+			"atomic": "cpp",
+			"ios": "cpp",
+			"string": "cpp",
+			"system_error": "cpp",
+			"vector": "cpp"
+		}
 	}
 }
