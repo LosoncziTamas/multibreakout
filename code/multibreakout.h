@@ -4,40 +4,18 @@
 #include <SDL2/SDL.h>
 
 #include "sdl_multibreakout.h"
+#include "multibreakout_entity.h"
 #include "multibreakout_math.h"
 
 extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *GameInput, SDL_Renderer *renderer);
-
-enum EntityType
-{
-    ENTITY_TYPE_NULL,
-    ENTITY_TYPE_BALL,
-    ENTITY_TYPE_PADDLE,
-    ENTITY_TYPE_BRICK,
-    ENTITY_TYPE_OBSTACLE,
-    ENTITY_TYPE_PROJECTILE
-};
-
-enum EntityFlags
-{
-    ENTITY_FLAG_COLLIDES = (1 << 0),
-    ENTITY_FLAG_STATIC = (1 << 1)
-};
-
-struct Entity
-{
-    Uint32 storageIndex;
-    Vec2 p;
-    Vec2 dp;
-    Vec2 dimensions;
-    EntityType type;
-    Uint32 flags;
-};
 
 struct GameState
 {
     Entity entities[256];
     Uint32 entityCount;
+
+    PaddleLogic paddles[4];
+    Uint32 paddleCount;
 
     Vec2 worldDimensions;
     float tileSideInMeters;

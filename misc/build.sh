@@ -6,7 +6,7 @@ pushd ./build
 CommonFlags="-Wall -Werror -Wno-write-strings -Wno-unused-variable -Wno-sign-compare -std=gnu++11 -fno-rtti -fno-exceptions"
 
 # Build a 64-bit version
-c++ $CommonFlags -o multibreakout.x86_64 ../code/sdl_multibreakout.cpp ../code/multibreakout.cpp ../code/multibreakout_math.cpp -I ./ -l SDL2 -g
+c++ $CommonFlags -o multibreakout.x86_64 ../code/sdl_multibreakout.cpp ../code/multibreakout.cpp ../code/multibreakout_math.cpp ../code/multibreakout_entity.cpp -I ./ -l SDL2 -g
 
 popd
 
