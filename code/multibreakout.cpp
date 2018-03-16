@@ -1,31 +1,14 @@
 #include "multibreakout.h"
 
-Entity *addPaddleEntity(GameState *gameState, Vec2 pos)
-{
-    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
-
-    Entity *paddle = gameState->entities + gameState->entityCount++;
-    paddle->storageIndex = gameState->entityCount - 1;
-    paddle->p = pos;
-    paddle->dimensions = vec2(1.5f, 0.5f);
-    paddle->dp = Vec2();
-    paddle->type = ENTITY_TYPE_PADDLE;
-
-    setFlag(paddle, ENTITY_FLAG_COLLIDES);
-
-    return paddle;
-}
-
-PaddleLogic* addPaddleLogic(Entity* paddleEntity, GameState* gameState, Uint32 paddleFlags)
+PaddleLogic *addPaddleLogic(Entity *paddleEntity, MemoryPartition *memoryPartition, Uint32 paddleFlags)
 {
     SDL_assert(paddleEntity->type == ENTITY_TYPE_PADDLE);
-    SDL_assert(SDL_arraysize(gameState->paddles) > gameState->paddleCount);
-    
-    PaddleLogic* paddleLogic = gameState->paddles + gameState->paddleCount++;
+
+    PaddleLogic *paddleLogic = pushStruct(memoryPartition, PaddleLogic);
     paddleLogic->entityIndex = paddleEntity->storageIndex;
     paddleLogic->flags = paddleFlags;
-    
-    bool swapDimensions = paddleLogic->flags & (PADDLE_FLAG_ORIENTATION_LEFT|PADDLE_FLAG_ORIENTATION_RIGHT);
+
+    bool swapDimensions = paddleLogic->flags & (PADDLE_FLAG_ORIENTATION_LEFT | PADDLE_FLAG_ORIENTATION_RIGHT);
     if (swapDimensions)
     {
         float tmp = paddleEntity->dimensions.y;
@@ -63,31 +46,32 @@ PaddleLogic* addPaddleLogic(Entity* paddleEntity, GameState* gameState, Uint32 p
         
         enemyControl->dangerZone = rect;
     }*/
-    
+
     return paddleLogic;
 }
 
-PaddleLogic* getPaddleLogic(GameState* gameState, Uint32 entityIndex)
+Entity *addPaddleEntity(GameState *gameState, Vec2 pos)
 {
-    SDL_assert(gameState->entities[entityIndex].type == ENTITY_TYPE_PADDLE);
-    
-    PaddleLogic* paddle = 0;
-    
-    for (Uint32 paddleIndex = 0; paddleIndex < gameState->paddleCount; ++paddleIndex)
-    {
-        paddle = gameState->paddles + paddleIndex;
-        if (paddle->entityIndex == entityIndex)
-        {
-            break;
-        }
-    }
-    
+    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
+
+    Entity *paddle = gameState->entities + gameState->entityCount++;
+    paddle->storageIndex = gameState->entityCount - 1;
+    paddle->p = pos;
+    paddle->dimensions = vec2(1.5f, 0.5f);
+    paddle->dp = Vec2();
+    paddle->type = ENTITY_TYPE_PADDLE;
+    paddle->paddleLogic = addPaddleLogic(paddle, 
+        &gameState->entityMemory, 
+        PADDLE_FLAG_ORIENTATION_BOTTOM | PADDLE_FLAG_PLAYER_CONTROLLED);
+
+    setFlag(paddle, ENTITY_FLAG_COLLIDES);
+
     return paddle;
 }
 
 void updatePaddles(GameInput *input, GameState *gameState)
 {
-    for (Uint32 paddleIndex = 0; paddleIndex < gameState->paddleCount; ++paddleIndex)
+    /*for (Uint32 paddleIndex = 0; paddleIndex < gameState->paddleCount; ++paddleIndex)
     {
         PaddleLogic* paddle = gameState->paddles + paddleIndex;
         if (paddle->flags & PADDLE_FLAG_PLAYER_CONTROLLED)
@@ -114,8 +98,9 @@ void updatePaddles(GameInput *input, GameState *gameState)
             }
             
             paddle->releaseBall = input->space;
-        }
-        /*else
+        }*/
+
+    /*else
         {
             EnemyControl* enemyControl = getEnemyControl(gameState, paddleIndex);
             SDL_assert(enemyControl);
@@ -244,8 +229,8 @@ void updatePaddles(GameInput *input, GameState *gameState)
                 default:
                     break;
             }
-        }*/
-    }
+        }
+    }*/
 }
 
 void addEntities(GameState *gameState)
@@ -260,7 +245,6 @@ void addEntities(GameState *gameState)
     Vec2 paddlePos = vec2((gameState->tilesPerWidth / 2) * gameState->tileSideInMeters, gameState->tileSideInMeters * 0.5f);
 
     Entity *bottomPaddleEntity = addPaddleEntity(gameState, paddlePos);
-    PaddleLogic *bottomPaddleLogic = addPaddleLogic(bottomPaddleEntity, gameState, PADDLE_FLAG_ORIENTATION_BOTTOM | PADDLE_FLAG_PLAYER_CONTROLLED);
 
     /*Entity *bottomBallEntity = addBallEntity(gameState, Vec2());
     BallLogic *bottomBallLogic = addBallLogic(bottomBallEntity, gameState);
@@ -284,16 +268,22 @@ void drawRect(SDL_Renderer *renderer, GameState *gameState, Rect rectangle, Vec2
     SDL_Rect sdlRect;
 
     Vec2 rectDimInPixels = getRectangleDim(rectangle);
-    
+
     sdlRect.w = rectDimInPixels.x;
     sdlRect.h = rectDimInPixels.y;
 
     sdlRect.x = offset.x + rectangle.bottomLeftCorner.x;
     sdlRect.y = gameState->screenDimensions.y - (rectangle.topRightCorner.y + offset.y);
-   
+
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
     SDL_RenderDrawRect(renderer, &sdlRect);
 }
+
+/*
+        InitializeArena(&GameState->WorldArena, Memory->PermanentStorageSize - sizeof(game_state),
+                        (uint8 *)Memory->PermanentStorage + sizeof(game_state));
+
+*/
 
 extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Renderer *renderer)
 {
@@ -303,6 +293,11 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
 
     if (!gameMemory->initialized)
     {
+        //memory partitioning
+        initializeMemoryPartition(&gameState->entityMemory, 
+            gameMemory->permanentMemorySize - sizeof(GameState), 
+            (Uint8 *)gameMemory->permanentMemory + sizeof(GameState));
+            
         //load assets
 
         //create world
@@ -313,7 +308,7 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
 
         gameState->tileSideInPixels = 32;
         gameState->metersToPixels = SDL_static_cast(float, gameState->tileSideInPixels) / gameState->tileSideInMeters;
-        
+
         //create renderer
         int screenWidth, screenHeight;
         SDL_GetRendererOutputSize(renderer, &screenWidth, &screenHeight);
@@ -348,33 +343,35 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
         {
             case ENTITY_TYPE_PADDLE:
             {
-                PaddleLogic* paddle = getPaddleLogic(gameState, entityIndex);
-                SDL_assert(paddle);
-
-                if (paddle->flags & (PADDLE_FLAG_ORIENTATION_TOP|PADDLE_FLAG_ORIENTATION_BOTTOM))
+                PaddleLogic* paddle = entity->paddleLogic;
+                if (paddle)
                 {
-                    if (paddle->moveLeft)
+                    if (paddle->flags & (PADDLE_FLAG_ORIENTATION_TOP | PADDLE_FLAG_ORIENTATION_BOTTOM))
                     {
-                        //ddp.x = -1.0;
+                        if (paddle->moveLeft)
+                        {
+                            //ddp.x = -1.0;
+                        }
+                        else if (paddle->moveRight)
+                        {
+                            //ddp.x = 1.0;
+                        }
+                        //entity->w = getPaddleSize(paddle->powerUps);
                     }
-                    else if (paddle->moveRight)
-                    {
-                        //ddp.x = 1.0;
-                    }
-                    //entity->w = getPaddleSize(paddle->powerUps);
                 }
-            }
+                //SDL_assert(paddle);
+            } break;
             default:
             {
-
-            }
+                
+            } break;
         }
     }
 
     //rendering
     beginDraw(renderer);
 
-    Entity* paddle = &gameState->entities[1];
+    Entity *paddle = &gameState->entities[1];
     Rect paddleRect = rectFromDimAndCenter(paddle->dimensions, paddle->p);
     paddleRect.bottomLeftCorner = paddleRect.bottomLeftCorner * gameState->metersToPixels;
     paddleRect.topRightCorner = paddleRect.topRightCorner * gameState->metersToPixels;
@@ -391,8 +388,8 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
             float offsetX = tileDims.x * 0.5f;
             float offsetY = tileDims.y * 0.5f;
 
-            Rect tile = rectFromDimAndCenter(tileDims, 
-                vec2(offsetX + (tileDims.x * horizontalTileIndex), offsetY + (tileDims.y * verticalTileIndex)));
+            Rect tile = rectFromDimAndCenter(tileDims,
+                                             vec2(offsetX + (tileDims.x * horizontalTileIndex), offsetY + (tileDims.y * verticalTileIndex)));
 
             drawRect(renderer, gameState, tile, gameState->worldInScreenSpace.bottomLeftCorner, 255, 255, 255, 31);
         }

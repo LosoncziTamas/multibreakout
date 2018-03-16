@@ -21,16 +21,7 @@ enum EntityFlags
     ENTITY_FLAG_STATIC = (1 << 1)
 };
 
-struct Entity
-{
-    Uint32 storageIndex;
-    Vec2 p;
-    Vec2 dp;
-    Vec2 dimensions;
-    EntityType type;
-    Uint32 flags;
-};
-
+struct Entity;
 struct PaddleLogic
 {
     Uint32 entityIndex;
@@ -40,6 +31,18 @@ struct PaddleLogic
     bool moveRight;
     bool releaseBall;
     Entity* ball;
+};
+
+struct Entity
+{
+    Uint32 storageIndex;
+    Vec2 p;
+    Vec2 dp;
+    Vec2 dimensions;
+    EntityType type;
+    Uint32 flags;
+
+    PaddleLogic* paddleLogic;
 };
 
 enum PaddleFlags
