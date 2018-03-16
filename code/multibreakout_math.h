@@ -18,10 +18,13 @@ Rect rectFromDimAndCenter(Vec2 dim, Vec2 center);
 Rect addRadiusToRect(Rect rect, Vec2 radius);
 Vec2 getRectangleDim(Rect rect);
 
+float square(float x);
+
 Vec2 operator*(float real, Vec2 vec);
 Vec2 operator*(Vec2 vec, float real);
 Vec2 operator+(Vec2 lhs, Vec2 rhs);
 Vec2 operator-(Vec2 lhs, Vec2 rhs);
-
+Vec2 &operator*=(Vec2 &vec, float real);
+Vec2 &operator+=(Vec2 &lhs, Vec2 rhs);
 
 #endif

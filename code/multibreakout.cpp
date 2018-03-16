@@ -60,13 +60,47 @@ Entity *addPaddleEntity(GameState *gameState, Vec2 pos)
     paddle->dimensions = vec2(1.5f, 0.5f);
     paddle->dp = Vec2();
     paddle->type = ENTITY_TYPE_PADDLE;
-    paddle->paddleLogic = addPaddleLogic(paddle, 
-        &gameState->entityMemory, 
-        PADDLE_FLAG_ORIENTATION_BOTTOM | PADDLE_FLAG_PLAYER_CONTROLLED);
+    paddle->paddleLogic = addPaddleLogic(paddle,
+                                         &gameState->entityMemory,
+                                         PADDLE_FLAG_ORIENTATION_BOTTOM | PADDLE_FLAG_PLAYER_CONTROLLED);
 
     setFlag(paddle, ENTITY_FLAG_COLLIDES);
 
     return paddle;
+}
+
+void setPaddleInput(GameInput *input, Entity *paddleEntity)
+{
+    SDL_assert(paddleEntity->type == ENTITY_TYPE_PADDLE);
+    SDL_assert(paddleEntity->paddleLogic);
+
+    PaddleLogic *paddleLogic = paddleEntity->paddleLogic;
+
+    if (paddleLogic->flags & PADDLE_FLAG_PLAYER_CONTROLLED)
+    {
+        if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
+        {
+            paddleLogic->moveLeft = input->left;
+            paddleLogic->moveRight = input->right;
+        }
+        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_TOP)
+        {
+            paddleLogic->moveLeft = input->right;
+            paddleLogic->moveRight = input->left;
+        }
+        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+        {
+            paddleLogic->moveLeft = input->left;
+            paddleLogic->moveRight = input->right;
+        }
+        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+        {
+            paddleLogic->moveLeft = input->right;
+            paddleLogic->moveRight = input->left;
+        }
+
+        paddleLogic->releaseBall = input->space;
+    }
 }
 
 void updatePaddles(GameInput *input, GameState *gameState)
@@ -279,11 +313,19 @@ void drawRect(SDL_Renderer *renderer, GameState *gameState, Rect rectangle, Vec2
     SDL_RenderDrawRect(renderer, &sdlRect);
 }
 
-/*
-        InitializeArena(&GameState->WorldArena, Memory->PermanentStorageSize - sizeof(game_state),
-                        (uint8 *)Memory->PermanentStorage + sizeof(game_state));
+struct MovementSpecs
+{
+    float speed;
+    float drag;
+};
 
-*/
+struct CollisionSpecs
+{
+    Vec2 desiredP;
+    Vec2 desiredDp;
+    Vec2 oldP;
+    float deltaLength;
+};
 
 extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Renderer *renderer)
 {
@@ -294,10 +336,10 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
     if (!gameMemory->initialized)
     {
         //memory partitioning
-        initializeMemoryPartition(&gameState->entityMemory, 
-            gameMemory->permanentMemorySize - sizeof(GameState), 
-            (Uint8 *)gameMemory->permanentMemory + sizeof(GameState));
-            
+        initializeMemoryPartition(&gameState->entityMemory,
+                                  gameMemory->permanentMemorySize - sizeof(GameState),
+                                  (Uint8 *)gameMemory->permanentMemory + sizeof(GameState));
+
         //load assets
 
         //create world
@@ -334,37 +376,46 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
         Entity *entity = gameState->entities + entityIndex;
         SDL_assert(entity->storageIndex > 0);
 
-        /*
-        MovementSpecs* specs = movements + entityIndex;
-        Vec2 ddp;
-        */
+        MovementSpecs specs = {};
+        Vec2 ddp = vec2(0.0f, 0.0f);
 
         switch (entity->type)
         {
-            case ENTITY_TYPE_PADDLE:
+        case ENTITY_TYPE_PADDLE:
+        {
+            setPaddleInput(gameInput, entity);
+            if (entity->paddleLogic)
             {
-                PaddleLogic* paddle = entity->paddleLogic;
-                if (paddle)
+                if (entity->paddleLogic->flags & (PADDLE_FLAG_ORIENTATION_TOP | PADDLE_FLAG_ORIENTATION_BOTTOM))
                 {
-                    if (paddle->flags & (PADDLE_FLAG_ORIENTATION_TOP | PADDLE_FLAG_ORIENTATION_BOTTOM))
+                    if (entity->paddleLogic->moveLeft)
                     {
-                        if (paddle->moveLeft)
-                        {
-                            //ddp.x = -1.0;
-                        }
-                        else if (paddle->moveRight)
-                        {
-                            //ddp.x = 1.0;
-                        }
-                        //entity->w = getPaddleSize(paddle->powerUps);
+                        ddp.x = -1.0;
                     }
+                    else if (entity->paddleLogic->moveRight)
+                    {
+                        ddp.x = 1.0;
+                    }
+                    //entity->w = getPaddleSize(paddle->powerUps);
                 }
-                //SDL_assert(paddle);
-            } break;
-            default:
-            {
-                
-            } break;
+            }
+            //TODO: use proper physics constants
+            specs.drag = 2.0f;
+            specs.speed = 100.0f;
+            
+            ddp *= specs.speed;
+            ddp += -specs.drag * entity->dp;
+            
+            Vec2 movementDelta = (0.5f * ddp * square(gameInput->deltaTime) + entity->dp * gameInput->deltaTime);
+
+            entity->dp = ddp * gameInput->deltaTime + entity->dp;
+            entity->p += movementDelta; 
+        }
+        break;
+        default:
+        {
+        }
+        break;
         }
     }
 
