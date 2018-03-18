@@ -55,5 +55,7 @@ enum PaddleFlags
 };
 
 void setFlag(Entity *entity, Uint32 flag);
+bool isSet(Entity *entity, Uint32 flag);
+void clearFlag(Entity *entity, Uint32 flag);
 
 #endif

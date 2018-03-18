@@ -60,9 +60,10 @@ Entity *addPaddleEntity(GameState *gameState, Vec2 pos)
     paddle->dimensions = vec2(1.5f, 0.5f);
     paddle->dp = Vec2();
     paddle->type = ENTITY_TYPE_PADDLE;
-    paddle->paddleLogic = addPaddleLogic(paddle,
-                                         &gameState->entityMemory,
-                                         PADDLE_FLAG_ORIENTATION_BOTTOM | PADDLE_FLAG_PLAYER_CONTROLLED);
+    paddle->paddleLogic = addPaddleLogic(
+        paddle,
+        &gameState->entityMemory,
+        PADDLE_FLAG_ORIENTATION_BOTTOM | PADDLE_FLAG_PLAYER_CONTROLLED);
 
     setFlag(paddle, ENTITY_FLAG_COLLIDES);
 
@@ -267,6 +268,23 @@ void updatePaddles(GameInput *input, GameState *gameState)
     }*/
 }
 
+Entity *addObstacleEntity(GameState *gameState, Vec2 pos, Vec2 dimensions)
+{
+    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
+
+    Entity *obstacle = gameState->entities + gameState->entityCount++;
+
+    obstacle->storageIndex = gameState->entityCount - 1;
+    obstacle->p = pos;
+    obstacle->dimensions = dimensions;
+    obstacle->dp = Vec2();
+    obstacle->type = ENTITY_TYPE_OBSTACLE;
+
+    setFlag(obstacle, ENTITY_FLAG_STATIC | ENTITY_FLAG_COLLIDES);
+
+    return obstacle;
+}
+
 void addEntities(GameState *gameState)
 {
     Entity *nullEntity = gameState->entities + gameState->entityCount++;
@@ -276,14 +294,17 @@ void addEntities(GameState *gameState)
 
     SDL_assert(nullEntity->storageIndex == 0);
 
-    Vec2 paddlePos = vec2((gameState->tilesPerWidth / 2) * gameState->tileSideInMeters, gameState->tileSideInMeters * 0.5f);
+    float epsilon = 0.01f;
+    Vec2 paddlePos = vec2(
+        (gameState->tilesPerWidth / 2) * gameState->tileSideInMeters,
+        (gameState->tileSideInMeters * 1.5f) + epsilon);
 
     Entity *bottomPaddleEntity = addPaddleEntity(gameState, paddlePos);
 
-    /*Entity *bottomBallEntity = addBallEntity(gameState, Vec2());
-    BallLogic *bottomBallLogic = addBallLogic(bottomBallEntity, gameState);
-
-    anchorBallToPaddle(bottomBallEntity, bottomPaddleEntity, bottomBallLogic, bottomPaddleLogic);*/
+    addObstacleEntity(gameState, vec2(0.25f, 3.75f), vec2(0.5f, 7.5f));
+    addObstacleEntity(gameState, vec2(7.25f, 3.75f), vec2(0.5f, 7.5f));
+    addObstacleEntity(gameState, vec2(3.75f, 7.25f), vec2(7.5f, 0.5f));
+    addObstacleEntity(gameState, vec2(3.75f, 0.25f), vec2(7.5f, 0.5f));
 }
 
 void beginDraw(SDL_Renderer *renderer)
@@ -327,6 +348,90 @@ struct CollisionSpecs
     float deltaLength;
 };
 
+CollisionSpecs defaultCollisionSpecs(Vec2 pos)
+{
+    CollisionSpecs collisionSpecs = {};
+
+    collisionSpecs.desiredP = pos;
+    collisionSpecs.desiredDp = vec2(0.0f, 0.0f);
+    collisionSpecs.oldP = pos;
+    collisionSpecs.deltaLength = 0.0f;
+
+    return collisionSpecs;
+}
+
+MovementSpecs defaultMovementSpecs()
+{
+    MovementSpecs specs = {};
+
+    specs.speed = 0.0f;
+    specs.drag = 0.0f;
+
+    return specs;
+}
+
+Vec2 getSurfaceNorm(Vec2 vector, Rect surfaceRect)
+{
+    float left = vector.x <= surfaceRect.bottomLeftCorner.x;
+    float right = vector.x >= surfaceRect.topRightCorner.x;
+    float top = vector.y >= surfaceRect.topRightCorner.y;
+    float bottom = vector.y <= surfaceRect.bottomLeftCorner.y;
+    
+    Vec2 result;
+    Uint32 sideCount = 0;
+    
+    if (right)
+    {
+        result = vec2(1.0f, 0.0f);
+        ++sideCount;
+    }
+    
+    if (left)
+    {
+        result = vec2(-1.0f, 0.0f);
+        ++sideCount;
+    }
+    
+    if (top)
+    {
+        result = vec2(0.0f, 1.0f);
+        ++sideCount;
+    }
+    
+    if (bottom)
+    {
+        result = vec2(0.0f, -1.0f);
+        ++sideCount;
+    }
+    
+    SDL_assert(!(left && right) || !(top && bottom));
+    SDL_assert(sideCount < 3);
+    
+    /*if (top && right)
+    {
+        result = (vector - surfaceRect->topRight).normalize();
+    }
+    
+    if (bottom && right)
+    {
+        Vec2 bottomRight(surfaceRect->topRight.x, surfaceRect->bottomLeft.y);
+        result = (vector - bottomRight).normalize();
+    }
+    
+    if (top && left)
+    {
+        Vec2 topLeft(surfaceRect->bottomLeft.x, surfaceRect->topRight.y);
+        result = (vector - topLeft).normalize();
+    }
+    
+    if (bottom && left)
+    {
+        result = (vector - surfaceRect->bottomLeft).normalize();
+    }*/
+    
+    return result;
+}
+
 extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Renderer *renderer)
 {
     SDL_assert(sizeof(GameState) <= gameMemory->permanentMemorySize);
@@ -336,9 +441,10 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
     if (!gameMemory->initialized)
     {
         //memory partitioning
-        initializeMemoryPartition(&gameState->entityMemory,
-                                  gameMemory->permanentMemorySize - sizeof(GameState),
-                                  (Uint8 *)gameMemory->permanentMemory + sizeof(GameState));
+        initializeMemoryPartition(
+            &gameState->entityMemory,
+            gameMemory->permanentMemorySize - sizeof(GameState),
+            (Uint8 *)gameMemory->permanentMemory + sizeof(GameState));
 
         //load assets
 
@@ -356,7 +462,9 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
         SDL_GetRendererOutputSize(renderer, &screenWidth, &screenHeight);
 
         gameState->screenDimensions = vec2(screenWidth, screenHeight);
-        gameState->worldInScreenSpace = rectFromDimAndCenter(gameState->worldDimensions * gameState->metersToPixels, vec2(screenWidth * 0.5f, screenHeight * 0.5f));
+        gameState->worldInScreenSpace = rectFromDimAndCenter(
+            gameState->worldDimensions * gameState->metersToPixels,
+            vec2(screenWidth * 0.5f, screenHeight * 0.5f));
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
         //add entities
@@ -376,7 +484,9 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
         Entity *entity = gameState->entities + entityIndex;
         SDL_assert(entity->storageIndex > 0);
 
-        MovementSpecs specs = {};
+        MovementSpecs specs = defaultMovementSpecs();
+        CollisionSpecs collisionSpecs = defaultCollisionSpecs(entity->p);
+
         Vec2 ddp = vec2(0.0f, 0.0f);
 
         switch (entity->type)
@@ -402,32 +512,82 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
             //TODO: use proper physics constants
             specs.drag = 2.0f;
             specs.speed = 100.0f;
-            
+
             ddp *= specs.speed;
             ddp += -specs.drag * entity->dp;
-            
+
             Vec2 movementDelta = (0.5f * ddp * square(gameInput->deltaTime) + entity->dp * gameInput->deltaTime);
 
-            entity->dp = ddp * gameInput->deltaTime + entity->dp;
-            entity->p += movementDelta; 
+            collisionSpecs.deltaLength = length(movementDelta);
+            collisionSpecs.desiredDp = ddp * gameInput->deltaTime + entity->dp;
+            collisionSpecs.desiredP = entity->p + movementDelta;
         }
         break;
+        case ENTITY_TYPE_OBSTACLE:
         default:
         {
         }
         break;
         }
+
+
+        Uint32 iterationCount = 4;
+        for (Uint32 iteration = 0; iteration <= iterationCount; ++iteration)
+        {
+            bool hit = false;
+
+            float t = iteration * (1.0f / iterationCount);
+            Vec2 entityLerpP = ((1.0f - t) * collisionSpecs.oldP) + (t * collisionSpecs.desiredP);
+
+            for (Uint32 testEntityIndex = 1; testEntityIndex < gameState->entityCount; ++testEntityIndex)
+            {
+                Entity *testEntity = gameState->entities + testEntityIndex;
+
+                if (testEntity->storageIndex == entity->storageIndex ||
+                    !isSet(testEntity, ENTITY_FLAG_COLLIDES) ||
+                    !isSet(entity, ENTITY_FLAG_COLLIDES))
+                {
+                    continue;
+                }
+
+                Rect entityBounds = rectFromDimAndCenter(entity->dimensions, entityLerpP);
+                Rect testEntityBounds = rectFromDimAndCenter(testEntity->dimensions, testEntity->p);
+
+                if (rectsOverlap(entityBounds, testEntityBounds))
+                {
+                    float remainingDistance = (1.0f - t) * collisionSpecs.deltaLength;
+                    if (remainingDistance == 0.0f && iteration == iterationCount)
+                    {
+                        remainingDistance = collisionSpecs.deltaLength * (1.0f / iterationCount);
+                    }
+
+                    if (entity->type == ENTITY_TYPE_PADDLE && testEntity->type == ENTITY_TYPE_OBSTACLE)
+                    {
+                        Vec2 wallNorm = getSurfaceNorm(collisionSpecs.desiredP, testEntityBounds);
+
+                        collisionSpecs.oldP = collisionSpecs.desiredP;
+                        collisionSpecs.desiredP = entityLerpP + (remainingDistance * wallNorm);
+                        collisionSpecs.desiredDp = reflect(entity->dp, wallNorm);
+                        collisionSpecs.deltaLength = remainingDistance;
+
+                        hit = true;
+                    }
+                }
+            }
+
+            if (hit)
+            {
+                printf("Collision \n");
+            }
+        }
+
+        entity->p = collisionSpecs.desiredP;
+        entity->dp = collisionSpecs.desiredDp;
     }
 
     //rendering
     beginDraw(renderer);
 
-    Entity *paddle = &gameState->entities[1];
-    Rect paddleRect = rectFromDimAndCenter(paddle->dimensions, paddle->p);
-    paddleRect.bottomLeftCorner = paddleRect.bottomLeftCorner * gameState->metersToPixels;
-    paddleRect.topRightCorner = paddleRect.topRightCorner * gameState->metersToPixels;
-
-    drawRect(renderer, gameState, paddleRect, gameState->worldInScreenSpace.bottomLeftCorner);
     drawRect(renderer, gameState, gameState->worldInScreenSpace);
 
     Vec2 tileDims = vec2(gameState->tileSideInMeters, gameState->tileSideInMeters) * gameState->metersToPixels;
@@ -439,11 +599,22 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
             float offsetX = tileDims.x * 0.5f;
             float offsetY = tileDims.y * 0.5f;
 
-            Rect tile = rectFromDimAndCenter(tileDims,
-                                             vec2(offsetX + (tileDims.x * horizontalTileIndex), offsetY + (tileDims.y * verticalTileIndex)));
+            Rect tile = rectFromDimAndCenter(
+                tileDims,
+                vec2(offsetX + (tileDims.x * horizontalTileIndex), offsetY + (tileDims.y * verticalTileIndex)));
 
             drawRect(renderer, gameState, tile, gameState->worldInScreenSpace.bottomLeftCorner, 255, 255, 255, 31);
         }
+    }
+
+    for (Uint32 entityIndex = 1; entityIndex < gameState->entityCount; ++entityIndex)
+    {
+        Entity *entity = gameState->entities + entityIndex;
+        Rect rect = rectFromDimAndCenter(entity->dimensions, entity->p);
+        rect.bottomLeftCorner *= gameState->metersToPixels;
+        rect.topRightCorner *= gameState->metersToPixels;
+
+        drawRect(renderer, gameState, rect, gameState->worldInScreenSpace.bottomLeftCorner);
     }
 
     endDraw(renderer);
