@@ -21,6 +21,15 @@ enum EntityFlags
     ENTITY_FLAG_STATIC = (1 << 1)
 };
 
+enum EntityPowerUp
+{
+    POWER_UP_NONE = 0,
+    POWER_UP_ENLARGE = (1 << 0),
+    POWER_UP_SHRINK = (1 << 1),
+    POWER_UP_ACCELERATE = (1 << 2),
+    POWER_UP_DECELERATE = (1 << 3)
+};
+
 struct Entity;
 struct PaddleLogic
 {
@@ -33,6 +42,14 @@ struct PaddleLogic
     Entity* ball;
 };
 
+struct BallLogic
+{
+    Uint32 entityIndex;
+    Entity *paddle;
+    EntityPowerUp powerUp;
+    PaddleLogic *collidedPaddle;
+};
+
 struct Entity
 {
     Uint32 storageIndex;
@@ -42,7 +59,8 @@ struct Entity
     EntityType type;
     Uint32 flags;
 
-    PaddleLogic* paddleLogic;
+    PaddleLogic *paddleLogic;
+    BallLogic *ballLogic;
 };
 
 enum PaddleFlags
@@ -54,8 +72,31 @@ enum PaddleFlags
     PADDLE_FLAG_PLAYER_CONTROLLED = (1 << 4)
 };
 
+struct MovementSpecs
+{
+    float speed;
+    float drag;
+};
+
+struct CollisionSpecs
+{
+    Vec2 desiredP;
+    Vec2 desiredDp;
+    Vec2 oldP;
+    float deltaLength;
+};
+
 void setFlag(Entity *entity, Uint32 flag);
 bool isSet(Entity *entity, Uint32 flag);
 void clearFlag(Entity *entity, Uint32 flag);
+
+MovementSpecs defaultMovementSpecs();
+CollisionSpecs defaultCollisionSpecs(Vec2 pos);
+Vec2 getSurfaceNorm(Vec2 vector, Rect surfaceRect);
+
+struct GameState;
+
+Entity *addObstacleEntity(GameState *gameState, Vec2 pos, Vec2 dimensions);
+Entity *addPaddleEntity(GameState *gameState, Vec2 pos);
 
 #endif

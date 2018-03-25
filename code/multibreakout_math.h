@@ -25,6 +25,7 @@ float lengthSquare(Vec2 vec);
 float length(Vec2 vec);
 Vec2 reflect(Vec2 vec, Vec2 norm);
 Vec2 getRectangleDim(Rect rect);
+Vec2 normalize(Vec2 vec);
 
 Vec2 operator*(float real, Vec2 vec);
 Vec2 operator*(Vec2 vec, float real);

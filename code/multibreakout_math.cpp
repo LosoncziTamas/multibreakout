@@ -53,21 +53,33 @@ float dotProduct(Vec2 lhs, Vec2 rhs)
 {
     float result = lhs.x * rhs.x + lhs.y * rhs.y;
 
-    return(result);
+    return result;
 }
 
 float lengthSquare(Vec2 vec)
 {
     float result = dotProduct(vec, vec);
 
-    return(result);
+    return result;
 }
 
 float length(Vec2 vec)
 {
     float result = SDL_sqrtf(lengthSquare(vec));
     
-    return(result);
+    return result;
+}
+
+Vec2 normalize(Vec2 vec)
+{
+    float vecLength = length(vec);
+    if (vecLength == 0)
+    {
+        vecLength = 1.0f;
+    }
+    Vec2 result = vec * (1.0f / vecLength);
+
+    return result;
 }
 
 Vec2 reflect(Vec2 vec, Vec2 norm) {
