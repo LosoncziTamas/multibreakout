@@ -17,6 +17,69 @@ void clearFlag(Entity *entity, Uint32 flag)
     entity->flags &= ~flag;
 }
 
+void anchorBallToPaddle(Entity *ballEntity, Entity *paddleEntity)
+{
+    SDL_assert(ballEntity->type == ENTITY_TYPE_BALL && paddleEntity->type == ENTITY_TYPE_PADDLE);
+
+    float anchorOffset = 0.01f;
+
+    PaddleState *paddleState = paddleEntity->paddleState;
+    SDL_assert(paddleState);
+
+    BallState *ballState = ballEntity->ballState;
+    SDL_assert(ballState);
+
+    if (paddleState->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+    {
+        ballEntity->p = paddleEntity->p;
+        ballEntity->p.x += paddleEntity->dimensions.x * 0.5f + ballEntity->dimensions.x * 0.5f + anchorOffset;
+    }
+    else if (paddleState && paddleState->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
+    {
+        ballEntity->p = paddleEntity->p;
+        ballEntity->p.y += paddleEntity->dimensions.y * 0.5f + ballEntity->dimensions.y * 0.5f + anchorOffset;
+    }
+    else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+    {
+        ballEntity->p = paddleEntity->p;
+        ballEntity->p.x -= paddleEntity->dimensions.x * 0.5f + ballEntity->dimensions.x * 0.5f + anchorOffset;
+    }
+    else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_TOP)
+    {
+        ballEntity->p = paddleEntity->p;
+        ballEntity->p.y -= paddleEntity->dimensions.y * 0.5f + ballEntity->dimensions.y * 0.5f + anchorOffset;
+    }
+    else
+    {
+        SDL_TriggerBreakpoint();
+    }
+    paddleState->ball = ballEntity;
+    ballState->paddle = paddleEntity;
+}
+
+Entity *addBallEntity(GameState *gameState, Vec2 pos, float radius)
+{
+    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
+
+    Entity *ball = gameState->entities + gameState->entityCount++;
+
+    ball->storageIndex = gameState->entityCount - 1;
+    ball->p = pos;
+    ball->dimensions = vec2(radius * 2.0f, radius * 2.0f);
+    ball->dp = Vec2();
+    ball->type = ENTITY_TYPE_BALL;
+
+    BallState *ballState = pushStruct(&gameState->entityMemory, BallState);
+    ballState->entityIndex = ball->storageIndex;
+    ballState->powerUp = POWER_UP_NONE;
+
+    ball->ballState = ballState;
+
+    setFlag(ball, ENTITY_FLAG_COLLIDES);
+
+    return ball;
+}
+
 Entity *addObstacleEntity(GameState *gameState, Vec2 pos, Vec2 dimensions)
 {
     SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
@@ -32,6 +95,30 @@ Entity *addObstacleEntity(GameState *gameState, Vec2 pos, Vec2 dimensions)
     setFlag(obstacle, ENTITY_FLAG_STATIC | ENTITY_FLAG_COLLIDES);
 
     return obstacle;
+}
+
+Entity *addBrickEntity(GameState *gameState, Vec2 pos, Vec2 dimensions)
+{
+    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
+    Entity *brick = gameState->entities + gameState->entityCount++;
+
+    brick->p = pos;
+    brick->dimensions = dimensions;
+    brick->type = ENTITY_TYPE_BRICK;
+    brick->storageIndex = gameState->entityCount - 1;
+
+    BrickState *brickState = pushStruct(&gameState->entityMemory, BrickState);
+    brickState->hitPoints = 3;
+    brickState->entityIndex = brick->storageIndex;
+    brickState->powerUp = POWER_UP_NONE;
+
+    brick->brickState = brickState;
+
+    setFlag(brick, ENTITY_FLAG_STATIC | ENTITY_FLAG_COLLIDES);
+
+    //gameState->activeBrickCount++;
+
+    return brick;
 }
 
 PaddleState *addPaddleState(Entity *paddleEntity, MemoryPartition *memoryPartition, Uint32 paddleFlags)

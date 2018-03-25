@@ -45,9 +45,19 @@ struct PaddleState
 struct BallState
 {
     Uint32 entityIndex;
-    Entity *paddle;
     EntityPowerUp powerUp;
-    PaddleState *collidedPaddle;
+    Entity *paddle;
+    //For now we assume that a ball can only interact with a paddle
+    Entity *collidedPaddle;
+};
+
+struct BrickState
+{
+    Uint32 entityIndex;
+    EntityPowerUp powerUp;
+    Uint32 hitPoints;
+    //For now we assume that a brick can only interact with a ball
+    Entity* collidedBall;
 };
 
 struct Entity
@@ -59,8 +69,10 @@ struct Entity
     EntityType type;
     Uint32 flags;
 
+    //Use union here?
     PaddleState *paddleState;
     BallState *ballState;
+    BrickState *brickState;
 };
 
 enum PaddleFlags
@@ -89,14 +101,16 @@ struct CollisionSpecs
 void setFlag(Entity *entity, Uint32 flag);
 bool isSet(Entity *entity, Uint32 flag);
 void clearFlag(Entity *entity, Uint32 flag);
+void anchorBallToPaddle(Entity *ballEntity, Entity *paddleEntity);
+
+struct GameState;
+Entity *addBallEntity(GameState *gameState, Vec2 pos, float radius);
+Entity *addObstacleEntity(GameState *gameState, Vec2 pos, Vec2 dimensions);
+Entity *addPaddleEntity(GameState *gameState, Vec2 pos);
+Entity *addBrickEntity(GameState *gameState, Vec2 pos, Vec2 dimensions);
 
 MovementSpecs defaultMovementSpecs();
 CollisionSpecs defaultCollisionSpecs(Vec2 pos);
 Vec2 getSurfaceNorm(Vec2 vector, Rect surfaceRect);
-
-struct GameState;
-
-Entity *addObstacleEntity(GameState *gameState, Vec2 pos, Vec2 dimensions);
-Entity *addPaddleEntity(GameState *gameState, Vec2 pos);
 
 #endif

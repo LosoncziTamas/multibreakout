@@ -61,69 +61,6 @@ void drawRect(SDL_Renderer *renderer, GameState *gameState, Rect rectangle, Vec2
     SDL_RenderDrawRect(renderer, &sdlRect);
 }
 
-void anchorBallToPaddle(Entity *ballEntity, Entity *paddleEntity)
-{
-    SDL_assert(ballEntity->type == ENTITY_TYPE_BALL && paddleEntity->type == ENTITY_TYPE_PADDLE);
-
-    float anchorOffset = 0.01f;
-
-    PaddleState *paddleState = paddleEntity->paddleState;
-    SDL_assert(paddleState);
-
-    BallState *ballState = ballEntity->ballState;
-    SDL_assert(ballState);
-
-    if (paddleState->flags & PADDLE_FLAG_ORIENTATION_LEFT)
-    {
-        ballEntity->p = paddleEntity->p;
-        ballEntity->p.x += paddleEntity->dimensions.x * 0.5f + ballEntity->dimensions.x * 0.5f + anchorOffset;
-    }
-    else if (paddleState && paddleState->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
-    {
-        ballEntity->p = paddleEntity->p;
-        ballEntity->p.y += paddleEntity->dimensions.y * 0.5f + ballEntity->dimensions.y * 0.5f + anchorOffset;
-    }
-    else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
-    {
-        ballEntity->p = paddleEntity->p;
-        ballEntity->p.x -= paddleEntity->dimensions.x * 0.5f + ballEntity->dimensions.x * 0.5f + anchorOffset;
-    }
-    else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_TOP)
-    {
-        ballEntity->p = paddleEntity->p;
-        ballEntity->p.y -= paddleEntity->dimensions.y * 0.5f + ballEntity->dimensions.y * 0.5f + anchorOffset;
-    }
-    else
-    {
-        SDL_TriggerBreakpoint();
-    }
-    paddleState->ball = ballEntity;
-    ballState->paddle = paddleEntity;
-}
-
-Entity *addBallEntity(GameState *gameState, Vec2 pos, float radius)
-{
-    SDL_assert(SDL_arraysize(gameState->entities) > gameState->entityCount);
-
-    Entity *ball = gameState->entities + gameState->entityCount++;
-
-    ball->storageIndex = gameState->entityCount - 1;
-    ball->p = pos;
-    ball->dimensions = vec2(radius * 2.0f, radius * 2.0f);
-    ball->dp = Vec2();
-    ball->type = ENTITY_TYPE_BALL;
-
-    BallState *ballState = pushStruct(&gameState->entityMemory, BallState);
-    ballState->entityIndex = ball->storageIndex;
-    ballState->powerUp = POWER_UP_NONE;
-
-    ball->ballState = ballState;
-
-    setFlag(ball, ENTITY_FLAG_COLLIDES);
-
-    return ball;
-}
-
 void addEntities(GameState *gameState)
 {
     Entity *nullEntity = gameState->entities + gameState->entityCount++;
@@ -140,6 +77,7 @@ void addEntities(GameState *gameState)
 
     Entity *bottomPaddleEntity = addPaddleEntity(gameState, paddlePos);
     Entity *ball = addBallEntity(gameState, vec2(0.0f, 0.0f), 0.25f);
+    Entity *brick = addBrickEntity(gameState, vec2(3.25f, 3.25f), vec2(0.5f, 0.5f));
     anchorBallToPaddle(ball, bottomPaddleEntity);
 
     addObstacleEntity(gameState, vec2(0.25f, 3.75f), vec2(0.5f, 7.5f));
@@ -148,7 +86,7 @@ void addEntities(GameState *gameState)
     addObstacleEntity(gameState, vec2(3.75f, 0.25f), vec2(7.5f, 0.5f));
 }
 
-Entity *getPaddleRef(Entity *entity)
+Entity *getPaddleRefFromBallEntity(Entity *entity)
 {
     SDL_assert(entity->type == ENTITY_TYPE_BALL);
     Entity *result = 0;
@@ -229,21 +167,21 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
         case ENTITY_TYPE_PADDLE:
         {
             setPaddleInput(gameInput, entity);
-            if (entity->paddleState)
+
+            SDL_assert(entity->paddleState);
+            if (entity->paddleState->flags & (PADDLE_FLAG_ORIENTATION_TOP | PADDLE_FLAG_ORIENTATION_BOTTOM))
             {
-                if (entity->paddleState->flags & (PADDLE_FLAG_ORIENTATION_TOP | PADDLE_FLAG_ORIENTATION_BOTTOM))
+                if (entity->paddleState->moveLeft)
                 {
-                    if (entity->paddleState->moveLeft)
-                    {
-                        ddp.x = -1.0;
-                    }
-                    else if (entity->paddleState->moveRight)
-                    {
-                        ddp.x = 1.0;
-                    }
-                    //entity->w = getPaddleSize(paddle->powerUps);
+                    ddp.x = -1.0;
                 }
+                else if (entity->paddleState->moveRight)
+                {
+                    ddp.x = 1.0;
+                }
+                //entity->w = getPaddleSize(paddle->powerUps);
             }
+
             //TODO: use proper physics constants
             specs.drag = 2.0f;
             specs.speed = 10.0f;
@@ -254,51 +192,64 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
             specs.drag = 2.0f;
             specs.speed = 10.0f;
 
-            if (entity->ballState)
+            SDL_assert(entity->ballState);
+
+            Entity *anchoredPaddle = getPaddleRefFromBallEntity(entity);
+            if (anchoredPaddle)
             {
-                Entity *anchoredPaddle = getPaddleRef(entity);
-                if (anchoredPaddle)
+                PaddleState *paddleState = anchoredPaddle->paddleState;
+                if (paddleState->releaseBall)
                 {
-                    PaddleState *paddleState = anchoredPaddle->paddleState;
-                    if (paddleState->releaseBall)
+                    Vec2 launchForce;
+
+                    if (paddleState->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
                     {
-                        Vec2 launchForce;
-
-                        if (paddleState->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
-                        {
-                            ddp.y = 1.0f;
-                            launchForce = vec2(0.0f, 5.0f);
-                        }
-                        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_TOP)
-                        {
-                            ddp.y = -1.0f;
-                            launchForce = vec2(0.0f, -5.0f);
-                        }
-                        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_LEFT)
-                        {
-                            ddp.x = 1.0f;
-                            launchForce = vec2(5.0f, 0.0f);
-                        }
-                        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
-                        {
-                            ddp.x = -1.0f;
-                            launchForce = vec2(-5.0f, 0.0f);
-                        }
-
-                        entity->dp = anchoredPaddle->dp + launchForce;
-
-                        entity->ballState->paddle = 0;
-                        paddleState->ball = 0;
+                        ddp.y = 1.0f;
+                        launchForce = vec2(0.0f, 5.0f);
                     }
-                    else
+                    else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_TOP)
                     {
-                        entity->dp = anchoredPaddle->dp;
+                        ddp.y = -1.0f;
+                        launchForce = vec2(0.0f, -5.0f);
                     }
+                    else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+                    {
+                        ddp.x = 1.0f;
+                        launchForce = vec2(5.0f, 0.0f);
+                    }
+                    else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+                    {
+                        ddp.x = -1.0f;
+                        launchForce = vec2(-5.0f, 0.0f);
+                    }
+
+                    entity->dp = anchoredPaddle->dp + launchForce;
+
+                    entity->ballState->paddle = 0;
+                    paddleState->ball = 0;
                 }
                 else
                 {
-                    ddp = normalize(entity->dp);
+                    entity->dp = anchoredPaddle->dp;
                 }
+            }
+            else
+            {
+                ddp = normalize(entity->dp);
+            }
+        }
+        break;
+        case ENTITY_TYPE_BRICK:
+        {
+            SDL_assert(entity->brickState);
+            BrickState *brickState = entity->brickState;
+            if (brickState->collidedBall)
+            {
+                if (--brickState->hitPoints == 0)
+                {
+                    clearFlag(entity, ENTITY_FLAG_COLLIDES);
+                }
+                brickState->collidedBall = 0;
             }
         }
         break;
@@ -390,6 +341,18 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
                         collisionSpecs.oldP = collisionSpecs.desiredP;
                         collisionSpecs.desiredP = entity->p + (remainingDistance * norm);
                         collisionSpecs.desiredDp = norm * extraForceLength * 0.1f;
+                    }
+                    else if (entity->type == ENTITY_TYPE_BALL && testEntity->type == ENTITY_TYPE_BRICK)
+                    {
+                        Vec2 norm = getSurfaceNorm(collisionSpecs.desiredP, testEntityBounds);
+
+                        collisionSpecs.oldP = collisionSpecs.desiredP;
+                        collisionSpecs.desiredP = entityLerpP + (remainingDistance * norm);
+                        collisionSpecs.desiredDp = reflect(entity->dp, norm);
+
+                        BrickState *brickState = testEntity->brickState;
+                        SDL_assert(brickState);
+                        brickState->collidedBall = entity;
                     }
                 }
             }
