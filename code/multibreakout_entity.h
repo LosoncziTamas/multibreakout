@@ -31,7 +31,7 @@ enum EntityPowerUp
 };
 
 struct Entity;
-struct PaddleLogic
+struct PaddleState
 {
     Uint32 entityIndex;
     Uint32 flags;
@@ -42,12 +42,12 @@ struct PaddleLogic
     Entity* ball;
 };
 
-struct BallLogic
+struct BallState
 {
     Uint32 entityIndex;
     Entity *paddle;
     EntityPowerUp powerUp;
-    PaddleLogic *collidedPaddle;
+    PaddleState *collidedPaddle;
 };
 
 struct Entity
@@ -59,8 +59,8 @@ struct Entity
     EntityType type;
     Uint32 flags;
 
-    PaddleLogic *paddleLogic;
-    BallLogic *ballLogic;
+    PaddleState *paddleState;
+    BallState *ballState;
 };
 
 enum PaddleFlags

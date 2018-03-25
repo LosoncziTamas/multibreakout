@@ -34,15 +34,15 @@ Entity *addObstacleEntity(GameState *gameState, Vec2 pos, Vec2 dimensions)
     return obstacle;
 }
 
-PaddleLogic *addPaddleLogic(Entity *paddleEntity, MemoryPartition *memoryPartition, Uint32 paddleFlags)
+PaddleState *addPaddleState(Entity *paddleEntity, MemoryPartition *memoryPartition, Uint32 paddleFlags)
 {
     SDL_assert(paddleEntity->type == ENTITY_TYPE_PADDLE);
 
-    PaddleLogic *paddleLogic = pushStruct(memoryPartition, PaddleLogic);
-    paddleLogic->entityIndex = paddleEntity->storageIndex;
-    paddleLogic->flags = paddleFlags;
+    PaddleState *paddleState = pushStruct(memoryPartition, PaddleState);
+    paddleState->entityIndex = paddleEntity->storageIndex;
+    paddleState->flags = paddleFlags;
 
-    bool swapDimensions = paddleLogic->flags & (PADDLE_FLAG_ORIENTATION_LEFT | PADDLE_FLAG_ORIENTATION_RIGHT);
+    bool swapDimensions = paddleState->flags & (PADDLE_FLAG_ORIENTATION_LEFT | PADDLE_FLAG_ORIENTATION_RIGHT);
     if (swapDimensions)
     {
         float tmp = paddleEntity->dimensions.y;
@@ -51,28 +51,28 @@ PaddleLogic *addPaddleLogic(Entity *paddleEntity, MemoryPartition *memoryPartiti
     }
 
     /*
-    if (!(paddleLogic->flags & PADDLE_FLAG_PLAYER_CONTROLLED))
+    if (!(paddleState->flags & PADDLE_FLAG_PLAYER_CONTROLLED))
     {
         SDL_assert(SDL_arraysize(gameState->enemyControls) > gameState->enemyControlCount);
         
         EnemyControl* enemyControl = gameState->enemyControls + gameState->enemyControlCount++;
-        enemyControl->paddleLogicIndex = gameState->paddleCount - 1;
+        enemyControl->paddleStateIndex = gameState->paddleCount - 1;
         enemyControl->state = ENEMY_STATE_IDLE;
         enemyControl->target = Vec2();
         
         Rectangle rect = {};
         
-        if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_TOP)
+        if (paddleState->flags & PADDLE_FLAG_ORIENTATION_TOP)
         {
             rect.bottomLeft = Vec2(160, SCREEN_HEIGHT * 0.5f);
             rect.topRight = Vec2(640, SCREEN_HEIGHT);
         }
-        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_LEFT)
         {
             rect.bottomLeft = Vec2(160, 0);
             rect.topRight = Vec2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT);
         }
-        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
         {
             rect.bottomLeft = Vec2(SCREEN_WIDTH * 0.5f, 0);
             rect.topRight = Vec2(640, SCREEN_HEIGHT);
@@ -81,7 +81,7 @@ PaddleLogic *addPaddleLogic(Entity *paddleEntity, MemoryPartition *memoryPartiti
         enemyControl->dangerZone = rect;
     }*/
 
-    return paddleLogic;
+    return paddleState;
 }
 
 Entity *addPaddleEntity(GameState *gameState, Vec2 pos)
@@ -94,7 +94,7 @@ Entity *addPaddleEntity(GameState *gameState, Vec2 pos)
     paddle->dimensions = vec2(1.5f, 0.5f);
     paddle->dp = Vec2();
     paddle->type = ENTITY_TYPE_PADDLE;
-    paddle->paddleLogic = addPaddleLogic(
+    paddle->paddleState = addPaddleState(
         paddle,
         &gameState->entityMemory,
         PADDLE_FLAG_ORIENTATION_BOTTOM | PADDLE_FLAG_PLAYER_CONTROLLED);
@@ -195,7 +195,7 @@ void updatePaddles(GameInput *input, GameState *gameState)
 {
     /*for (Uint32 paddleIndex = 0; paddleIndex < gameState->paddleCount; ++paddleIndex)
     {
-        PaddleLogic* paddle = gameState->paddles + paddleIndex;
+        PaddleState* paddle = gameState->paddles + paddleIndex;
         if (paddle->flags & PADDLE_FLAG_PLAYER_CONTROLLED)
         {
             if (paddle->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)

@@ -3,34 +3,34 @@
 void setPaddleInput(GameInput *input, Entity *paddleEntity)
 {
     SDL_assert(paddleEntity->type == ENTITY_TYPE_PADDLE);
-    SDL_assert(paddleEntity->paddleLogic);
+    SDL_assert(paddleEntity->paddleState);
 
-    PaddleLogic *paddleLogic = paddleEntity->paddleLogic;
+    PaddleState *paddleState = paddleEntity->paddleState;
 
-    if (paddleLogic->flags & PADDLE_FLAG_PLAYER_CONTROLLED)
+    if (paddleState->flags & PADDLE_FLAG_PLAYER_CONTROLLED)
     {
-        if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
+        if (paddleState->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
         {
-            paddleLogic->moveLeft = input->left;
-            paddleLogic->moveRight = input->right;
+            paddleState->moveLeft = input->left;
+            paddleState->moveRight = input->right;
         }
-        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_TOP)
+        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_TOP)
         {
-            paddleLogic->moveLeft = input->right;
-            paddleLogic->moveRight = input->left;
+            paddleState->moveLeft = input->right;
+            paddleState->moveRight = input->left;
         }
-        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_LEFT)
         {
-            paddleLogic->moveLeft = input->left;
-            paddleLogic->moveRight = input->right;
+            paddleState->moveLeft = input->left;
+            paddleState->moveRight = input->right;
         }
-        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
         {
-            paddleLogic->moveLeft = input->right;
-            paddleLogic->moveRight = input->left;
+            paddleState->moveLeft = input->right;
+            paddleState->moveRight = input->left;
         }
 
-        paddleLogic->releaseBall = input->space;
+        paddleState->releaseBall = input->space;
     }
 }
 
@@ -67,28 +67,28 @@ void anchorBallToPaddle(Entity *ballEntity, Entity *paddleEntity)
 
     float anchorOffset = 0.01f;
 
-    PaddleLogic *paddleLogic = paddleEntity->paddleLogic;
-    SDL_assert(paddleLogic);
+    PaddleState *paddleState = paddleEntity->paddleState;
+    SDL_assert(paddleState);
 
-    BallLogic *ballLogic = ballEntity->ballLogic;
-    SDL_assert(ballLogic);
+    BallState *ballState = ballEntity->ballState;
+    SDL_assert(ballState);
 
-    if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+    if (paddleState->flags & PADDLE_FLAG_ORIENTATION_LEFT)
     {
         ballEntity->p = paddleEntity->p;
         ballEntity->p.x += paddleEntity->dimensions.x * 0.5f + ballEntity->dimensions.x * 0.5f + anchorOffset;
     }
-    else if (paddleLogic && paddleLogic->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
+    else if (paddleState && paddleState->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
     {
         ballEntity->p = paddleEntity->p;
         ballEntity->p.y += paddleEntity->dimensions.y * 0.5f + ballEntity->dimensions.y * 0.5f + anchorOffset;
     }
-    else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+    else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
     {
         ballEntity->p = paddleEntity->p;
         ballEntity->p.x -= paddleEntity->dimensions.x * 0.5f + ballEntity->dimensions.x * 0.5f + anchorOffset;
     }
-    else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_TOP)
+    else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_TOP)
     {
         ballEntity->p = paddleEntity->p;
         ballEntity->p.y -= paddleEntity->dimensions.y * 0.5f + ballEntity->dimensions.y * 0.5f + anchorOffset;
@@ -97,8 +97,8 @@ void anchorBallToPaddle(Entity *ballEntity, Entity *paddleEntity)
     {
         SDL_TriggerBreakpoint();
     }
-    paddleLogic->ball = ballEntity;
-    ballLogic->paddle = paddleEntity;
+    paddleState->ball = ballEntity;
+    ballState->paddle = paddleEntity;
 }
 
 Entity *addBallEntity(GameState *gameState, Vec2 pos, float radius)
@@ -113,11 +113,11 @@ Entity *addBallEntity(GameState *gameState, Vec2 pos, float radius)
     ball->dp = Vec2();
     ball->type = ENTITY_TYPE_BALL;
 
-    BallLogic *ballLogic = pushStruct(&gameState->entityMemory, BallLogic);
-    ballLogic->entityIndex = ball->storageIndex;
-    ballLogic->powerUp = POWER_UP_NONE;
+    BallState *ballState = pushStruct(&gameState->entityMemory, BallState);
+    ballState->entityIndex = ball->storageIndex;
+    ballState->powerUp = POWER_UP_NONE;
 
-    ball->ballLogic = ballLogic;
+    ball->ballState = ballState;
 
     setFlag(ball, ENTITY_FLAG_COLLIDES);
 
@@ -152,15 +152,15 @@ Entity *getPaddleRef(Entity *entity)
 {
     SDL_assert(entity->type == ENTITY_TYPE_BALL);
     Entity *result = 0;
-    if (entity->ballLogic)
+    if (entity->ballState)
     {
-        if (entity->ballLogic->paddle)
+        if (entity->ballState->paddle)
         {
-            result = entity->ballLogic->paddle;
+            result = entity->ballState->paddle;
             SDL_assert(result->type == ENTITY_TYPE_PADDLE);
-            if (result->paddleLogic)
+            if (result->paddleState)
             {
-                SDL_assert(result->paddleLogic->ball == entity);
+                SDL_assert(result->paddleState->ball == entity);
             }
             else
             {
@@ -229,15 +229,15 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
         case ENTITY_TYPE_PADDLE:
         {
             setPaddleInput(gameInput, entity);
-            if (entity->paddleLogic)
+            if (entity->paddleState)
             {
-                if (entity->paddleLogic->flags & (PADDLE_FLAG_ORIENTATION_TOP | PADDLE_FLAG_ORIENTATION_BOTTOM))
+                if (entity->paddleState->flags & (PADDLE_FLAG_ORIENTATION_TOP | PADDLE_FLAG_ORIENTATION_BOTTOM))
                 {
-                    if (entity->paddleLogic->moveLeft)
+                    if (entity->paddleState->moveLeft)
                     {
                         ddp.x = -1.0;
                     }
-                    else if (entity->paddleLogic->moveRight)
+                    else if (entity->paddleState->moveRight)
                     {
                         ddp.x = 1.0;
                     }
@@ -254,32 +254,32 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
             specs.drag = 2.0f;
             specs.speed = 10.0f;
 
-            if (entity->ballLogic)
+            if (entity->ballState)
             {
                 Entity *anchoredPaddle = getPaddleRef(entity);
                 if (anchoredPaddle)
                 {
-                    PaddleLogic *paddleLogic = anchoredPaddle->paddleLogic;
-                    if (paddleLogic->releaseBall)
+                    PaddleState *paddleState = anchoredPaddle->paddleState;
+                    if (paddleState->releaseBall)
                     {
                         Vec2 launchForce;
 
-                        if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
+                        if (paddleState->flags & PADDLE_FLAG_ORIENTATION_BOTTOM)
                         {
                             ddp.y = 1.0f;
                             launchForce = vec2(0.0f, 5.0f);
                         }
-                        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_TOP)
+                        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_TOP)
                         {
                             ddp.y = -1.0f;
                             launchForce = vec2(0.0f, -5.0f);
                         }
-                        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_LEFT)
+                        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_LEFT)
                         {
                             ddp.x = 1.0f;
                             launchForce = vec2(5.0f, 0.0f);
                         }
-                        else if (paddleLogic->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
+                        else if (paddleState->flags & PADDLE_FLAG_ORIENTATION_RIGHT)
                         {
                             ddp.x = -1.0f;
                             launchForce = vec2(-5.0f, 0.0f);
@@ -287,8 +287,8 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
 
                         entity->dp = anchoredPaddle->dp + launchForce;
 
-                        entity->ballLogic->paddle = 0;
-                        paddleLogic->ball = 0;
+                        entity->ballState->paddle = 0;
+                        paddleState->ball = 0;
                     }
                     else
                     {
@@ -376,9 +376,9 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
 
                         Vec2 norm = normalize(entity->p - collisionSpecs.desiredP);
 
-                        PaddleLogic *paddleLogic = entity->paddleLogic;
-                        SDL_assert(paddleLogic);
-                        if (paddleLogic->flags & (PADDLE_FLAG_ORIENTATION_TOP | PADDLE_FLAG_ORIENTATION_BOTTOM))
+                        PaddleState *paddleState = entity->paddleState;
+                        SDL_assert(paddleState);
+                        if (paddleState->flags & (PADDLE_FLAG_ORIENTATION_TOP | PADDLE_FLAG_ORIENTATION_BOTTOM))
                         {
                             norm.y = 0.0f;
                         }
