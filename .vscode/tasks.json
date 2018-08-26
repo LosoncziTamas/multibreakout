@@ -11,6 +11,16 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "launch",
+            "type": "shell",
+            "command": "build/multibreakout.x86_64"
+        },
+        {
+            "label": "hotload",
+            "type": "shell",
+            "command": "misc/hotload.sh"
         }
     ]
 }

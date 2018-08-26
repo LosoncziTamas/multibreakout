@@ -30,7 +30,30 @@ enum EntityPowerUp
     POWER_UP_DECELERATE = (1 << 3)
 };
 
+enum PaddleFlags
+{
+    PADDLE_FLAG_ORIENTATION_BOTTOM = (1 << 0),
+    PADDLE_FLAG_ORIENTATION_TOP = (1 << 1),
+    PADDLE_FLAG_ORIENTATION_LEFT = (1 << 2),
+    PADDLE_FLAG_ORIENTATION_RIGHT = (1 << 3),
+    PADDLE_FLAG_PLAYER_CONTROLLED = (1 << 4)
+};
+
 struct Entity;
+
+struct PaddleAi
+{
+    enum State
+    {
+        IDLE,
+        STEERING,
+        DEFENDING
+    } state;
+
+    Rect dangerZone;
+    Vec2 target;
+};
+
 struct PaddleState
 {
     Uint32 entityIndex;
@@ -39,7 +62,7 @@ struct PaddleState
     bool moveLeft;
     bool moveRight;
     bool releaseBall;
-    Entity* ball;
+    Entity *ball;
 };
 
 struct BallState
@@ -57,7 +80,7 @@ struct BrickState
     EntityPowerUp powerUp;
     Uint32 hitPoints;
     //For now we assume that a brick can only interact with a ball
-    Entity* collidedBall;
+    Entity *collidedBall;
 };
 
 struct Entity
@@ -73,15 +96,6 @@ struct Entity
     PaddleState *paddleState;
     BallState *ballState;
     BrickState *brickState;
-};
-
-enum PaddleFlags
-{
-    PADDLE_FLAG_ORIENTATION_BOTTOM = (1 << 0),
-    PADDLE_FLAG_ORIENTATION_TOP = (1 << 1),
-    PADDLE_FLAG_ORIENTATION_LEFT = (1 << 2),
-    PADDLE_FLAG_ORIENTATION_RIGHT = (1 << 3),
-    PADDLE_FLAG_PLAYER_CONTROLLED = (1 << 4)
 };
 
 struct MovementSpecs

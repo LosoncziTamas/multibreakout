@@ -59,7 +59,7 @@ static float secondsElapsed(Uint64 old, Uint64 current)
 void startRecordingInput(PlatformState* platformState)
 {
     platformState->recording = true;
-    platformState->inputRecordHandler = SDL_RWFromFile("input", "w");
+    platformState->inputRecordHandler = SDL_RWFromFile("build/input", "w");
     
     size_t bytesToWrite = platformState->totalSize;
     size_t writtenObjects = SDL_RWwrite(platformState->inputRecordHandler, platformState->gameMemoryBlock, bytesToWrite, 1);
@@ -84,7 +84,7 @@ void recordInput(PlatformState* platformState, GameInput* gameInput)
 void startInputPlayback(PlatformState* platformState)
 {
     platformState->replaying = true;
-    platformState->inputPlaybackHandler = SDL_RWFromFile("input","r");
+    platformState->inputPlaybackHandler = SDL_RWFromFile("build/input","r");
     
     SDL_assert(platformState->inputPlaybackHandler);
     SDL_RWread(platformState->inputPlaybackHandler, platformState->gameMemoryBlock, platformState->totalSize, 1);
@@ -154,7 +154,7 @@ int main(void)
     GameCode gameCode = {};
     time_t lastWrite = 0;
     bool loadingDll = true;
-    const char *dllPath = "game.so";
+    const char *dllPath = "build/game.so";
     
     SDL_bool running = SDL_TRUE;
 
@@ -227,7 +227,6 @@ int main(void)
             playbackInput(&platformState, &input);
         }
         
-#if HOTLOAD
         time_t time = getLastWriteTime(dllPath);
         
         if (time > lastWrite)
@@ -245,12 +244,8 @@ int main(void)
         }
         else if(gameCode.dll)
         {
-            gameCode.update(gameState);
+            gameCode.update(&gameMemory, &input, renderer);
         }
-#else
-        gameUpdate(&gameMemory, &input, renderer);
-#endif
-        
         startCounter = end_counter;
     }
     
