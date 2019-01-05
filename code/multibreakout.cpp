@@ -184,7 +184,7 @@ extern "C" void gameUpdate(GameMemory *gameMemory, GameInput *gameInput, SDL_Ren
 
             //TODO: use proper physics constants
             specs.drag = 2.0f;
-            specs.speed = 10.0f;
+            specs.speed = 20.0f;
         }
         break;
         case ENTITY_TYPE_BALL:
